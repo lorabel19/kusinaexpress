@@ -1,9 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include  
-from restaurant.views import home
+from django.urls import path, include
 
 urlpatterns = [
-    path('', home),
     path('admin/', admin.site.urls),
-    path('api/', include('restaurant.urls')), 
+    path('', include('restaurant.urls')),  # include web pages and API
 ]
