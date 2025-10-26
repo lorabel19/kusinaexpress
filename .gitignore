@@ -1,0 +1,20 @@
+# Virtual environment
+venv/
+
+# Django cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite (if ever created)
+db.sqlite3
+
+# Environment variables
+.env
+
+# VSCode settings
+.vscode/
+
+# PyCharm
+.idea/
