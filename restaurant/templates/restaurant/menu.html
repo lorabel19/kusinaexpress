@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Menu</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background-color:#fffaf3; color:#2d2d2d; }
+
+  header {
+    background-color: #d62828;
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size:26px; letter-spacing:1px; }
+  nav { display:flex; align-items:center; gap:10px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; }
+  nav a:hover { color:#fcbf49; }
+  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+  .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  .search-form { display:flex; justify-content:center; margin:30px 0; }
+  .search-form input { padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:250px; margin-right:5px; }
+  .search-form button { padding:8px 12px; border-radius:6px; border:none; background-color:#d62828; color:white; font-weight:600; cursor:pointer; }
+  .search-form button:hover { background-color:#f77f00; }
+
+  h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
+
+  .categories { display:flex; justify-content:center; flex-wrap:wrap; gap:15px; margin-bottom:40px; }
+  .category-btn { background:white; border:2px dashed #d62828; padding:10px 20px; cursor:pointer; font-weight:600; border-radius:6px; transition: all 0.3s; }
+  .category-btn:hover { background:#f8eded; }
+
+  .restaurant { margin-bottom:40px; }
+  .restaurant h3 {
+    color:#d62828;
+    font-size:22px;
+    margin-bottom:20px;
+    border-bottom:2px solid #d62828;
+    display:inline-block;
+    padding-bottom:5px;
+  }
+  .menu-items { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+  .item-card { background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:15px; text-align:center; transition:transform 0.3s, box-shadow 0.3s; }
+  .item-card:hover { transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.15); }
+  .item-card img { width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:10px; }
+  .item-card h4 { color:#d62828; margin-bottom:8px; }
+  .item-card p { font-size:14px; color:#555; margin-bottom:5px; }
+  .price { display:block; font-weight:bold; color:#27ae60; margin-bottom:10px; }
+  .item-card button { padding:6px 12px; border:none; background-color:#d62828; color:white; font-weight:600; border-radius:6px; cursor:pointer; }
+  .item-card button:hover { background-color:#f77f00; }
+
+  .sold-out { opacity:0.5; position:relative; }
+  .sold-out::after { content:"SOLD OUT"; position:absolute; top:10px; left:10px; background:red; color:white; padding:5px 10px; font-size:12px; font-weight:bold; border-radius:4px; }
+
+  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
+  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KusinaExpress</h1>
+  <nav>
+    <a href="{% url 'restaurant:dashboard' %}">Home</a>
+    <a href="{% url 'restaurant:menu' %}">Menu</a>
+    <a href="{% url 'restaurant:cart' %}">Cart (<span id="cartCount">0</span>)</a>
+    <a href="#">Order</a>
+    <a href="#">Contact</a>
+    <a href="#">About Us</a>
+    <div class="auth-button">
+      {% if user %}
+        <a href="{% url 'restaurant:home' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<section>
+  <h2 class="section-title">Menu Categories</h2>
+
+  <form class="search-form" onsubmit="return false;">
+    <input type="search" id="searchInput" placeholder="Search for foods...">
+    <button onclick="filterMenu()">Search</button>
+  </form>
+
+  <div class="categories">
+    <button class="category-btn" onclick="filterCategory('all')">All</button>
+    <button class="category-btn" onclick="filterCategory('meals')">Meals</button>
+    <button class="category-btn" onclick="filterCategory('drinks')">Drinks</button>
+    <button class="category-btn" onclick="filterCategory('desserts')">Desserts</button>
+  </div>
+
+  <div class="restaurant">
+    <h3>Meals</h3>
+    <div class="menu-items" id="mealsContainer"></div>
+  </div>
+  <div class="restaurant">
+    <h3>Drinks</h3>
+    <div class="menu-items" id="drinksContainer"></div>
+  </div>
+  <div class="restaurant">
+    <h3>Desserts</h3>
+    <div class="menu-items" id="dessertsContainer"></div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<script>
+let allMenuItems = [];
+
+// CSRF helper for Django
+function getCookie(name) {
+  let cookieValue = null;
+  if(document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for(let i=0;i<cookies.length;i++) {
+      const cookie = cookies[i].trim();
+      if(cookie.substring(0,name.length+1) === (name+'=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Fetch menu items
+async function fetchMenu() {
+  try {
+    const response = await fetch('/api/menu/');
+    allMenuItems = await response.json();
+    displayMenu(allMenuItems);
+    updateCartCount();
+  } catch(error) {
+    console.error('Error fetching menu:', error);
+  }
+}
+
+// Display items
+function displayMenu(items) {
+  const mealsContainer = document.getElementById('mealsContainer');
+  const drinksContainer = document.getElementById('drinksContainer');
+  const dessertsContainer = document.getElementById('dessertsContainer');
+
+  mealsContainer.innerHTML = '';
+  drinksContainer.innerHTML = '';
+  dessertsContainer.innerHTML = '';
+
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    if(item.is_available === 0) card.classList.add('sold-out');
+    card.setAttribute('data-category', item.category?.toLowerCase());
+
+    card.innerHTML = `
+      <img src="${item.image_url || 'https://via.placeholder.com/300x150?text=No+Image'}" alt="${item.name}">
+      <h4>${item.name}</h4>
+      <p>${item.description || 'No description available'}</p>
+      <span class="price">₱${item.price}</span>
+      <button onclick="addToCart(${item.id})">Add to Cart</button>
+    `;
+
+    if(item.category?.toLowerCase() === 'meals') mealsContainer.appendChild(card);
+    else if(item.category?.toLowerCase() === 'drinks') drinksContainer.appendChild(card);
+    else if(item.category?.toLowerCase() === 'desserts') dessertsContainer.appendChild(card);
+  });
+}
+
+// Filter category
+function filterCategory(category) {
+  const filtered = category === 'all' ? allMenuItems : allMenuItems.filter(item => item.category?.toLowerCase() === category);
+  displayMenu(filtered);
+}
+
+// Search menu
+function filterMenu() {
+  const searchText = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allMenuItems.filter(item => 
+    item.name.toLowerCase().includes(searchText) || 
+    (item.description && item.description.toLowerCase().includes(searchText))
+  );
+  displayMenu(filtered);
+}
+
+// Add to cart
+async function addToCart(itemId, quantity=1) {
+  try {
+    const response = await fetch('/restaurant/api/cart/add/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ item_id: itemId, quantity })
+    });
+
+    const data = await response.json();
+    if(response.ok) {
+      alert('Item added to cart!');
+      updateCartCount();
+    } else {
+      alert(data.detail || 'Error adding item. Make sure you are logged in!');
+      console.log('Add to cart error:', data);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Something went wrong!');
+  }
+}
+
+// Update cart count
+async function updateCartCount() {
+  try {
+    const res = await fetch('/restaurant/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc, item) => acc + item.quantity, 0);
+    document.getElementById('cartCount').innerText = count;
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+// Initialize
+fetchMenu();
+</script>
+</body>
+</html>

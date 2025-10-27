@@ -1,0 +1,303 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Cart</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background-color:#fffaf3; color:#2d2d2d; }
+
+  header {
+    background-color: #d62828;
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size:26px; letter-spacing:1px; }
+  nav { display:flex; align-items:center; gap:10px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; }
+  nav a:hover { color:#fcbf49; }
+  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+  .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  .order-wrapper {
+    max-width:900px;
+    margin:40px auto;
+    background:white;
+    border-radius:12px;
+    padding:30px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  }
+  h2.section-title { font-size:28px; color:#d62828; text-align:center; margin-bottom:25px; }
+
+  .order-item {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:15px;
+    background:#f8eded;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  }
+  .order-item .image-holder { width:90px; height:90px; background:#ddd; border-radius:10px; margin-right:15px; flex-shrink:0; }
+  .order-info { flex:1; text-align:justify; }
+  .order-info h3 { font-size:16px; color:#d62828; margin-bottom:5px; }
+  .order-info p { font-size:14px; color:#555; }
+  .order-controls { display:flex; gap:10px; align-items:center; margin-top:5px; }
+  .order-controls button { padding:4px 8px; border:none; background:#d62828; color:white; font-weight:bold; border-radius:6px; cursor:pointer; }
+  .order-price { font-weight:bold; font-size:16px; color:#27ae60; }
+
+  .summary-box {
+    padding:15px;
+    border-radius:12px;
+    margin-top:20px;
+    background:#f8eded;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  }
+  .summary-item { display:flex; justify-content:space-between; margin-bottom:10px; font-size:16px; }
+  .summary-item.total { font-weight:bold; font-size:18px; color:#d62828; }
+
+  form label { font-weight:600; display:block; margin:15px 0 5px; font-size:14px; }
+  form input, form select, textarea {
+    width:100%; padding:12px; font-size:14px; border:1px solid #ccc; border-radius:8px;
+    background:#fff; margin-bottom:12px;
+  }
+  textarea { height:80px; resize:none; }
+
+  .payment-options {
+    margin:20px 0;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .payment-options span {
+    display:block; text-align:center; padding:10px 12px; border-radius:8px;
+    background:#fff; border:1px solid #d62828; color:#d62828; font-weight:600; cursor:pointer; transition: all 0.3s;
+  }
+  .payment-options span:hover { background:#d62828; color:white; }
+
+  .place-order {
+    width:100%; background:#d62828; color:#fff; border:none; padding:15px;
+    border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px; transition: background 0.3s;
+  }
+  .place-order:hover { background:#f77f00; }
+
+  footer {
+    background-color:#3a0ca3;
+    color:white;
+    text-align:center;
+    padding:25px;
+    margin-top:50px;
+    font-size:14px;
+  }
+  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KusinaExpress</h1>
+  <nav>
+    <a href="{% url 'restaurant:dashboard' %}">Home</a>
+    <a href="{% url 'restaurant:menu' %}">Menu</a>
+    <a href="{% url 'restaurant:cart' %}">Cart</a>
+    <a href="#">Order</a>
+    <a href="#">Contact</a>
+    <a href="#">About Us</a>
+    <div class="auth-button">
+      {% if user %}
+        <a href="{% url 'restaurant:home' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<div class="order-wrapper">
+  <h2 class="section-title">Current Order</h2>
+  <div id="cartItems"></div>
+
+  <div class="summary-box">
+    <div class="summary-item"><span>Subtotal:</span><span id="subtotal">₱0</span></div>
+    <div class="summary-item"><span>Shipping Fee:</span><span id="shipping">₱40</span></div>
+    <div class="summary-item total"><span>Total:</span><span id="total">₱0</span></div>
+  </div>
+
+  <form id="orderForm">
+    <label>Name:</label>
+    <input type="text" name="name" placeholder="Enter your full name" required>
+    <label>Delivery Address:</label>
+    <input type="text" name="address" placeholder="Enter your address" required>
+    <label>Contact Number:</label>
+    <input type="text" name="contact" placeholder="09xxxxxxxxx" required>
+    <label>Delivery Option:</label>
+    <select name="delivery_option">
+      <option>Pick-up</option>
+      <option>Delivery</option>
+    </select>
+    <label>Notes:</label>
+    <textarea name="notes" placeholder="Add any notes for your order"></textarea>
+    <label>Payment Options</label>
+    <div class="payment-options">
+      <span data-method="cod">Cash on Delivery</span>
+      <span data-method="gcash">GCash / E-Wallet</span>
+      <span data-method="card">Credit / Debit Card</span>
+    </div>
+    <button type="submit" class="place-order">Place Order</button>
+  </form>
+</div>
+
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<script>
+let cartItems = [];
+let selectedPayment = 'cod';
+
+// CSRF helper
+function getCookie(name) {
+  let cookieValue = null;
+  if(document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for(let i=0;i<cookies.length;i++) {
+      const cookie = cookies[i].trim();
+      if(cookie.substring(0,name.length+1) === (name+'=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Fetch cart from backend
+async function fetchCart() {
+  try {
+    const res = await fetch('/restaurant/api/cart/');
+    cartItems = await res.json();
+    displayCart();
+  } catch(err) { console.error(err); }
+}
+
+async function updateQuantity(itemId, delta) {
+  const item = cartItems.find(i => i.id === itemId);
+  if(!item) return;
+  const newQuantity = item.quantity + delta;
+  if(newQuantity <= 0) {
+    await removeItem(itemId);
+    return;
+  }
+  // Update backend
+  try {
+    await fetch('/restaurant/api/cart/add/', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({item_id:itemId, quantity: delta})
+    });
+    item.quantity = newQuantity;
+    displayCart();
+  } catch(err){ console.error(err); }
+}
+
+async function removeItem(itemId){
+  try {
+    // Remove by setting quantity negative
+    const item = cartItems.find(i => i.id===itemId);
+    if(item){
+      await fetch('/restaurant/api/cart/add/',{
+        method:'POST',
+        headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({item_id:itemId, quantity:-item.quantity})
+      });
+    }
+    cartItems = cartItems.filter(i => i.id!==itemId);
+    displayCart();
+  } catch(err){ console.error(err); }
+}
+
+function displayCart(){
+  const container = document.getElementById('cartItems');
+  container.innerHTML='';
+  let subtotal = 0;
+  cartItems.forEach(item=>{
+    const itemDiv=document.createElement('div');
+    itemDiv.className='order-item';
+    itemDiv.innerHTML=`
+      <div class="image-holder">
+        <img src="${item.image_url || 'https://via.placeholder.com/90'}" style="width:100%; height:100%; border-radius:10px;" alt="${item.name}">
+      </div>
+      <div class="order-info">
+        <h3>${item.name}</h3>
+        <p>${item.description || ''}</p>
+        <div class="order-controls">
+          <button onclick="updateQuantity(${item.id}, -1)">-</button>
+          <span>${item.quantity}</span>
+          <button onclick="updateQuantity(${item.id}, 1)">+</button>
+          <button onclick="removeItem(${item.id})">Remove</button>
+        </div>
+      </div>
+      <div class="order-price">₱${item.price*item.quantity}</div>
+    `;
+    container.appendChild(itemDiv);
+    subtotal += item.price*item.quantity;
+  });
+  document.getElementById('subtotal').innerText=`₱${subtotal}`;
+  document.getElementById('total').innerText=`₱${subtotal+40}`;
+}
+
+// Payment selection
+document.querySelectorAll('.payment-options span').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    selectedPayment = el.dataset.method;
+    document.querySelectorAll('.payment-options span').forEach(s=>{
+      s.style.background='#fff';
+      s.style.color='#d62828';
+    });
+    el.style.background='#d62828';
+    el.style.color='#fff';
+  });
+});
+
+// Place order
+document.getElementById('orderForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const formData=new FormData(this);
+  const orderData={
+    address: formData.get('address'),
+    contact: formData.get('contact'),
+    delivery_option: formData.get('delivery_option'),
+    notes: formData.get('notes'),
+    payment_method: selectedPayment,
+    items: cartItems
+  };
+  try{
+    const res = await fetch('/restaurant/api/orders/',{
+      method:'POST',
+      headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify(orderData)
+    });
+    if(res.ok){
+      alert('Order placed successfully!');
+      cartItems=[];
+      displayCart();
+      this.reset();
+    } else {
+      alert('Failed to place order.');
+    }
+  } catch(err){ console.error(err); alert('Error submitting order'); }
+});
+
+fetchCart();
+</script>
+</body>
+</html>
