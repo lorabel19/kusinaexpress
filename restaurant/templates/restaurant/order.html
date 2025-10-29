@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Place Order</title>
+<link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
+<style>
+  /* Add any extra page-specific styles here */
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KusinaExpress</h1>
+  <nav>
+    <a href="{% url 'restaurant:dashboard' %}">Home</a>
+    <a href="{% url 'restaurant:menu' %}">Menu</a>
+    <a href="{% url 'restaurant:cart' %}">Cart</a>
+    <div class="auth-button">
+      {% if user %}
+        <a href="{% url 'restaurant:home' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<div class="order-wrapper">
+  <h2 class="section-title">Your Order</h2>
+
+  <!-- Cart Items -->
+  <div id="cartItems"></div>
+
+  <!-- Summary -->
+  <div class="summary-box">
+    <div class="summary-item"><span>Subtotal:</span><span id="subtotal">₱0</span></div>
+    <div class="summary-item"><span>Shipping Fee:</span><span id="shipping">₱40</span></div>
+    <div class="summary-item total"><span>Total:</span><span id="total">₱0</span></div>
+  </div>
+
+  <!-- Order Form -->
+  <form id="orderForm">
+    <label>Name:</label>
+    <input type="text" name="name" placeholder="Enter your full name" required>
+
+    <label>Delivery Address:</label>
+    <input type="text" name="address" placeholder="Enter your address" required>
+
+    <label>Contact Number:</label>
+    <input type="text" name="contact" placeholder="09xxxxxxxxx" required>
+
+    <label>Delivery Option:</label>
+    <select name="delivery_option">
+      <option value="pickup">Pick-up</option>
+      <option value="delivery">Delivery</option>
+    </select>
+
+    <label>Notes:</label>
+    <textarea name="notes" placeholder="Add any notes for your order"></textarea>
+
+    <label>Payment Method:</label>
+    <div class="payment-options">
+      <span data-method="cod" class="active">Cash on Delivery</span>
+      <span data-method="gcash">GCash / E-Wallet</span>
+      <span data-method="card">Credit / Debit Card</span>
+    </div>
+
+    <button type="submit" class="place-order">Place Order</button>
+  </form>
+</div>
+
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<!-- Toast Notification -->
+<div id="toast">Item added to cart!</div>
+
+<script>
+// JavaScript for handling cart and orders
+
+let cartItems = [];
+let selectedPayment = 'cod';
+
+// CSRF helper
+function getCookie(name) {
+  let cookieValue = null;
+  if(document.cookie && document.cookie !== '') {
+    document.cookie.split(';').forEach(cookie => {
+      if(cookie.trim().startsWith(name + '=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// Show toast
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.style.opacity = 1;
+  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+}
+
+// Fetch cart items
+async function fetchCart() {
+  try {
+    const res = await fetch('/api/cart/');
+    cartItems = await res.json();
+    displayCart();
+  } catch(err){ console.error(err); }
+}
+
+// Update quantity
+async function updateQuantity(itemId, delta) {
+  const item = cartItems.find(i=>i.item_id===itemId);
+  if(!item) return;
+  const newQty = item.quantity + delta;
+  if(newQty <= 0) { await removeItem(itemId); return; }
+
+  await fetchCartUpdate(itemId, delta);
+  item.quantity = newQty;
+  displayCart();
+}
+
+// Remove item
+async function removeItem(itemId){
+  const item = cartItems.find(i=>i.item_id===itemId);
+  if(!item) return;
+  await fetchCartUpdate(itemId, -item.quantity);
+  cartItems = cartItems.filter(i=>i.item_id!==itemId);
+  displayCart();
+}
+
+// Helper for POST cart update
+async function fetchCartUpdate(itemId, quantity){
+  try {
+    await fetch('/api/cart/add/', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ item_id: itemId, quantity })
+    });
+    showToast('Cart updated!');
+  } catch(err){ console.error(err); }
+}
+
+// Display cart
+function displayCart() {
+  const container = document.getElementById('cartItems');
+  container.innerHTML = '';
+  let subtotal = 0;
+
+  if(cartItems.length === 0) {
+    container.innerHTML = '<p style="text-align:center;">Your cart is empty.</p>';
+  }
+
+  cartItems.forEach(item=>{
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'order-item';
+    itemDiv.innerHTML = `
+      <div class="image-holder">
+        <img src="${item.image_url || 'https://via.placeholder.com/90'}" style="width:100%; height:100%; border-radius:10px;" alt="${item.name}">
+      </div>
+      <div class="order-info">
+        <h3>${item.name}</h3>
+        <p>${item.description || ''}</p>
+        <div class="order-controls">
+          <button type="button" onclick="updateQuantity(${item.item_id}, -1)">-</button>
+          <span>${item.quantity}</span>
+          <button type="button" onclick="updateQuantity(${item.item_id}, 1)">+</button>
+          <button type="button" onclick="removeItem(${item.item_id})">Remove</button>
+        </div>
+      </div>
+      <div class="order-price">₱${parseFloat(item.subtotal).toFixed(2)}</div>
+    `;
+    container.appendChild(itemDiv);
+    subtotal += parseFloat(item.subtotal);
+  });
+
+  document.getElementById('subtotal').innerText = `₱${subtotal.toFixed(2)}`;
+  document.getElementById('total').innerText = `₱${(subtotal + 40).toFixed(2)}`;
+}
+
+// Payment selection
+document.querySelectorAll('.payment-options span').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    selectedPayment = el.dataset.method;
+    document.querySelectorAll('.payment-options span').forEach(s=>s.classList.remove('active'));
+    el.classList.add('active');
+  });
+});
+
+// Place order
+document.getElementById('orderForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  if(cartItems.length===0){ alert('Your cart is empty.'); return; }
+
+  const formData = new FormData(this);
+  const orderData = {
+    name: formData.get('name'),
+    address: formData.get('address'),
+    contact: formData.get('contact'),
+    delivery_option: formData.get('delivery_option'),
+    notes: formData.get('notes'),
+    payment_method: selectedPayment,
+    items: cartItems
+  };
+
+  try{
+    const res = await fetch('/api/orders/', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify(orderData)
+    });
+    if(res.ok){
+      showToast('Order placed successfully!');
+      cartItems = [];
+      displayCart();
+      this.reset();
+    } else {
+      const data = await res.json();
+      alert(data.detail || 'Failed to place order.');
+    }
+  } catch(err){ console.error(err); alert('Error submitting order'); }
+});
+
+fetchCart();
+</script>
+
+</body>
+</html>
