@@ -3,8 +3,9 @@ from django.contrib import messages
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import MenuItems, Users, Orders, OrderItems
-from .serializers import MenuItemsSerializer, OrderItemsSerializer, OrdersSerializer
+from .models import MenuItems, Users, Orders, Cart
+from .serializers import MenuItemsSerializer, CartSerializer, OrdersSerializer
+from decimal import Decimal  # ✅ added for subtotal calculation precision
 
 # -----------------------------
 # Menu Items API
@@ -70,14 +71,19 @@ def logout_view(request):
 def menu_page(request):
     """Render menu page."""
     user = get_logged_in_user(request)
-    return render(request, 'restaurant/menu.html', {'user': user})
+    items = MenuItems.objects.filter(is_available=1)
+    return render(request, 'restaurant/menu.html', {'user': user, 'menu_items': items})
 
 def cart_page(request):
     """Render cart page."""
     user = get_logged_in_user(request)
     if not user:
         return redirect('restaurant:login')
-    return render(request, 'restaurant/cart.html', {'user': user})
+
+    # ✅ Updated to fetch and show cart items
+    cart_items = Cart.objects.filter(user=user)
+    total = sum(item.subtotal for item in cart_items)
+    return render(request, 'restaurant/cart.html', {'user': user, 'cart_items': cart_items, 'total': total})
 
 # -----------------------------
 # Cart APIs
@@ -89,12 +95,8 @@ def cart_api(request):
     if not user:
         return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    order = Orders.objects.filter(user_id=user.user_id, status='pending').first()
-    if not order:
-        return Response([])
-
-    items = OrderItems.objects.filter(order=order)
-    serializer = OrderItemsSerializer(items, many=True)
+    items = Cart.objects.filter(user=user)
+    serializer = CartSerializer(items, many=True)
     return Response(serializer.data)
 
 @api_view(['POST'])
@@ -111,21 +113,36 @@ def add_to_cart_api(request):
         return Response({"detail": "Item ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        menu_item = MenuItems.objects.get(id=item_id)
-        order, _ = Orders.objects.get_or_create(user_id=user.user_id, status='pending')
-        order_item, created = OrderItems.objects.get_or_create(order=order, item=menu_item)
-        if not created:
-            order_item.quantity += quantity
+        menu_item = MenuItems.objects.get(item_id=item_id)
+
+        # ✅ Ensure existing cart item is properly handled
+        cart_item, created = Cart.objects.get_or_create(user=user, item=menu_item)
+
+        if created:
+            cart_item.quantity = quantity
         else:
-            order_item.quantity = quantity
-        order_item.subtotal = menu_item.price * order_item.quantity
-        order_item.save()
-        return Response({"detail": "Item added to cart"})
+            cart_item.quantity = (cart_item.quantity or 0) + quantity  # handles null quantity safely
+
+        # ✅ Always compute subtotal properly
+        cart_item.subtotal = Decimal(menu_item.price) * Decimal(cart_item.quantity)
+        cart_item.save()
+
+        # ✅ Return flattened fields including image_url for frontend
+        return Response({
+            "detail": f"'{menu_item.name}' added to cart.",
+            "cart_id": cart_item.cart_id,
+            "item_id": menu_item.item_id,
+            "name": menu_item.name,
+            "price": str(menu_item.price),
+            "quantity": cart_item.quantity,
+            "subtotal": str(cart_item.subtotal),
+            "image_url": menu_item.image_url
+        }, status=status.HTTP_200_OK)
+
     except MenuItems.DoesNotExist:
         return Response({"detail": "Menu item not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"detail": f"Error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 @api_view(['POST'])
 def place_order_api(request):
     """Confirm and place the current order."""
@@ -134,19 +151,21 @@ def place_order_api(request):
         return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
     data = request.data
-    order = Orders.objects.filter(user_id=user.user_id, status='pending').first()
-    if not order:
+    # Create or get pending order for this user
+    order, _ = Orders.objects.get_or_create(user=user, status='pending')
+
+    cart_items = Cart.objects.filter(user=user)
+    if not cart_items.exists():
         return Response({"detail": "No items in cart"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        order.delivery_address = data.get('address', '')
-        order.contact_number = data.get('contact', '')
-        order.delivery_option = data.get('delivery_option', 'pickup')
-        order.notes = data.get('notes', '')
-        order.payment_method = data.get('payment_method', 'cash')
-        order.total = sum([oi.subtotal for oi in order.orderitems_set.all()]) + 40  # delivery fee
+        order.total_amount = sum([ci.subtotal for ci in cart_items]) + Decimal('40.00')  # ✅ added Decimal for precision
         order.status = 'confirmed'
         order.save()
+
+        # Optionally, clear cart after placing order
+        cart_items.delete()
+
         return Response({"detail": "Order placed successfully"})
     except Exception as e:
         return Response({"detail": f"Error placing order: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

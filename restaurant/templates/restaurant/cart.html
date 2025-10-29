@@ -81,7 +81,7 @@
     display:block; text-align:center; padding:10px 12px; border-radius:8px;
     background:#fff; border:1px solid #d62828; color:#d62828; font-weight:600; cursor:pointer; transition: all 0.3s;
   }
-  .payment-options span:hover { background:#d62828; color:white; }
+  .payment-options span.active { background:#d62828; color:white; }
 
   .place-order {
     width:100%; background:#d62828; color:#fff; border:none; padding:15px;
@@ -99,6 +99,21 @@
   }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
+
+  /* Toast notification */
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background:#27ae60;
+    color:white;
+    padding:10px 20px;
+    border-radius:6px;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.5s;
+    z-index:200;
+  }
 </style>
 </head>
 <body>
@@ -141,14 +156,14 @@
     <input type="text" name="contact" placeholder="09xxxxxxxxx" required>
     <label>Delivery Option:</label>
     <select name="delivery_option">
-      <option>Pick-up</option>
-      <option>Delivery</option>
+      <option value="pickup">Pick-up</option>
+      <option value="delivery">Delivery</option>
     </select>
     <label>Notes:</label>
     <textarea name="notes" placeholder="Add any notes for your order"></textarea>
     <label>Payment Options</label>
     <div class="payment-options">
-      <span data-method="cod">Cash on Delivery</span>
+      <span data-method="cod" class="active">Cash on Delivery</span>
       <span data-method="gcash">GCash / E-Wallet</span>
       <span data-method="card">Credit / Debit Card</span>
     </div>
@@ -160,6 +175,9 @@
   <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
 </footer>
 
+<!-- Toast notification -->
+<div id="toast">Item added to cart!</div>
+
 <script>
 let cartItems = [];
 let selectedPayment = 'cod';
@@ -168,111 +186,119 @@ let selectedPayment = 'cod';
 function getCookie(name) {
   let cookieValue = null;
   if(document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for(let i=0;i<cookies.length;i++) {
-      const cookie = cookies[i].trim();
-      if(cookie.substring(0,name.length+1) === (name+'=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length+1));
-        break;
+    document.cookie.split(';').forEach(cookie => {
+      if(cookie.trim().startsWith(name + '=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
       }
-    }
+    });
   }
   return cookieValue;
 }
 
-// Fetch cart from backend
+// Show toast
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.style.opacity = 1;
+  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+}
+
+// Fetch cart items
 async function fetchCart() {
   try {
-    const res = await fetch('/restaurant/api/cart/');
+    const res = await fetch('/api/cart/');
     cartItems = await res.json();
     displayCart();
-  } catch(err) { console.error(err); }
+  } catch(err){ console.error(err); }
 }
 
+// Update quantity
 async function updateQuantity(itemId, delta) {
-  const item = cartItems.find(i => i.id === itemId);
+  const item = cartItems.find(i=>i.item.item_id===itemId);
   if(!item) return;
-  const newQuantity = item.quantity + delta;
-  if(newQuantity <= 0) {
-    await removeItem(itemId);
-    return;
-  }
-  // Update backend
-  try {
-    await fetch('/restaurant/api/cart/add/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
-      body: JSON.stringify({item_id:itemId, quantity: delta})
-    });
-    item.quantity = newQuantity;
-    displayCart();
-  } catch(err){ console.error(err); }
+  const newQty = item.quantity + delta;
+  if(newQty <= 0) { await removeItem(itemId); return; }
+
+  await fetchCartUpdate(itemId, delta);
+  item.quantity = newQty;
+  displayCart();
 }
 
+// Remove item
 async function removeItem(itemId){
+  const item = cartItems.find(i=>i.item.item_id===itemId);
+  if(!item) return;
+  await fetchCartUpdate(itemId, -item.quantity);
+  cartItems = cartItems.filter(i=>i.item.item_id!==itemId);
+  displayCart();
+}
+
+// Helper for POST cart update
+async function fetchCartUpdate(itemId, quantity){
   try {
-    // Remove by setting quantity negative
-    const item = cartItems.find(i => i.id===itemId);
-    if(item){
-      await fetch('/restaurant/api/cart/add/',{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({item_id:itemId, quantity:-item.quantity})
-      });
-    }
-    cartItems = cartItems.filter(i => i.id!==itemId);
-    displayCart();
+    await fetch('/api/cart/add/', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ item_id: itemId, quantity })
+    });
+    showToast('Item updated!');
   } catch(err){ console.error(err); }
 }
 
-function displayCart(){
+// Display cart
+function displayCart() {
   const container = document.getElementById('cartItems');
-  container.innerHTML='';
+  container.innerHTML = '';
   let subtotal = 0;
+
+  if(cartItems.length === 0) {
+    container.innerHTML = '<p style="text-align:center;">Your cart is empty.</p>';
+  }
+
   cartItems.forEach(item=>{
-    const itemDiv=document.createElement('div');
-    itemDiv.className='order-item';
-    itemDiv.innerHTML=`
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'order-item';
+    itemDiv.innerHTML = `
       <div class="image-holder">
         <img src="${item.image_url || 'https://via.placeholder.com/90'}" style="width:100%; height:100%; border-radius:10px;" alt="${item.name}">
       </div>
       <div class="order-info">
-        <h3>${item.name}</h3>
-        <p>${item.description || ''}</p>
+        <h3>${item.item.name}</h3>
+        <p>${item.item.description || ''}</p>
         <div class="order-controls">
-          <button onclick="updateQuantity(${item.id}, -1)">-</button>
+          <button onclick="updateQuantity(${item.item.item_id}, -1)">-</button>
           <span>${item.quantity}</span>
-          <button onclick="updateQuantity(${item.id}, 1)">+</button>
-          <button onclick="removeItem(${item.id})">Remove</button>
+          <button onclick="updateQuantity(${item.item.item_id}, 1)">+</button>
+          <button onclick="removeItem(${item.item.item_id})">Remove</button>
         </div>
       </div>
-      <div class="order-price">₱${item.price*item.quantity}</div>
+      <div class="order-price">₱${parseFloat(item.subtotal).toFixed(2)}</div>
     `;
     container.appendChild(itemDiv);
-    subtotal += item.price*item.quantity;
+    subtotal += parseFloat(item.subtotal);
   });
-  document.getElementById('subtotal').innerText=`₱${subtotal}`;
-  document.getElementById('total').innerText=`₱${subtotal+40}`;
+
+  document.getElementById('subtotal').innerText = `₱${subtotal.toFixed(2)}`;
+  document.getElementById('total').innerText = `₱${(subtotal + 40).toFixed(2)}`;
 }
 
 // Payment selection
 document.querySelectorAll('.payment-options span').forEach(el=>{
   el.addEventListener('click', ()=>{
     selectedPayment = el.dataset.method;
-    document.querySelectorAll('.payment-options span').forEach(s=>{
-      s.style.background='#fff';
-      s.style.color='#d62828';
-    });
-    el.style.background='#d62828';
-    el.style.color='#fff';
+    document.querySelectorAll('.payment-options span').forEach(s=>s.classList.remove('active'));
+    el.classList.add('active');
   });
 });
 
 // Place order
 document.getElementById('orderForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  const formData=new FormData(this);
-  const orderData={
+  if(cartItems.length===0){ alert('Your cart is empty.'); return; }
+
+  const formData = new FormData(this);
+  const orderData = {
+    name: formData.get('name'),
     address: formData.get('address'),
     contact: formData.get('contact'),
     delivery_option: formData.get('delivery_option'),
@@ -280,19 +306,21 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
     payment_method: selectedPayment,
     items: cartItems
   };
+
   try{
-    const res = await fetch('/restaurant/api/orders/',{
+    const res = await fetch('/api/orders/', {
       method:'POST',
       headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
       body: JSON.stringify(orderData)
     });
     if(res.ok){
-      alert('Order placed successfully!');
-      cartItems=[];
+      showToast('Order placed successfully!');
+      cartItems = [];
       displayCart();
       this.reset();
     } else {
-      alert('Failed to place order.');
+      const data = await res.json();
+      alert(data.detail || 'Failed to place order.');
     }
   } catch(err){ console.error(err); alert('Error submitting order'); }
 });

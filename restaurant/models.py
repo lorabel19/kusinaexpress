@@ -47,16 +47,16 @@ class MenuItems(models.Model):
         db_table = 'menu_items'
 
 
-class OrderItems(models.Model):
-    order_item_id = models.AutoField(primary_key=True)
-    order = models.ForeignKey('Orders', models.DO_NOTHING)
+class Cart(models.Model):
+    cart_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('Users', models.DO_NOTHING)
     item = models.ForeignKey(MenuItems, models.DO_NOTHING)
     quantity = models.IntegerField(blank=True, null=True)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        managed = False
-        db_table = 'order_items'
+        managed = False  # Django won't touch the table
+        db_table = 'cart'
 
 
 class Orders(models.Model):
