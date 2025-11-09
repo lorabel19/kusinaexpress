@@ -195,53 +195,67 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// Show toast
+// Toast notification
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.innerText = msg;
   toast.style.opacity = 1;
-  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+  setTimeout(() => { toast.style.opacity = 0; }, 2000);
 }
 
 // Fetch cart items
 async function fetchCart() {
   try {
     const res = await fetch('/api/cart/');
+    if(!res.ok) return;
     cartItems = await res.json();
     displayCart();
   } catch(err){ console.error(err); }
 }
 
-// Update quantity
+// Update quantity (+/-)
 async function updateQuantity(itemId, delta) {
-  const item = cartItems.find(i=>i.item.item_id===itemId);
+  const item = cartItems.find(i => i.item.item_id === itemId);
   if(!item) return;
-  const newQty = item.quantity + delta;
-  if(newQty <= 0) { await removeItem(itemId); return; }
 
-  await fetchCartUpdate(itemId, delta);
-  item.quantity = newQty;
-  displayCart();
+  const newQty = item.quantity + delta;
+  if(newQty <= 0) {
+    await removeItem(item.cart_id);
+    return;
+  }
+
+  try {
+    await fetch('/api/cart/add/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ item_id: itemId, quantity: delta })
+    });
+    showToast('Cart updated!');
+    await fetchCart();
+  } catch(err){ console.error(err); }
 }
 
 // Remove item
-async function removeItem(itemId){
-  const item = cartItems.find(i=>i.item.item_id===itemId);
+async function removeItem(cartId) {
+  const item = cartItems.find(i => i.cart_id === cartId);
   if(!item) return;
-  await fetchCartUpdate(itemId, -item.quantity);
-  cartItems = cartItems.filter(i=>i.item.item_id!==itemId);
-  displayCart();
-}
 
-// Helper for POST cart update
-async function fetchCartUpdate(itemId, quantity){
   try {
+    // Option 2: send negative quantity to remove
     await fetch('/api/cart/add/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-      body: JSON.stringify({ item_id: itemId, quantity })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ item_id: item.item.item_id, quantity: -999 })
     });
-    showToast('Item updated!');
+    cartItems = cartItems.filter(i => i.cart_id !== cartId);
+    displayCart();
+    showToast('Item removed!');
   } catch(err){ console.error(err); }
 }
 
@@ -253,14 +267,17 @@ function displayCart() {
 
   if(cartItems.length === 0) {
     container.innerHTML = '<p style="text-align:center;">Your cart is empty.</p>';
+    document.getElementById('subtotal').innerText = `₱0.00`;
+    document.getElementById('total').innerText = `₱40.00`;
+    return;
   }
 
-  cartItems.forEach(item=>{
+  cartItems.forEach(item => {
     const itemDiv = document.createElement('div');
     itemDiv.className = 'order-item';
     itemDiv.innerHTML = `
       <div class="image-holder">
-        <img src="${item.image_url || 'https://via.placeholder.com/90'}" style="width:100%; height:100%; border-radius:10px;" alt="${item.name}">
+        <img src="${item.item.image_url || 'https://via.placeholder.com/90'}" style="width:100%; height:100%; border-radius:10px;" alt="${item.item.name}">
       </div>
       <div class="order-info">
         <h3>${item.item.name}</h3>
@@ -269,7 +286,7 @@ function displayCart() {
           <button onclick="updateQuantity(${item.item.item_id}, -1)">-</button>
           <span>${item.quantity}</span>
           <button onclick="updateQuantity(${item.item.item_id}, 1)">+</button>
-          <button onclick="removeItem(${item.item.item_id})">Remove</button>
+          <button onclick="removeItem(${item.cart_id})">Remove</button>
         </div>
       </div>
       <div class="order-price">₱${parseFloat(item.subtotal).toFixed(2)}</div>
@@ -283,10 +300,10 @@ function displayCart() {
 }
 
 // Payment selection
-document.querySelectorAll('.payment-options span').forEach(el=>{
-  el.addEventListener('click', ()=>{
+document.querySelectorAll('.payment-options span').forEach(el => {
+  el.addEventListener('click', () => {
     selectedPayment = el.dataset.method;
-    document.querySelectorAll('.payment-options span').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.payment-options span').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
   });
 });
@@ -294,7 +311,7 @@ document.querySelectorAll('.payment-options span').forEach(el=>{
 // Place order
 document.getElementById('orderForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  if(cartItems.length===0){ alert('Your cart is empty.'); return; }
+  if(cartItems.length === 0){ alert('Your cart is empty.'); return; }
 
   const formData = new FormData(this);
   const orderData = {
@@ -303,17 +320,20 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
     contact: formData.get('contact'),
     delivery_option: formData.get('delivery_option'),
     notes: formData.get('notes'),
-    payment_method: selectedPayment,
-    items: cartItems
+    payment_method: selectedPayment
   };
 
-  try{
-    const res = await fetch('/api/orders/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
+  try {
+    const res = await fetch('/api/orders/place/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
       body: JSON.stringify(orderData)
     });
-    if(res.ok){
+
+    if(res.ok) {
       showToast('Order placed successfully!');
       cartItems = [];
       displayCart();
@@ -325,7 +345,12 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   } catch(err){ console.error(err); alert('Error submitting order'); }
 });
 
+// Initial fetch
 fetchCart();
 </script>
+
+
+
 </body>
 </html>
+

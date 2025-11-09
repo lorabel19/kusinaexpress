@@ -68,11 +68,18 @@ def logout_view(request):
     request.session.flush()
     return redirect('restaurant:login')
 
+from django.db import connection
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from decimal import Decimal
+
 def menu_page(request):
     """Render menu page."""
     user = get_logged_in_user(request)
     items = MenuItems.objects.filter(is_available=1)
     return render(request, 'restaurant/menu.html', {'user': user, 'menu_items': items})
+
 
 def cart_page(request):
     """Render cart page."""
@@ -80,10 +87,10 @@ def cart_page(request):
     if not user:
         return redirect('restaurant:login')
 
-    # ✅ Updated to fetch and show cart items
     cart_items = Cart.objects.filter(user=user)
     total = sum(item.subtotal for item in cart_items)
     return render(request, 'restaurant/cart.html', {'user': user, 'cart_items': cart_items, 'total': total})
+
 
 # -----------------------------
 # Cart APIs
@@ -99,37 +106,42 @@ def cart_api(request):
     serializer = CartSerializer(items, many=True)
     return Response(serializer.data)
 
+
 @api_view(['POST'])
 def add_to_cart_api(request):
-    """Add a menu item to the cart or update quantity."""
+    """Add a menu item to the cart, update quantity, or remove if quantity <= 0."""
     user = get_logged_in_user(request)
     if not user:
         return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
     item_id = request.data.get('item_id')
-    quantity = int(request.data.get('quantity', 1))
+    quantity = int(request.data.get('quantity', 1))  # default to 1 if not provided
 
     if not item_id:
         return Response({"detail": "Item ID is required"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         menu_item = MenuItems.objects.get(item_id=item_id)
-
-        # ✅ Ensure existing cart item is properly handled
         cart_item, created = Cart.objects.get_or_create(user=user, item=menu_item)
 
+        # Update quantity
         if created:
             cart_item.quantity = quantity
         else:
-            cart_item.quantity = (cart_item.quantity or 0) + quantity  # handles null quantity safely
+            cart_item.quantity = (cart_item.quantity or 0) + quantity
 
-        # ✅ Always compute subtotal properly
+        # Delete cart item if quantity <= 0
+        if cart_item.quantity <= 0:
+            cart_item.delete()
+            return Response({"detail": f"'{menu_item.name}' removed from cart."}, status=status.HTTP_200_OK)
+
+        # Compute subtotal
         cart_item.subtotal = Decimal(menu_item.price) * Decimal(cart_item.quantity)
         cart_item.save()
 
-        # ✅ Return flattened fields including image_url for frontend
+        # Return flattened response for frontend
         return Response({
-            "detail": f"'{menu_item.name}' added to cart.",
+            "detail": f"'{menu_item.name}' added/updated in cart.",
             "cart_id": cart_item.cart_id,
             "item_id": menu_item.item_id,
             "name": menu_item.name,
@@ -143,6 +155,26 @@ def add_to_cart_api(request):
         return Response({"detail": "Menu item not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"detail": f"Error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ✅ NEW: remove single cart item
+@api_view(['DELETE'])
+def remove_from_cart_api(request, cart_id):
+    """Remove an item from cart (manual delete since managed=False)."""
+    user = get_logged_in_user(request)
+    if not user:
+        return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM cart WHERE cart_id = %s AND user_id = %s", [cart_id, user.user_id])
+        return Response({"detail": "Item removed successfully"}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"detail": f"Error removing item: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ✅ Updated: place_order_api (manual cart clearing)
 @api_view(['POST'])
 def place_order_api(request):
     """Confirm and place the current order."""
@@ -150,22 +182,23 @@ def place_order_api(request):
     if not user:
         return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    data = request.data
-    # Create or get pending order for this user
-    order, _ = Orders.objects.get_or_create(user=user, status='pending')
-
     cart_items = Cart.objects.filter(user=user)
     if not cart_items.exists():
         return Response({"detail": "No items in cart"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        order.total_amount = sum([ci.subtotal for ci in cart_items]) + Decimal('40.00')  # ✅ added Decimal for precision
+        # compute total
+        total_amount = sum([ci.subtotal for ci in cart_items]) + Decimal('40.00')
+        order, _ = Orders.objects.get_or_create(user=user, status='pending')
+        order.total_amount = total_amount
         order.status = 'confirmed'
         order.save()
 
-        # Optionally, clear cart after placing order
-        cart_items.delete()
+        # ✅ manually clear cart (since managed=False)
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM cart WHERE user_id = %s", [user.user_id])
 
-        return Response({"detail": "Order placed successfully"})
+        return Response({"detail": "Order placed successfully"}, status=status.HTTP_200_OK)
+
     except Exception as e:
         return Response({"detail": f"Error placing order: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

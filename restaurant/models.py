@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from decimal import Decimal
 
 
 class Deliveries(models.Model):
@@ -49,14 +50,17 @@ class MenuItems(models.Model):
 
 class Cart(models.Model):
     cart_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('Users', models.DO_NOTHING)
-    item = models.ForeignKey(MenuItems, models.DO_NOTHING)
+    user = models.ForeignKey('Users', on_delete=models.DO_NOTHING)
+    item = models.ForeignKey('MenuItems', on_delete=models.DO_NOTHING)
     quantity = models.IntegerField(blank=True, null=True)
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
 
     class Meta:
-        managed = False  # Django won't touch the table
+        managed = False  # ✅ keep False since database is manually managed
         db_table = 'cart'
+
+    def __str__(self):
+        return f"{self.user} - {self.item} (x{self.quantity})"
 
 
 class Orders(models.Model):
