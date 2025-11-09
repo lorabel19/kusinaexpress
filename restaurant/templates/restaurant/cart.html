@@ -22,11 +22,25 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
   header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; }
+  nav { display:flex; align-items:center; gap:10px; position:relative; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
   nav a:hover { color:#fcbf49; }
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  /* Cart badge */
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background:red;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    border-radius:50%;
+    padding:2px 6px;
+    display:none;
+  }
 
   .order-wrapper {
     max-width:900px;
@@ -123,8 +137,11 @@
   <nav>
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}">Cart</a>
-    <a href="#">Order</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart
+      <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="#">Contact</a>
     <a href="#">About Us</a>
     <div class="auth-button">
@@ -175,7 +192,6 @@
   <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
 </footer>
 
-<!-- Toast notification -->
 <div id="toast">Item added to cart!</div>
 
 <script>
@@ -195,12 +211,29 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// Toast notification
+// Toast
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.innerText = msg;
   toast.style.opacity = 1;
   setTimeout(() => { toast.style.opacity = 0; }, 2000);
+}
+
+// Update Cart Badge
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    const badge = document.getElementById('cartBadge');
+    if(count > 0){
+      badge.innerText = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch(err){ console.error(err); }
 }
 
 // Fetch cart items
@@ -210,6 +243,7 @@ async function fetchCart() {
     if(!res.ok) return;
     cartItems = await res.json();
     displayCart();
+    updateCartBadge();
   } catch(err){ console.error(err); }
 }
 
@@ -227,10 +261,7 @@ async function updateQuantity(itemId, delta) {
   try {
     await fetch('/api/cart/add/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken')
-      },
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
       body: JSON.stringify({ item_id: itemId, quantity: delta })
     });
     showToast('Cart updated!');
@@ -244,18 +275,15 @@ async function removeItem(cartId) {
   if(!item) return;
 
   try {
-    // Option 2: send negative quantity to remove
     await fetch('/api/cart/add/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken')
-      },
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
       body: JSON.stringify({ item_id: item.item.item_id, quantity: -999 })
     });
     cartItems = cartItems.filter(i => i.cart_id !== cartId);
     displayCart();
     showToast('Item removed!');
+    updateCartBadge();
   } catch(err){ console.error(err); }
 }
 
@@ -326,10 +354,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   try {
     const res = await fetch('/api/orders/place/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken')
-      },
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
       body: JSON.stringify(orderData)
     });
 
@@ -337,6 +362,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
       showToast('Order placed successfully!');
       cartItems = [];
       displayCart();
+      updateCartBadge();
       this.reset();
     } else {
       const data = await res.json();
@@ -349,8 +375,5 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
 fetchCart();
 </script>
 
-
-
 </body>
 </html>
-

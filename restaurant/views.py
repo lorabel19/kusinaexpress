@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from .models import MenuItems, Users, Orders, Cart
 from .serializers import MenuItemsSerializer, CartSerializer, OrdersSerializer
 from decimal import Decimal  
-
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import Orders, Users
 
 # Menu Items API
 class MenuItemsViewSet(viewsets.ModelViewSet):
@@ -197,3 +199,38 @@ def place_order_api(request):
 
     except Exception as e:
         return Response({"detail": f"Error placing order: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+#order view
+def order_view(request):
+    user_id = request.session.get('user_id')  # get logged-in user_id from session
+    if not user_id:
+        return render(request, 'restaurant/order.html', {'order_id': None})
+
+    user = get_object_or_404(Users, pk=user_id)
+    order = Orders.objects.filter(user=user).order_by('-order_date').first()
+
+    context = {
+        'order_id': order.order_id if order else None
+    }
+    return render(request, 'restaurant/order.html', context)
+
+
+def track_order_api(request, order_id):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'User not logged in'}, status=403)
+
+    user = get_object_or_404(Users, pk=user_id)
+    order = get_object_or_404(Orders, pk=order_id, user=user)
+
+    steps = ["Order Confirmed", "Preparing Order", "Out for Delivery", "Delivered"]
+
+    data = {
+        'order_id': order.order_id,
+        'status': order.status or "Order Confirmed",
+        'order_date': order.order_date.strftime('%Y-%m-%d %H:%M') if order.order_date else None,
+        'total_amount': float(order.total_amount),
+        'steps': steps
+    }
+    return JsonResponse(data)
+

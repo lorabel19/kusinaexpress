@@ -4,10 +4,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KusinaExpress | Place Order</title>
-<link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
+<title>KusinaExpress | Track Order</title>
 <style>
-  
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background-color:#fffaf3; color:#2d2d2d; }
+
+  header { background-color:#d62828; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
+  header h1 { font-size:26px; letter-spacing:1px; }
+  nav { display:flex; align-items:center; gap:10px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
+  nav a:hover { color:#fcbf49; }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background:red;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    border-radius:50%;
+    padding:2px 6px;
+    display:none; 
+  }
+
+  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+  .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  main { padding: 30px 0; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+
+  h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
+
+  .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; }
+  .status-item { background:white; border:2px dashed #d62828; border-radius:12px; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; transition: all 0.3s; }
+  .status-item.active { background:#f8eded; font-weight:bold; border-color:#f77f00; }
+
+  .map-section { background:white; border:2px dashed #d62828; border-radius:12px; padding:20px; }
+  .map-placeholder { width:100%; height:300px; background:#f8eded; border:1px dashed #f77f00; display:flex; justify-content:center; align-items:center; font-size:18px; color:#555; border-radius:10px; }
+
+  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
+  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+
+  #toast { position: fixed; bottom:20px; right:20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
 </style>
 </head>
 <body>
@@ -17,7 +57,13 @@
   <nav>
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}">Cart</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart
+      <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
+    <a href="#">Contact</a>
+    <a href="#">About Us</a>
     <div class="auth-button">
       {% if user %}
         <a href="{% url 'restaurant:home' %}">
@@ -28,207 +74,102 @@
   </nav>
 </header>
 
-<div class="order-wrapper">
-  <h2 class="section-title">Your Order</h2>
+<main>
+  <div class="container">
+    <!-- Order Status -->
+    <section>
+      <h2 class="section-title">Order Status</h2>
+      <div class="status-section">
+        <div class="status-item" data-status="Order Confirmed">
+          <p>Order Confirmed</p>
+          <p class="time">--</p>
+        </div>
+        <div class="status-item" data-status="Preparing Order">
+          <p>Preparing Order</p>
+          <p class="time">--</p>
+        </div>
+        <div class="status-item" data-status="Out for Delivery">
+          <p>Out for Delivery</p>
+          <p class="time">--</p>
+        </div>
+        <div class="status-item" data-status="Delivered">
+          <p>Delivered</p>
+          <p class="time">--</p>
+        </div>
+      </div>
+    </section>
 
-  <!-- Cart Items -->
-  <div id="cartItems"></div>
-
-  <!-- Summary -->
-  <div class="summary-box">
-    <div class="summary-item"><span>Subtotal:</span><span id="subtotal">₱0</span></div>
-    <div class="summary-item"><span>Shipping Fee:</span><span id="shipping">₱40</span></div>
-    <div class="summary-item total"><span>Total:</span><span id="total">₱0</span></div>
+    <!-- Delivery Map -->
+    <section>
+      <h2 class="section-title">Delivery Map</h2>
+      <div class="map-section">
+        <div class="map-placeholder">
+          Map Placeholder (Delivery Route)
+        </div>
+      </div>
+    </section>
   </div>
-
-  <!-- Order Form -->
-  <form id="orderForm">
-    <label>Name:</label>
-    <input type="text" name="name" placeholder="Enter your full name" required>
-
-    <label>Delivery Address:</label>
-    <input type="text" name="address" placeholder="Enter your address" required>
-
-    <label>Contact Number:</label>
-    <input type="text" name="contact" placeholder="09xxxxxxxxx" required>
-
-    <label>Delivery Option:</label>
-    <select name="delivery_option">
-      <option value="pickup">Pick-up</option>
-      <option value="delivery">Delivery</option>
-    </select>
-
-    <label>Notes:</label>
-    <textarea name="notes" placeholder="Add any notes for your order"></textarea>
-
-    <label>Payment Method:</label>
-    <div class="payment-options">
-      <span data-method="cod" class="active">Cash on Delivery</span>
-      <span data-method="gcash">GCash / E-Wallet</span>
-      <span data-method="card">Credit / Debit Card</span>
-    </div>
-
-    <button type="submit" class="place-order">Place Order</button>
-  </form>
-</div>
+</main>
 
 <footer>
   <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
 </footer>
 
-<!-- Toast Notification -->
 <div id="toast">Item added to cart!</div>
 
 <script>
-// JavaScript for handling cart and orders
+  const orderId = "{{ order_id }}";  // Pass order_id from Django view
 
-let cartItems = [];
-let selectedPayment = 'cod';
+  // --- Order Status ---
+  async function fetchOrderStatus() {
+    try {
+      const response = await fetch(`/restaurant/api/orders/${orderId}/`);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
 
-// CSRF helper
-function getCookie(name) {
-  let cookieValue = null;
-  if(document.cookie && document.cookie !== '') {
-    document.cookie.split(';').forEach(cookie => {
-      if(cookie.trim().startsWith(name + '=')){
-        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
-      }
-    });
-  }
-  return cookieValue;
-}
+      const timestamps = data.timestamps;
+      const statusItems = document.querySelectorAll('.status-item');
 
-// Show toast
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.innerText = msg;
-  toast.style.opacity = 1;
-  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
-}
+      statusItems.forEach(item => {
+        const statusName = item.dataset.status;
+        const timeEl = item.querySelector('.time');
 
-// Fetch cart items
-async function fetchCart() {
-  try {
-    const res = await fetch('/api/cart/');
-    cartItems = await res.json();
-    displayCart();
-  } catch(err){ console.error(err); }
-}
-
-// Update quantity
-async function updateQuantity(itemId, delta) {
-  const item = cartItems.find(i=>i.item_id===itemId);
-  if(!item) return;
-  const newQty = item.quantity + delta;
-  if(newQty <= 0) { await removeItem(itemId); return; }
-
-  await fetchCartUpdate(itemId, delta);
-  item.quantity = newQty;
-  displayCart();
-}
-
-// Remove item
-async function removeItem(itemId){
-  const item = cartItems.find(i=>i.item_id===itemId);
-  if(!item) return;
-  await fetchCartUpdate(itemId, -item.quantity);
-  cartItems = cartItems.filter(i=>i.item_id!==itemId);
-  displayCart();
-}
-
-// Helper for POST cart update
-async function fetchCartUpdate(itemId, quantity){
-  try {
-    await fetch('/api/cart/add/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-      body: JSON.stringify({ item_id: itemId, quantity })
-    });
-    showToast('Cart updated!');
-  } catch(err){ console.error(err); }
-}
-
-// Display cart
-function displayCart() {
-  const container = document.getElementById('cartItems');
-  container.innerHTML = '';
-  let subtotal = 0;
-
-  if(cartItems.length === 0) {
-    container.innerHTML = '<p style="text-align:center;">Your cart is empty.</p>';
-  }
-
-  cartItems.forEach(item=>{
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'order-item';
-    itemDiv.innerHTML = `
-      <div class="image-holder">
-        <img src="${item.image_url || 'https://via.placeholder.com/90'}" style="width:100%; height:100%; border-radius:10px;" alt="${item.name}">
-      </div>
-      <div class="order-info">
-        <h3>${item.name}</h3>
-        <p>${item.description || ''}</p>
-        <div class="order-controls">
-          <button type="button" onclick="updateQuantity(${item.item_id}, -1)">-</button>
-          <span>${item.quantity}</span>
-          <button type="button" onclick="updateQuantity(${item.item_id}, 1)">+</button>
-          <button type="button" onclick="removeItem(${item.item_id})">Remove</button>
-        </div>
-      </div>
-      <div class="order-price">₱${parseFloat(item.subtotal).toFixed(2)}</div>
-    `;
-    container.appendChild(itemDiv);
-    subtotal += parseFloat(item.subtotal);
-  });
-
-  document.getElementById('subtotal').innerText = `₱${subtotal.toFixed(2)}`;
-  document.getElementById('total').innerText = `₱${(subtotal + 40).toFixed(2)}`;
-}
-
-// Payment selection
-document.querySelectorAll('.payment-options span').forEach(el=>{
-  el.addEventListener('click', ()=>{
-    selectedPayment = el.dataset.method;
-    document.querySelectorAll('.payment-options span').forEach(s=>s.classList.remove('active'));
-    el.classList.add('active');
-  });
-});
-
-// Place order
-document.getElementById('orderForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  if(cartItems.length===0){ alert('Your cart is empty.'); return; }
-
-  const formData = new FormData(this);
-  const orderData = {
-    name: formData.get('name'),
-    address: formData.get('address'),
-    contact: formData.get('contact'),
-    delivery_option: formData.get('delivery_option'),
-    notes: formData.get('notes'),
-    payment_method: selectedPayment,
-    items: cartItems
-  };
-
-  try{
-    const res = await fetch('/api/orders/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken') },
-      body: JSON.stringify(orderData)
-    });
-    if(res.ok){
-      showToast('Order placed successfully!');
-      cartItems = [];
-      displayCart();
-      this.reset();
-    } else {
-      const data = await res.json();
-      alert(data.detail || 'Failed to place order.');
+        if (timestamps && timestamps[statusName]) {
+          item.classList.add('active');
+          timeEl.textContent = timestamps[statusName];
+        } else {
+          item.classList.remove('active');
+          timeEl.textContent = '--';
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching order status:", error);
     }
-  } catch(err){ console.error(err); alert('Error submitting order'); }
-});
+  }
 
-fetchCart();
+  fetchOrderStatus();
+  setInterval(fetchOrderStatus, 10000);
+
+  // --- Cart Badge ---
+  async function updateCartBadge(){
+    try{
+      const res = await fetch('/api/cart/');
+      if(!res.ok) return;
+      const items = await res.json();
+      const count = items.reduce((acc,i)=>acc+i.quantity,0);
+      const badge = document.getElementById('cartBadge');
+      if(count>0){
+        badge.innerText = count;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }catch(err){ console.error(err); }
+  }
+
+  // Initial cart badge fetch
+  updateCartBadge();
+  setInterval(updateCartBadge, 10000);  // auto-update every 10s
 </script>
 
 </body>

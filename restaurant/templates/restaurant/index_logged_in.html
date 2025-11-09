@@ -9,7 +9,6 @@
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
   body { background-color:#fffaf3; color:#2d2d2d; }
 
-
   header {
     background-color: #d62828;
     color: white;
@@ -25,13 +24,25 @@
 
   header h1 { font-size:26px; letter-spacing:1px; }
   nav { display:flex; align-items:center; gap:10px; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
   nav a:hover { color:#fcbf49; }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background:red;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    border-radius:50%;
+    padding:2px 6px;
+    display:none; 
+  }
 
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
 
-  
   .hero {
     background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
     url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg');
@@ -63,6 +74,9 @@
   footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
+
+  /* Toast notification */
+  #toast { position: fixed; bottom:20px; right:20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
 </style>
 </head>
 <body>
@@ -72,11 +86,13 @@
   <nav>
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}">Cart</a>
-    <a href="#">Order</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart
+      <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="#">Contact</a>
     <a href="#">About Us</a>
-
     <div class="auth-button">
       {% if user %}
         <a href="{% url 'restaurant:home' %}">
@@ -137,6 +153,54 @@
 <footer>
   <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
 </footer>
+
+<div id="toast">Item added to cart!</div>
+
+<script>
+// CSRF helper
+function getCookie(name){
+  let cookieValue = null;
+  if(document.cookie && document.cookie!==''){
+    document.cookie.split(';').forEach(cookie=>{
+      if(cookie.trim().startsWith(name+'=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// Show toast
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.innerText = msg;
+  toast.style.opacity = 1;
+  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+}
+
+// Update cart badge
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    const badge = document.getElementById('cartBadge');
+    if(count>0){
+      badge.innerText = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }catch(err){ console.error(err); }
+}
+
+// Initial fetch
+updateCartBadge();
+
+// Optional: poll every 10s in case cart updates in another tab
+setInterval(updateCartBadge, 10000);
+</script>
 
 </body>
 </html>

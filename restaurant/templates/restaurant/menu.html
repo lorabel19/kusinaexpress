@@ -11,11 +11,25 @@
 
   header { background-color:#d62828; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
   header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; }
+  nav { display:flex; align-items:center; gap:10px; position:relative; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
   nav a:hover { color:#fcbf49; }
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  /* Cart badge */
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 50%;
+    display: none;
+  }
 
   .search-form { display:flex; justify-content:center; margin:30px 0; }
   .search-form input { padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:250px; margin-right:5px; }
@@ -58,8 +72,11 @@
   <nav>
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}">Cart (<span id="cartCount">0</span>)</a>
-    <a href="#">Order</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart
+      <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="#">Contact</a>
     <a href="#">About Us</a>
     <div class="auth-button">
@@ -137,7 +154,7 @@ async function fetchMenu(){
     const res = await fetch('/api/menu/');
     allMenuItems = await res.json();
     displayMenu(allMenuItems);
-    updateCartCount();
+    updateCartBadge();
   }catch(err){ console.error(err); }
 }
 
@@ -189,19 +206,28 @@ async function addToCart(itemId, quantity=1){
       headers:{ 'Content-Type':'application/json', 'X-CSRFToken':getCookie('csrftoken') },
       body: JSON.stringify({ item_id:itemId, quantity })
     });
-    if(res.ok){ showToast('Item added to cart!'); updateCartCount(); }
+    if(res.ok){ 
+      showToast('Item added to cart!'); 
+      updateCartBadge(); 
+    }
     else { const data = await res.json(); alert(data.detail || 'Error adding item'); }
   }catch(err){ console.error(err); alert('Something went wrong'); }
 }
 
-// Update cart count
-async function updateCartCount(){
+// Update cart badge
+async function updateCartBadge(){
   try{
     const res = await fetch('/api/cart/');
     if(!res.ok) return;
     const items = await res.json();
+    const badge = document.getElementById('cartBadge');
     const count = items.reduce((acc,i)=>acc+i.quantity,0);
-    document.getElementById('cartCount').innerText = count;
+    if(count>0){
+      badge.innerText = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
   }catch(err){ console.error(err); }
 }
 
