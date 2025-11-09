@@ -5,18 +5,16 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import MenuItems, Users, Orders, Cart
 from .serializers import MenuItemsSerializer, CartSerializer, OrdersSerializer
-from decimal import Decimal  # ✅ added for subtotal calculation precision
+from decimal import Decimal  
 
-# -----------------------------
+
 # Menu Items API
-# -----------------------------
 class MenuItemsViewSet(viewsets.ModelViewSet):
     queryset = MenuItems.objects.all()
     serializer_class = MenuItemsSerializer
 
-# -----------------------------
+
 # Helper: Get logged-in user
-# -----------------------------
 def get_logged_in_user(request):
     """Return currently logged-in user, or None if not logged in."""
     user_id = request.session.get('user_id')
@@ -28,9 +26,7 @@ def get_logged_in_user(request):
         request.session.flush()
         return None
 
-# -----------------------------
 # Pages
-# -----------------------------
 def home(request):
     """Render home page."""
     user = get_logged_in_user(request)
@@ -92,9 +88,8 @@ def cart_page(request):
     return render(request, 'restaurant/cart.html', {'user': user, 'cart_items': cart_items, 'total': total})
 
 
-# -----------------------------
+
 # Cart APIs
-# -----------------------------
 @api_view(['GET'])
 def cart_api(request):
     """Return current user's cart items."""
@@ -157,7 +152,7 @@ def add_to_cart_api(request):
         return Response({"detail": f"Error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# ✅ NEW: remove single cart item
+#remove single cart item
 @api_view(['DELETE'])
 def remove_from_cart_api(request, cart_id):
     """Remove an item from cart (manual delete since managed=False)."""
@@ -174,7 +169,7 @@ def remove_from_cart_api(request, cart_id):
         return Response({"detail": f"Error removing item: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# ✅ Updated: place_order_api (manual cart clearing)
+#place_order_api 
 @api_view(['POST'])
 def place_order_api(request):
     """Confirm and place the current order."""
@@ -194,7 +189,7 @@ def place_order_api(request):
         order.status = 'confirmed'
         order.save()
 
-        # ✅ manually clear cart (since managed=False)
+        #manually clear cart
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM cart WHERE user_id = %s", [user.user_id])
 

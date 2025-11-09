@@ -9,7 +9,7 @@
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
   body { background-color:#fffaf3; color:#2d2d2d; }
 
-  /* HEADER - same as login page */
+
   header {
     background-color: #d62828;
     color: white;
@@ -31,7 +31,7 @@
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
 
-  /* HERO */
+  
   .hero {
     background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
     url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg');
@@ -72,7 +72,7 @@
   <nav>
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="#">Cart</a>
+    <a href="{% url 'restaurant:cart' %}">Cart</a>
     <a href="#">Order</a>
     <a href="#">Contact</a>
     <a href="#">About Us</a>

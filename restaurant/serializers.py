@@ -16,7 +16,7 @@ class CartSerializer(serializers.ModelSerializer):
         queryset=MenuItems.objects.all(), source='item', write_only=True
     )
 
-    # ✅ Add flattened image_url field for frontend
+    #Add flattened image_url field for frontend
     image_url = serializers.CharField(source='item.image_url', read_only=True)
 
     class Meta:
