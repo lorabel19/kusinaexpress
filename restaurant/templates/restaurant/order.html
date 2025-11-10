@@ -80,22 +80,10 @@
     <section>
       <h2 class="section-title">Order Status</h2>
       <div class="status-section">
-        <div class="status-item" data-status="Order Confirmed">
-          <p>Order Confirmed</p>
-          <p class="time">--</p>
-        </div>
-        <div class="status-item" data-status="Preparing Order">
-          <p>Preparing Order</p>
-          <p class="time">--</p>
-        </div>
-        <div class="status-item" data-status="Out for Delivery">
-          <p>Out for Delivery</p>
-          <p class="time">--</p>
-        </div>
-        <div class="status-item" data-status="Delivered">
-          <p>Delivered</p>
-          <p class="time">--</p>
-        </div>
+        <div class="status-item" data-status="Order Confirmed"><p>Order Confirmed</p><p class="time">--</p></div>
+        <div class="status-item" data-status="Preparing Order"><p>Preparing Order</p><p class="time">--</p></div>
+        <div class="status-item" data-status="Out for Delivery"><p>Out for Delivery</p><p class="time">--</p></div>
+        <div class="status-item" data-status="Delivered"><p>Delivered</p><p class="time">--</p></div>
       </div>
     </section>
 
@@ -103,9 +91,7 @@
     <section>
       <h2 class="section-title">Delivery Map</h2>
       <div class="map-section">
-        <div class="map-placeholder">
-          Map Placeholder (Delivery Route)
-        </div>
+        <div class="map-placeholder">Map Placeholder (Delivery Route)</div>
       </div>
     </section>
   </div>
@@ -118,23 +104,24 @@
 <div id="toast">Item added to cart!</div>
 
 <script>
-  const orderId = "{{ order_id }}";  // Pass order_id from Django view
+  const orderId = "{{ order_id }}";
 
-  // --- Order Status ---
+  // --- Only fetch order status if order exists ---
   async function fetchOrderStatus() {
+    if (!orderId) return; // skip if no order
+
     try {
-      const response = await fetch(`/restaurant/api/orders/${orderId}/`);
-      if (!response.ok) throw new Error("Network response was not ok");
+      const response = await fetch(`/api/orders/${orderId}/`);
+      if (!response.ok) throw new Error("Order not found");
       const data = await response.json();
 
-      const timestamps = data.timestamps;
+      const timestamps = data.timestamps || {};
       const statusItems = document.querySelectorAll('.status-item');
 
       statusItems.forEach(item => {
         const statusName = item.dataset.status;
         const timeEl = item.querySelector('.time');
-
-        if (timestamps && timestamps[statusName]) {
+        if (timestamps[statusName]) {
           item.classList.add('active');
           timeEl.textContent = timestamps[statusName];
         } else {
@@ -147,29 +134,26 @@
     }
   }
 
-  fetchOrderStatus();
-  setInterval(fetchOrderStatus, 10000);
-
-  // --- Cart Badge ---
-  async function updateCartBadge(){
-    try{
-      const res = await fetch('/api/cart/');
-      if(!res.ok) return;
-      const items = await res.json();
-      const count = items.reduce((acc,i)=>acc+i.quantity,0);
-      const badge = document.getElementById('cartBadge');
-      if(count>0){
-        badge.innerText = count;
-        badge.style.display = 'inline-block';
-      } else {
-        badge.style.display = 'none';
-      }
-    }catch(err){ console.error(err); }
+  if (orderId) {
+    fetchOrderStatus();
+    setInterval(fetchOrderStatus, 10000); // auto-refresh every 10s
   }
 
-  // Initial cart badge fetch
+  // --- Cart Badge ---
+  async function updateCartBadge() {
+    try {
+      const res = await fetch('/api/cart/');
+      if (!res.ok) return;
+      const items = await res.json();
+      const count = items.reduce((acc, i) => acc + i.quantity, 0);
+      const badge = document.getElementById('cartBadge');
+      badge.style.display = count > 0 ? 'inline-block' : 'none';
+      badge.innerText = count > 0 ? count : '';
+    } catch (err) { console.error(err); }
+  }
+
   updateCartBadge();
-  setInterval(updateCartBadge, 10000);  // auto-update every 10s
+  setInterval(updateCartBadge, 10000);
 </script>
 
 </body>

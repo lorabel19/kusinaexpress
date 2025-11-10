@@ -16,7 +16,7 @@ class CartSerializer(serializers.ModelSerializer):
         queryset=MenuItems.objects.all(), source='item', write_only=True
     )
 
-    #Add flattened image_url field for frontend
+    # Add flattened image_url field for frontend
     image_url = serializers.CharField(source='item.image_url', read_only=True)
 
     class Meta:
@@ -26,8 +26,11 @@ class CartSerializer(serializers.ModelSerializer):
 
 # Serializer for Orders
 class OrdersSerializer(serializers.ModelSerializer):
-    # Use CartSerializer instead of OrderItemsSerializer
+    # Use CartSerializer for order items
     order_items = CartSerializer(many=True, read_only=True, source='cart_set')
+
+    # ✅ Add timestamps for order tracking
+    timestamps = serializers.SerializerMethodField()
 
     class Meta:
         model = Orders
@@ -42,5 +45,15 @@ class OrdersSerializer(serializers.ModelSerializer):
             'notes',
             'payment_method',
             'status',
-            'order_date'
+            'order_date',
+            'timestamps',  # include timestamps
         ]
+
+    # SerializerMethodField function
+    def get_timestamps(self, obj):
+        return {
+            "Order Confirmed": obj.confirmed_at.strftime("%I:%M %p") if obj.confirmed_at else None,
+            "Preparing Order": obj.preparing_at.strftime("%I:%M %p") if obj.preparing_at else None,
+            "Out for Delivery": obj.out_for_delivery_at.strftime("%I:%M %p") if obj.out_for_delivery_at else None,
+            "Delivered": obj.delivered_at.strftime("%I:%M %p") if obj.delivered_at else None,
+        }

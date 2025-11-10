@@ -9,6 +9,10 @@ from decimal import Decimal
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import Orders, Users
+import json
+from decimal import Decimal
+from django.utils import timezone
+
 
 # Menu Items API
 class MenuItemsViewSet(viewsets.ModelViewSet):
@@ -171,66 +175,96 @@ def remove_from_cart_api(request, cart_id):
         return Response({"detail": f"Error removing item: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-#place_order_api 
-@api_view(['POST'])
+# Place Order API
 def place_order_api(request):
     """Confirm and place the current order."""
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+
     user = get_logged_in_user(request)
     if not user:
-        return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
+        return JsonResponse({"detail": "Not logged in"}, status=401)
 
     cart_items = Cart.objects.filter(user=user)
     if not cart_items.exists():
-        return Response({"detail": "No items in cart"}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"detail": "No items in cart"}, status=400)
 
     try:
+        # parse JSON data
+        data = json.loads(request.body)
+
         # compute total
         total_amount = sum([ci.subtotal for ci in cart_items]) + Decimal('40.00')
-        order, _ = Orders.objects.get_or_create(user=user, status='pending')
-        order.total_amount = total_amount
-        order.status = 'confirmed'
-        order.save()
 
-        #manually clear cart
-        with connection.cursor() as cursor:
-            cursor.execute("DELETE FROM cart WHERE user_id = %s", [user.user_id])
+        # create new order with local time
+        now = timezone.localtime()  
+        order = Orders.objects.create(
+            user=user,
+            total_amount=total_amount,
+            delivery_address=data.get('address', ''),
+            contact_number=data.get('contact', ''),
+            delivery_option=data.get('delivery_option', ''),
+            notes=data.get('notes', ''),
+            payment_method=data.get('payment_method', ''),
+            status='Order Confirmed',
+            order_date=now,
+            confirmed_at=now,
+        )
 
-        return Response({"detail": "Order placed successfully"}, status=status.HTTP_200_OK)
+        # associate cart items to order
+        for ci in cart_items:
+            ci.order = order
+            ci.save()
+
+        # Clear cart
+        cart_items.delete()
+
+        return JsonResponse({
+            "detail": "Order placed successfully",
+            "order_id": order.order_id
+        }, status=201)
 
     except Exception as e:
-        return Response({"detail": f"Error placing order: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-#order view
+        return JsonResponse({"detail": f"Error placing order: {str(e)}"}, status=500)
+
+
+# Order Page View
 def order_view(request):
-    user_id = request.session.get('user_id')  # get logged-in user_id from session
-    if not user_id:
+    """Render order tracking page."""
+    user = get_logged_in_user(request)
+    if not user:
         return render(request, 'restaurant/order.html', {'order_id': None})
 
-    user = get_object_or_404(Users, pk=user_id)
+    # Get latest order
     order = Orders.objects.filter(user=user).order_by('-order_date').first()
-
-    context = {
-        'order_id': order.order_id if order else None
-    }
+    context = {'order_id': order.order_id if order else None}
     return render(request, 'restaurant/order.html', context)
 
 
+
+# API: Track Order
 def track_order_api(request, order_id):
-    user_id = request.session.get('user_id')
-    if not user_id:
+    """Return order status and timestamps for tracking."""
+    user = get_logged_in_user(request)
+    if not user:
         return JsonResponse({'error': 'User not logged in'}, status=403)
 
-    user = get_object_or_404(Users, pk=user_id)
     order = get_object_or_404(Orders, pk=order_id, user=user)
 
     steps = ["Order Confirmed", "Preparing Order", "Out for Delivery", "Delivered"]
 
+    # convert all timestamps to localtime
     data = {
         'order_id': order.order_id,
         'status': order.status or "Order Confirmed",
-        'order_date': order.order_date.strftime('%Y-%m-%d %H:%M') if order.order_date else None,
+        'order_date': timezone.localtime(order.order_date).strftime('%Y-%m-%d %H:%M') if order.order_date else None,
         'total_amount': float(order.total_amount),
-        'steps': steps
+        'steps': steps,
+        'timestamps': {
+            "Order Confirmed": timezone.localtime(order.confirmed_at).strftime("%I:%M %p") if order.confirmed_at else None,
+            "Preparing Order": timezone.localtime(order.preparing_at).strftime("%I:%M %p") if order.preparing_at else None,
+            "Out for Delivery": timezone.localtime(order.out_for_delivery_at).strftime("%I:%M %p") if order.out_for_delivery_at else None,
+            "Delivered": timezone.localtime(order.delivered_at).strftime("%I:%M %p") if order.delivered_at else None,
+        }
     }
     return JsonResponse(data)
-

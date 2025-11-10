@@ -61,11 +61,23 @@ class Orders(models.Model):
     user = models.ForeignKey('Users', models.DO_NOTHING)
     order_date = models.DateTimeField(blank=True, null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=16, blank=True, null=True)
+    status = models.CharField(max_length=32, blank=True, null=True)
+
+    delivery_address = models.TextField(blank=True, null=True)
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    delivery_option = models.CharField(max_length=50, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    payment_method = models.CharField(max_length=50, blank=True, null=True)
+
+    confirmed_at = models.DateTimeField(blank=True, null=True)
+    preparing_at = models.DateTimeField(blank=True, null=True)
+    out_for_delivery_at = models.DateTimeField(blank=True, null=True)
+    delivered_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'orders'
+
 
 
 class Payments(models.Model):
