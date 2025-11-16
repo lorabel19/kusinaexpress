@@ -91,11 +91,11 @@
       <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="#">Contact</a>
-    <a href="#">About Us</a>
+    <a href="{% url 'restaurant:contact' %}">Contact</a>
+    <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
-        <a href="{% url 'restaurant:home' %}">
+        <a href="{% url 'restaurant:profile' %}">
           <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
         </a>
       {% endif %}

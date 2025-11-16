@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | About Us</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background-color:#fffaf3; color:#2d2d2d; }
+
+  /* HEADER */
+  header {
+    background-color: #d62828;
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size:26px; letter-spacing:1px; }
+  nav { display:flex; align-items:center; gap:10px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
+  nav a:hover { color:#fcbf49; }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background:red;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    border-radius:50%;
+    padding:2px 6px;
+    display:none; 
+  }
+
+  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+  .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  /* HERO SECTION */
+  .about-hero {
+    position:relative;
+    background:linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2a/33/10/3e/manila-bay-kitchen-is.jpg');
+    background-size:cover;
+    background-position:center;
+    color:white;
+    text-align:center;
+    padding:120px 20px 80px;
+  }
+  .about-hero h2 { font-size:48px; margin-bottom:15px; font-weight:700; }
+  .about-hero p { font-size:20px; max-width:700px; margin:0 auto; line-height:1.6; }
+
+  /* INFO SECTION */
+  .about-info {
+    display:flex;
+    flex-wrap:wrap;
+    gap:40px;
+    justify-content:center;
+    padding:60px 20px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .about-card {
+    background:#fff;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.1);
+    flex:1 1 300px;
+    padding:40px 30px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align:center;
+  }
+  .about-card:hover { transform:translateY(-5px); box-shadow:0 12px 30px rgba(0,0,0,0.15); }
+  .about-card h3 { color:#d62828; margin-bottom:15px; font-size:22px; }
+  .about-card p { font-size:16px; color:#555; line-height:1.6; }
+
+  /* TEAM SECTION */
+  .team-section { padding:60px 20px; background:#f8eded; }
+  .team-section h2 { text-align:center; color:#d62828; font-size:36px; margin-bottom:50px; font-weight:700; }
+  .team-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:30px; max-width:1200px; margin:0 auto; }
+  .team-card { background:#fff; padding:25px; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.1); text-align:center; transition: transform 0.3s, box-shadow 0.3s; }
+  .team-card:hover { transform:translateY(-5px); box-shadow:0 12px 30px rgba(0,0,0,0.15); }
+  .team-card img { width:120px; height:120px; border-radius:50%; margin-bottom:15px; object-fit:cover; }
+  .team-card h4 { color:#d62828; font-size:18px; margin-bottom:5px; }
+  .team-card p { font-size:14px; color:#555; }
+
+  /* ABOUT FOOTER SOCIAL */
+  .about-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 40px;
+    background:#fff;
+    border-top:1px solid #ddd;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  .social-links a {
+    text-decoration: none;
+    color:#d62828;
+    font-weight:600;
+    margin:0 10px;
+    transition: color 0.3s;
+    text-align:center;
+  }
+  .social-links a:hover { color:#f77f00; }
+
+  /* BASE FOOTER */
+  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:0; font-size:14px; }
+  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+
+  @media(max-width:768px) { 
+    .about-footer { flex-direction:column; gap:15px; text-align:center; } 
+    .social-links a { margin: 5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <h1>KusinaExpress</h1>
+  <nav>
+    <a href="{% url 'restaurant:dashboard' %}">Home</a>
+    <a href="{% url 'restaurant:menu' %}">Menu</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart
+      <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
+    <a href="{% url 'restaurant:contact' %}">Contact</a>
+    <a href="{% url 'restaurant:about' %}">About Us</a>
+    <div class="auth-button">
+      {% if user %}
+        <a href="{% url 'restaurant:home' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<!-- HERO SECTION -->
+<section class="about-hero">
+  <h2>About KusinaExpress</h2>
+  <p>Founded in 2020 in Quezon City, KusinaExpress delivers authentic Filipino flavors directly to your doorstep. From traditional Adobo to Kare-Kare, we bring comfort food closer to every Filipino home.</p>
+</section>
+
+<!-- INFO CARDS -->
+<section class="about-info">
+  <div class="about-card">
+    <h3>Our Mission</h3>
+    <p>To provide fast, fresh, and flavorful Filipino meals that connect families to the taste of home.</p>
+  </div>
+  <div class="about-card">
+    <h3>Our Vision</h3>
+    <p>To become the most loved Filipino food delivery service nationwide, known for quality, reliability, and exceptional service.</p>
+  </div>
+  <div class="about-card">
+    <h3>Our Values</h3>
+    <p>Passion for food, commitment to customers, and fostering community through shared Filipino culinary experiences.</p>
+  </div>
+</section>
+
+<!-- TEAM SECTION -->
+<section class="team-section">
+  <h2>Meet Our Team</h2>
+  <div class="team-container">
+    <div class="team-card">
+      <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Team Member">
+      <h4>Juan Dela Cruz</h4>
+      <p>Founder & CEO</p>
+    </div>
+    <div class="team-card">
+      <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="Team Member">
+      <h4>Maria Santos</h4>
+      <p>Head Chef</p>
+    </div>
+    <div class="team-card">
+      <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="Team Member">
+      <h4>Pedro Reyes</h4>
+      <p>Operations Manager</p>
+    </div>
+    <div class="team-card">
+      <img src="https://randomuser.me/api/portraits/women/4.jpg" alt="Team Member">
+      <h4>Lisa Cruz</h4>
+      <p>Customer Support Lead</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT FOOTER SOCIAL -->
+<section class="about-footer">
+  <div class="social-links">
+    <a href="https://facebook.com/kusinaexpress" target="_blank">Facebook</a>
+    <a href="https://instagram.com/kusinaexpress" target="_blank">Instagram</a>
+    <a href="https://twitter.com/kusinaexpress" target="_blank">Twitter</a>
+    <a href="https://www.kusinaexpress.com" target="_blank">Website</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<script>
+// Update cart badge
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    const badge = document.getElementById('cartBadge');
+    if(count>0){ badge.innerText = count; badge.style.display='inline-block'; }
+    else{ badge.style.display='none'; }
+  }catch(err){ console.error(err); }
+}
+updateCartBadge();
+setInterval(updateCartBadge,10000);
+</script>
+</body>
+</html>

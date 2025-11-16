@@ -86,8 +86,8 @@
       <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="#">Contact</a>
-    <a href="#">About Us</a>
+    <a href="{% url 'restaurant:contact' %}">Contact</a>
+    <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
         <a href="{% url 'restaurant:home' %}"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile"></a>
@@ -290,7 +290,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   };
 
   try {
-    const res = await fetch('/api/orders/', {  // keep trailing slash
+    const res = await fetch('/api/orders/', {  
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -311,7 +311,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
       // Redirect to order tracking page using order_id from API
       if(data.order_id){
         window.location.href = `/order/?order_id=${data.order_id}`; 
-        // or `/order/${data.order_id}/` depending on your URL setup
+        
       }
 
     } else {

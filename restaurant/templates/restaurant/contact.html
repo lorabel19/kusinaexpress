@@ -1,0 +1,278 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Contact</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background-color:#fffaf3; color:#2d2d2d; }
+
+  /* HEADER */
+  header {
+    background-color: #d62828;
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size:26px; letter-spacing:1px; }
+  nav { display:flex; align-items:center; gap:10px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
+  nav a:hover { color:#fcbf49; }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background:red;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    border-radius:50%;
+    padding:2px 6px;
+    display:none; 
+  }
+
+  .auth-button { 
+    margin-left:15px; 
+    padding-left:15px; 
+    border-left:2px solid rgba(255,255,255,0.3); 
+    display:flex; 
+    align-items:center; 
+  }
+  .auth-button a { display:flex; align-items:center; }
+  .auth-button a img { 
+    width:30px;   /* same as homepage */
+    height:30px;  /* same as homepage */
+    border-radius:50%; 
+    display:block; 
+  }
+
+  /* MAIN CONTENT */
+  main { padding:60px 40px; max-width:1200px; margin:0 auto; }  /* adjust para consistent sa homepage */
+  h2.section-title { text-align:center; color:#d62828; font-size:32px; margin-bottom:40px; font-weight:700; }
+
+  .contact-container {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:30px;
+    width:100%;
+  }
+
+  .contact-section {
+    background:#fff;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+    display:flex;
+    flex-direction:column;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .contact-section:hover { transform:translateY(-5px); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
+  .contact-section h3 { color:#d62828; margin-bottom:20px; font-size:20px; text-align:center; }
+
+  .faq-item {
+    background:#f8eded;
+    border-left:4px solid #f77f00;
+    padding:12px 15px;
+    margin-bottom:12px;
+    border-radius:8px;
+    font-size:15px;
+    line-height:1.5;
+  }
+
+  .contact-section p { font-size:15px; margin-bottom:15px; line-height:1.6; }
+
+  form input, form textarea, form button {
+    padding:12px 15px;
+    border-radius:8px;
+    font-size:14px;
+    border:1px solid #d62828;
+    width:100%;
+  }
+  form input, form textarea { margin-bottom:12px; }
+  form textarea { resize: vertical; }
+
+  form button {
+    background:#d62828;
+    color:white;
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+    transition: background 0.3s;
+  }
+  form button:hover { background:#f77f00; }
+
+  button {
+    cursor:pointer;
+    padding:10px 15px;
+    border-radius:8px;
+    border:none;
+    background:#d62828;
+    color:white;
+    font-weight:600;
+    transition: background 0.3s;
+  }
+  button:hover { background:#f77f00; }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom:20px;
+    right:20px;
+    background:#27ae60;
+    color:white;
+    padding:12px 20px;
+    border-radius:8px;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.5s;
+    z-index:200;
+  }
+
+  /* FOOTER */
+  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
+  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+
+  @media(max-width:600px) { 
+    .contact-container { grid-template-columns:1fr; } 
+    main { padding:40px 20px; }  /* mobile adjustment */
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <h1>KusinaExpress</h1>
+  <nav>
+    <a href="{% url 'restaurant:dashboard' %}">Home</a>
+    <a href="{% url 'restaurant:menu' %}">Menu</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
+    <a href="{% url 'restaurant:contact' %}">Contact</a>
+    <a href="{% url 'restaurant:about' %}">About Us</a>
+    <div class="auth-button">
+      {% if user %}
+      <a href="{% url 'restaurant:home' %}">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+      </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<!-- MAIN CONTENT -->
+<main>
+  <h2 class="section-title">Contact & Support</h2>
+  <div class="contact-container">
+    <!-- FAQ Section -->
+    <div class="contact-section">
+      <h3>Frequently Asked Questions (FAQs)</h3>
+      <div class="faq-item">
+        <strong>Q:</strong> How do I place an order?<br>
+        <strong>A:</strong> Go to the Menu page, choose your items, and click “Add to Order”.
+      </div>
+      <div class="faq-item">
+        <strong>Q:</strong> How can I track my delivery?<br>
+        <strong>A:</strong> Use the “Track” section to view your delivery status and map.
+      </div>
+      <div class="faq-item">
+        <strong>Q:</strong> What payment methods are accepted?<br>
+        <strong>A:</strong> We accept cash on delivery, debit/credit cards, and e-wallets.
+      </div>
+    </div>
+
+    <!-- Live Chat Section -->
+    <div class="contact-section">
+      <h3>Live Chat & Help Desk</h3>
+      <p>Need help? Connect with our customer representative through live chat or contact our help desk for inquiries.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button>Start Live Chat</button>
+        <button>Contact Help Desk</button>
+      </div>
+    </div>
+
+    <!-- Feedback Form Section -->
+    <div class="contact-section">
+      <h3>Feedback Form</h3>
+      <p>We value your feedback! Please share your comments or suggestions below.</p>
+      <form id="feedbackForm">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Your Name" required>
+        <input type="email" name="email" placeholder="Your Email" required>
+        <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+        <button type="submit">Submit Feedback</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<div id="toast">Item added to cart!</div>
+
+<script>
+// --- CSRF Helper ---
+function getCookie(name){
+  let cookieValue = null;
+  if(document.cookie && document.cookie !== '') {
+    document.cookie.split(';').forEach(cookie=>{
+      if(cookie.trim().startsWith(name+'=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// --- Cart Badge ---
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    const badge = document.getElementById('cartBadge');
+    if(count>0){ badge.innerText = count; badge.style.display = 'inline-block'; }
+    else{ badge.style.display = 'none'; }
+  } catch(err){ console.error(err); }
+}
+updateCartBadge();
+setInterval(updateCartBadge, 10000);
+
+// --- Feedback Form Submission ---
+const form = document.getElementById("feedbackForm");
+form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const csrftoken = '{{ csrf_token }}';
+    const data = { name:this.name.value, email:this.email.value, message:this.message.value };
+    try {
+        const response = await fetch("{% url 'restaurant:api-contact' %}", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json","X-CSRFToken":csrftoken },
+            body:JSON.stringify(data),
+            credentials:"same-origin"
+        });
+        const result = await response.json();
+        if(response.ok){ alert("Feedback submitted successfully!"); form.reset(); }
+        else{ alert("Error: "+JSON.stringify(result)); }
+    } catch(err){ console.error(err); alert("An error occurred. Please try again."); }
+});
+</script>
+
+</body>
+</html>

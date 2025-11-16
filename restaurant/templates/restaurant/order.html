@@ -37,11 +37,11 @@
   h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
 
   .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; }
-  .status-item { background:white; border:2px dashed #d62828; border-radius:12px; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; transition: all 0.3s; }
+  .status-item { background:white; border:2px solid #d62828; border-radius:12px; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; transition: all 0.3s; }
   .status-item.active { background:#f8eded; font-weight:bold; border-color:#f77f00; }
 
-  .map-section { background:white; border:2px dashed #d62828; border-radius:12px; padding:20px; }
-  .map-placeholder { width:100%; height:300px; background:#f8eded; border:1px dashed #f77f00; display:flex; justify-content:center; align-items:center; font-size:18px; color:#555; border-radius:10px; }
+  .map-section { background:white; border:2px solid #d62828; border-radius:12px; padding:20px; }
+  .map-placeholder { width:100%; height:300px; background:#f8eded; border:1px solid #f77f00; display:flex; justify-content:center; align-items:center; font-size:18px; color:#555; border-radius:10px; }
 
   footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
@@ -62,8 +62,8 @@
       <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="#">Contact</a>
-    <a href="#">About Us</a>
+    <a href="{% url 'restaurant:contact' %}">Contact</a>
+    <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
         <a href="{% url 'restaurant:home' %}">
@@ -108,8 +108,7 @@
 
   // --- Only fetch order status if order exists ---
   async function fetchOrderStatus() {
-    if (!orderId) return; // skip if no order
-
+    if (!orderId) return; 
     try {
       const response = await fetch(`/api/orders/${orderId}/`);
       if (!response.ok) throw new Error("Order not found");
@@ -136,7 +135,7 @@
 
   if (orderId) {
     fetchOrderStatus();
-    setInterval(fetchOrderStatus, 10000); // auto-refresh every 10s
+    setInterval(fetchOrderStatus, 10000); 
   }
 
   // --- Cart Badge ---

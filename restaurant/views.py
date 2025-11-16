@@ -14,6 +14,7 @@ from decimal import Decimal
 from django.utils import timezone
 
 
+
 # Menu Items API
 class MenuItemsViewSet(viewsets.ModelViewSet):
     queryset = MenuItems.objects.all()
@@ -268,3 +269,51 @@ def track_order_api(request, order_id):
         }
     }
     return JsonResponse(data)
+
+def contact_page(request):
+    return render(request, 'restaurant/contact.html')
+
+from rest_framework import generics, permissions
+from .models import ContactMessage, Users
+from .serializers import ContactMessageSerializer
+
+class ContactMessageListCreateAPIView(generics.ListCreateAPIView):
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    permission_classes = [permissions.AllowAny]  # or IsAuthenticated if you want
+
+    def perform_create(self, serializer):
+        # Replace this with how you identify the logged-in Users instance
+        # For example, if you store `user_id` in session:
+        user_id = self.request.session.get('user_id')  
+        user_instance = Users.objects.filter(user_id=user_id).first() if user_id else None
+        serializer.save(user=user_instance)
+        
+
+def about(request):
+    return render(request, 'restaurant/about.html')
+
+from django.shortcuts import render
+from .models import Users
+
+def profile_view(request):
+    # Assuming you store the logged-in user's id in the session
+    user_id = request.session.get('user_id')  # Example session key
+    
+    if not user_id:
+        # Redirect to login page if not logged in
+        return redirect('login')  
+
+    user = Users.objects.filter(user_id=user_id).first()
+    
+    context = {
+        'user': user
+    }
+    return render(request, 'restaurant/profile.html', context)
+
+def logout_view(request):
+    # Clear session
+    request.session.flush()  # clears all session data
+    return redirect('restaurant/login.html')  # redirect to login 
+
+

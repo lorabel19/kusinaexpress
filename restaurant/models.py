@@ -105,3 +105,20 @@ class Users(models.Model):
     class Meta:
         managed = False
         db_table = 'users'
+
+class ContactMessage(models.Model):
+    message_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('Users', models.SET_NULL, null=True, blank=True)  
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+    rating = models.IntegerField(null=True, blank=True)
+    date_submitted = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.email}"
+
+    class Meta:
+        db_table = 'contact_message'  
+        managed = False               
+

@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Profile</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background-color:#fffaf3; color:#2d2d2d; }
+
+  /* === HEADER === */
+  header {
+    background-color: #d62828;
+    color: white;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+
+  header h1 { font-size:26px; letter-spacing:1px; }
+  nav { display:flex; align-items:center; gap:10px; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
+  nav a:hover { color:#fcbf49; }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -17px;
+    background:red;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    border-radius:50%;
+    padding:2px 6px;
+    display:none;
+  }
+
+  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+  .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  /* === MAIN PROFILE CONTENT (UNCHANGED) === */
+  main {
+    max-width:1200px;
+    margin:40px auto;
+    padding:0 20px;
+  }
+  .profile-container {
+    background:#fff;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.1);
+    padding:40px 30px;
+  }
+  .profile-container h2 { text-align:center; color:#d62828; font-size:36px; margin-bottom:50px; font-weight:700; }
+
+  .profile-summary-info h3 { font-size:28px; color:#d62828; margin-bottom:10px; }
+  .profile-summary-info p { font-size:16px; color:#555; }
+
+  .profile-section {
+    background:#f8eded;
+    border-radius:15px;
+    padding:25px 30px;
+    margin-bottom:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .profile-section:hover {
+    transform:translateY(-3px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  }
+  .profile-section h3 { color:#d62828; font-size:20px; }
+  .profile-section p { flex:1; margin:0 20px; color:#444; font-size:15px; }
+  .profile-section button {
+    background:#d62828;
+    color:white;
+    border:none;
+    padding:10px 25px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:background 0.3s;
+  }
+  .profile-section button:hover { background:#b71c1c; }
+
+  .logout-container {
+    display:flex;
+    justify-content:center;
+    margin-top:40px;
+  }
+  .logout-container button {
+    background:#d62828;
+    color:white;
+    border:none;
+    padding:12px 35px;
+    font-size:16px;
+    font-weight:700;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background 0.3s;
+  }
+  .logout-container button:hover { background:#b71c1c; }
+
+  /* === FOOTER === */
+  footer {
+    background-color:#3a0ca3;
+    color:white;
+    text-align:center;
+    padding:25px;
+    margin-top:50px;
+    font-size:14px;
+  }
+  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
+  footer a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <h1>KusinaExpress</h1>
+  <nav>
+    <a href="{% url 'restaurant:dashboard' %}">Home</a>
+    <a href="{% url 'restaurant:menu' %}">Menu</a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart
+      <span id="cartBadge" class="cart-badge"></span>
+    </a>
+    <a href="{% url 'restaurant:order' %}">Order</a>
+    <a href="{% url 'restaurant:contact' %}">Contact</a>
+    <a href="#">About Us</a>
+
+    <div class="auth-button">
+      {% if user %}
+        <a href="{% url 'restaurant:profile' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<!-- MAIN PROFILE CONTENT (UNCHANGED) -->
+<main>
+  <div class="profile-container">
+    <h2>My Profile</h2>
+
+    <div class="profile-summary-info">
+      <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+      <p>Email: {{ user.email }}</p>
+      <p>Member since: {{ user.date_joined|date:"F Y" }}</p>
+    </div>
+
+    <div class="profile-section">
+      <h3>Order History</h3>
+      <p>Check your previous food orders and digital receipts easily.</p>
+      <button>View Orders</button>
+    </div>
+
+    <div class="profile-section">
+      <h3>Saved Addresses</h3>
+      <p>Manage and update your delivery addresses for quicker checkout.</p>
+      <button>Manage Address</button>
+    </div>
+
+    <div class="profile-section">
+      <h3>Payment Methods</h3>
+      <p>View or change your linked payment methods like GCash or cards.</p>
+      <button>Manage Payment</button>
+    </div>
+
+    <div class="profile-section">
+      <h3>Settings</h3>
+      <p>Edit personal information and update your account preferences.</p>
+      <button>Open Settings</button>
+    </div>
+
+    <div class="logout-container">
+      <form method="POST" action="{% url 'restaurant:logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+      </form>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<script>
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    const badge = document.getElementById('cartBadge');
+    badge.style.display = count > 0 ? 'inline-block':'none';
+    if(count>0) badge.innerText = count;
+  }catch(err){
+    console.error(err);
+  }
+}
+updateCartBadge();
+setInterval(updateCartBadge, 10000);
+</script>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import MenuItems, Cart, Orders
+from .models import MenuItems, Cart, Orders, ContactMessage
 
 # Serializer for Menu Items
 class MenuItemsSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class OrdersSerializer(serializers.ModelSerializer):
     # Use CartSerializer for order items
     order_items = CartSerializer(many=True, read_only=True, source='cart_set')
 
-    # ✅ Add timestamps for order tracking
+    #timestamps for order tracking
     timestamps = serializers.SerializerMethodField()
 
     class Meta:
@@ -46,7 +46,7 @@ class OrdersSerializer(serializers.ModelSerializer):
             'payment_method',
             'status',
             'order_date',
-            'timestamps',  # include timestamps
+            'timestamps',  
         ]
 
     # SerializerMethodField function
@@ -57,3 +57,9 @@ class OrdersSerializer(serializers.ModelSerializer):
             "Out for Delivery": obj.out_for_delivery_at.strftime("%I:%M %p") if obj.out_for_delivery_at else None,
             "Delivered": obj.delivered_at.strftime("%I:%M %p") if obj.delivered_at else None,
         }
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ['message_id', 'user', 'name', 'email', 'message', 'rating', 'date_submitted']
+        read_only_fields = ['message_id', 'date_submitted']
