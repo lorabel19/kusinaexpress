@@ -311,9 +311,12 @@ def profile_view(request):
     }
     return render(request, 'restaurant/profile.html', context)
 
+from django.shortcuts import redirect
+from django.contrib.auth import logout
+
 def logout_view(request):
-    # Clear session
-    request.session.flush()  # clears all session data
-    return redirect('restaurant/login.html')  # redirect to login 
+    logout(request)  # log out the user
+    return redirect('restaurant:login')
+
 
 

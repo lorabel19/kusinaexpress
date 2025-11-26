@@ -164,9 +164,9 @@
     <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
-      <a href="{% url 'restaurant:home' %}">
-        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-      </a>
+        <a href="{% url 'restaurant:profile' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
       {% endif %}
     </div>
   </nav>
