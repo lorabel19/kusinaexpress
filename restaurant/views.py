@@ -318,5 +318,18 @@ def logout_view(request):
     logout(request)  # log out the user
     return redirect('restaurant:login')
 
+from django.shortcuts import render
+from .models import MenuItems
 
+def menu(request):
+    meals = MenuItems.objects.filter(category='meals')
+    drinks = MenuItems.objects.filter(category='drinks')
+    desserts = MenuItems.objects.filter(category='desserts')
+    
+    context = {
+        'meals': meals,
+        'drinks': drinks,
+        'desserts': desserts
+    }
+    return render(request, 'restaurant/mainmenu.html', context)
 

@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KusinaExpress | Menu</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+    body { background-color:#fffaf3; color:#2d2d2d; }
+
+    header {
+      background-color:#d62828; color:white;
+      padding:20px 40px; display:flex; justify-content:space-between; align-items:center;
+      position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size:26px; letter-spacing:1px; }
+    nav { display:flex; align-items:center; gap:10px; }
+    nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition:0.3s; }
+    nav a:hover { color:#fcbf49; }
+    .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+    .auth-button a { background:white; color:#d62828; padding:8px 15px; border-radius:8px; font-weight:700; text-decoration:none; }
+    .auth-button a:hover { background:#fff; color:#d62828; }
+
+    .search-form { display:flex; justify-content:center; margin:30px 0; }
+    .search-form input { padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:250px; margin-right:5px; }
+    .search-form button { padding:8px 12px; border-radius:6px; border:none; background-color:#d62828; color:white; font-weight:600; cursor:pointer; }
+    .search-form button:hover { background-color:#f77f00; }
+
+    h2.section-title { text-align:center; margin:25px 0; color:#d62828; font-size:30px; font-weight:700; }
+
+    .categories { display:flex; justify-content:center; flex-wrap:wrap; gap:15px; margin-bottom:40px; }
+    .category-btn { background:white; border:2px solid #d62828; padding:10px 20px; cursor:pointer; font-weight:600; border-radius:6px; transition:0.3s; }
+    .category-btn:hover { background:#f8eded; }
+
+    .restaurant { margin-bottom:40px; padding:0 40px; }
+    .restaurant h3 { color:#d62828; font-size:22px; margin-bottom:20px; border-bottom:2px solid #d62828; display:inline-block; padding-bottom:5px; }
+
+    .menu-items { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px; }
+
+    .item-card { background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:15px; text-align:center; transition:0.3s; position:relative; }
+    .item-card:hover { transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.15); }
+
+    .item-card img { width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:10px; }
+    .item-card h4 { color:#d62828; margin-bottom:8px; }
+    .item-card p { color:#555; font-size:14px; margin-bottom:5px; }
+    .price { display:block; font-weight:bold; color:#27ae60; margin-bottom:10px; }
+
+    .sold-out { opacity:0.5; }
+    .sold-out::after {
+      content:"SOLD OUT";
+      position:absolute;
+      top:10px; left:10px;
+      background:red; color:white; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold;
+    }
+
+    footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>KusinaExpress</h1>
+    <nav>
+      <a href="{% url 'restaurant:home' %}">Home</a>
+      <a href="{% url 'restaurant:public_menu' %}">Menu</a>
+      <a href="{% url 'restaurant:login' %}">Cart</a>
+      <a href="{% url 'restaurant:login' %}">Order</a>
+      <a href="{% url 'restaurant:login' %}">Contact</a>
+      <a href="{% url 'restaurant:login' %}">About Us</a>
+
+      <!-- Login / Sign Up Button -->
+      <div class="auth-button">
+    <a href="/login/">Login / Sign Up</a>
+    </div>
+    </nav>
+  </header>
+
+<section>
+  <h2 class="section-title">Menu Categories</h2>
+
+  <form class="search-form" onsubmit="return false;">
+    <input type="search" id="searchInput" placeholder="Search for foods..." />
+    <button onclick="filterMenu()">Search</button>
+  </form>
+
+  <div class="categories">
+    <button class="category-btn" onclick="filterCategory('all')">All</button>
+    <button class="category-btn" onclick="filterCategory('meals')">Meals</button>
+    <button class="category-btn" onclick="filterCategory('drinks')">Drinks</button>
+    <button class="category-btn" onclick="filterCategory('desserts')">Desserts</button>
+  </div>
+
+  <!-- Meals -->
+  <div class="restaurant">
+    <h3>Meals</h3>
+    <div class="menu-items" id="mealsContainer">
+      {% for item in meals %}
+      <div class="item-card {% if item.is_available == 0 %}sold-out{% endif %}">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+        <h4>{{ item.name }}</h4>
+        <p>{{ item.description }}</p>
+        <span class="price">₱{{ item.price }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Drinks -->
+  <div class="restaurant">
+    <h3>Drinks</h3>
+    <div class="menu-items" id="drinksContainer">
+      {% for item in drinks %}
+      <div class="item-card {% if item.is_available == 0 %}sold-out{% endif %}">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+        <h4>{{ item.name }}</h4>
+        <p>{{ item.description }}</p>
+        <span class="price">₱{{ item.price }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Desserts -->
+  <div class="restaurant">
+    <h3>Desserts</h3>
+    <div class="menu-items" id="dessertsContainer">
+      {% for item in desserts %}
+      <div class="item-card {% if item.is_available == 0 %}sold-out{% endif %}">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+        <h4>{{ item.name }}</h4>
+        <p>{{ item.description }}</p>
+        <span class="price">₱{{ item.price }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</section>
+
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<script>
+  function filterCategory(category) {
+    const allItems = document.querySelectorAll('.item-card');
+    allItems.forEach(item => {
+      const parentCategory = item.closest('.restaurant').querySelector('h3').textContent.toLowerCase();
+      item.style.display = (category === 'all' || category === parentCategory) ? 'block' : 'none';
+    });
+  }
+
+  function filterMenu() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const allItems = document.querySelectorAll('.item-card');
+    allItems.forEach(item => {
+      const name = item.querySelector('h4').textContent.toLowerCase();
+      item.style.display = name.includes(input) ? 'block' : 'none';
+    });
+  }
+</script>
+
+</body>
+</html>

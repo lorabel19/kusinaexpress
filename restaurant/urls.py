@@ -35,6 +35,8 @@ urlpatterns = [
     path('contact/', views.contact_page, name='contact'), #Contact Page
     path('about/', views.about, name='about'),          #About Page
     path('profile/', views.profile_view, name='profile'),
+    path('public-menu/', views.menu, name='public_menu'),  # public menu page
+    
 
     # API Endpoints
     path('api/', include(router.urls)),                       # DRF Menu API

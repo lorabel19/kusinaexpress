@@ -179,12 +179,12 @@
   <header>
     <h1>KusinaExpress</h1>
     <nav>
-      <a href="#">Home</a>
-      <a href="#">Menu</a>
-      <a href="#">Cart</a>
-      <a href="#">Order</a>
-      <a href="#">Contact</a>
-      <a href="#">About Us</a>
+      <a href="{% url 'restaurant:home' %}">Home</a>
+      <a href="{% url 'restaurant:public_menu' %}">Menu</a>
+      <a href="{% url 'restaurant:login' %}">Cart</a>
+      <a href="{% url 'restaurant:login' %}">Order</a>
+      <a href="{% url 'restaurant:login' %}">Contact</a>
+      <a href="{% url 'restaurant:login' %}">About Us</a>
 
       <!-- Login / Sign Up Button -->
       <div class="auth-button">
