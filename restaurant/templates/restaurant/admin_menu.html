@@ -65,9 +65,8 @@ footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size
   <a href="{% url 'restaurant:admin-dashboard' %}">Dashboard</a>
   <a href="{% url 'restaurant:admin-menu' %}">Manage Menu</a>
   <a href="{% url 'restaurant:admin-orders' %}">Manage Orders</a>
-  <a href="#">Users</a>
-  <a href="#">Feedback</a>
-  <a href="#">Logout</a>
+  <a href="{% url 'restaurant:admin-feedback' %}">Feedback</a>
+  <a href="{% url 'restaurant:logout' %}">Logout</a>
 </div>
 
 <div class="main-content">

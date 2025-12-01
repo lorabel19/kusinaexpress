@@ -1,248 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KusinaExpress | Home</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Home</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
-    body {
-      background-color: #fffaf3;
-      color: #2d2d2d;
-    }
+body { background-color: #fffaf3; color: #2d2d2d; }
 
-    header {
-      background-color: #d62828; 
-      color: white;
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
+header {
+  background-color: #d62828;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
 
-    header h1 {
-      font-size: 26px;
-      letter-spacing: 1px;
-    }
+header h1 { font-size: 24px; }
 
-    nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+nav { display: flex; align-items: center; gap: 10px; }
 
-    nav a {
-      color: white;
-      margin: 0 10px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s;
-    }
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.3s, background 0.3s;
+}
 
-    nav a:hover {
-      color: #fcbf49; 
-    }
+nav a:hover { color: #d62828; background: white; }
 
-    /* Login / Sign Up Button */
-    .auth-button {
-      margin-left: 15px;
-      padding-left: 15px;
-      border-left: 2px solid rgba(255,255,255,0.3);
-    }
+.auth-button a {
+  background-color: white;
+  color: #d62828;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+}
 
-    .auth-button a {
-      background-color: white;
-      color: #d62828;
-      padding: 8px 15px;
-      border-radius: 8px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: background-color 0.3s, color 0.3s;
-    }
+.auth-button a:hover { background-color: #fcbf49; color: #2d2d2d; }
 
-    .auth-button a:hover {
-      background-color: #fff;
-      color: #d62828;
-    }
+/* Hamburger menu button */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 4px;
+}
 
-    .hero {
-      background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-      url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg');
-      background-size: cover;
-      background-position: center;
-      height: 420px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      text-align: center;
-      padding: 0 20px;
-    }
+.menu-toggle div {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  transition: 0.3s;
+}
 
-    .hero h2 {
-      font-size: 48px;
-      margin-bottom: 15px;
-      font-weight: 700;
-      color: #fff;
-    }
+/* Hero section */
+.hero {
+  background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+  url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  padding: 0 20px;
+}
 
-    .hero p {
-      font-size: 20px;
-      color: #f8edeb;
-      max-width: 600px;
-    }
+.hero h2 { font-size: 36px; margin-bottom: 10px; }
+.hero p { font-size: 16px; max-width: 500px; }
 
-    section {
-      padding: 60px 40px;
-    }
+section { padding: 40px 20px; }
 
-    h2.section-title {
-      text-align: justify;
-      color: #d62828;
-      font-size: 32px;
-      margin-bottom: 30px;
-      font-weight: 700;
-    }
+h2.section-title {
+  text-align: center;
+  color: #d62828;
+  font-size: 28px;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
 
-    .featured, .promotions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-    }
+.featured, .promotions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
 
-    .card {
-      background-color: #fff;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-    .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
+.card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
 
-    .card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
+.card img { width: 100%; height: 180px; object-fit: cover; }
+.card h3 { color: #d62828; margin: 12px 0 8px; font-weight: 700; font-size: 18px; }
+.card p { color: #555; padding: 0 10px 15px; font-size: 14px; line-height: 1.4; }
 
-    .card h3 {
-      color: #d62828;
-      margin: 15px 0 10px;
-      font-weight: 700;
-    }
+footer {
+  background-color: #3a0ca3;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  margin-top: 30px;
+}
 
-    .card p {
-      color: #555;
-      padding: 0 15px 20px;
-      font-size: 15px;
-      line-height: 1.5;
-    }
+footer a { color: #fcbf49; text-decoration: none; font-weight: 600; }
+footer a:hover { text-decoration: underline; }
 
-    footer {
-      background-color: #3a0ca3; 
-      color: white;
-      text-align: center;
-      padding: 25px;
-      margin-top: 50px;
-      font-size: 14px;
-    }
+/* Responsive styles */
+@media(max-width: 768px){
+  .menu-toggle { display: flex; }
 
-    footer a {
-      color: #fcbf49;
-      text-decoration: none;
-      font-weight: 600;
-    }
+  nav {
+    flex-direction: column;
+    width: 100%;
+    display: none; /* hide menu initially */
+  }
 
-    footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  nav.show { display: flex; }
+
+  nav a { width: 100%; text-align: center; margin: 5px 0; }
+  
+  header h1 { margin-bottom: 10px; }
+}
+
+@media(max-width: 480px){
+  .hero { height: 220px; }
+  .hero h2 { font-size: 22px; }
+  .hero p { font-size: 13px; }
+  .card img { height: 150px; }
+  .card h3 { font-size: 16px; }
+  .card p { font-size: 13px; }
+}
+</style>
 </head>
 <body>
 
-  <header>
-    <h1>KusinaExpress</h1>
-    <nav>
-      <a href="{% url 'restaurant:home' %}">Home</a>
-      <a href="{% url 'restaurant:public_menu' %}">Menu</a>
-      <a href="{% url 'restaurant:login' %}">Cart</a>
-      <a href="{% url 'restaurant:login' %}">Order</a>
-      <a href="{% url 'restaurant:login' %}">Contact</a>
-      <a href="{% url 'restaurant:login' %}">About Us</a>
+<header>
+  <h1>KusinaExpress</h1>
+  <div class="menu-toggle" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <nav id="nav-menu">
+    <a href="{% url 'restaurant:home' %}">Home</a>
+    <a href="{% url 'restaurant:public_menu' %}">Menu</a>
+    <a href="{% url 'restaurant:login' %}">Cart</a>
+    <a href="{% url 'restaurant:login' %}">Order</a>
+    <a href="{% url 'restaurant:login' %}">Contact</a>
+    <a href="{% url 'restaurant:login' %}">About Us</a>
+    <div class="auth-button"><a href="/login/">Login / Sign Up</a></div>
+  </nav>
+</header>
 
-      <!-- Login / Sign Up Button -->
-      <div class="auth-button">
-    <a href="/login/">Login / Sign Up</a>
+<section class="hero">
+  <h2>Welcome to KusinaExpress</h2>
+  <p>Bringing Filipino comfort food straight to your doorstep fast, fresh, and flavorful!</p>
+</section>
+
+<section>
+  <h2 class="section-title">Featured Dishes</h2>
+  <div class="featured">
+    <div class="card">
+      <img src="https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg" alt="Adobo">
+      <h3>Adobo</h3>
+      <p>Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves – a Filipino classic.</p>
     </div>
-    </nav>
-  </header>
-
-  <section class="hero">
-    <h2>Welcome to KusinaExpress</h2>
-    <p>Bringing Filipino comfort food straight to your doorstep fast, fresh, and flavorful!</p>
-  </section>
-
-  <section>
-    <h2 class="section-title">Featured Dishes</h2>
-    <div class="featured">
-      <div class="card">
-        <img src="https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg" alt="Lumpia">
-        <h3>Adobo</h3>
-        <p>Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves a true Filipino classic.</p>
-      </div>
-      <div class="card">
-        <img src="https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg" alt="Sisig">
-        <h3>Sinigang</h3>
-        <p>A comforting sour soup made with tamarind, fresh vegetables, and your choice of pork, shrimp, or fish.</p>
-      </div>
-      <div class="card">
-        <img src="https://www.maggi.ph/sites/default/files/inline-images/Bulalo.jpg" alt="Sinigang">
-        <h3>Kare-Kare</h3>
-        <p>Rich peanut stew with oxtail and vegetables, best paired with bagoong (shrimp paste).</p>
-      </div>
+    <div class="card">
+      <img src="https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg" alt="Sinigang">
+      <h3>Sinigang</h3>
+      <p>A comforting sour soup made with tamarind, fresh vegetables, and your choice of pork, shrimp, or fish.</p>
     </div>
-  </section>
-
-  <section>
-    <h2 class="section-title">Promotions & Deals</h2>
-    <div class="promotions">
-      <div class="card">
-        <img src="https://img.ph.my-best.com/product_images/5e045c5b532c925cf2dcb2ca7f864bc0.jpg?ixlib=rails-4.3.1&q=70&lossless=0&w=800&h=800&fit=clip&s=2b05ffc576fb681475d94d45fc7d4e3c" alt="Halo-Halo">
-        <h3>Meal Combo</h3>
-        <p>Enjoy more for less! Choose from our best-selling dishes paired with rice and a drink — perfect for any meal.</p>
-      </div>
-      <div class="card">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Lechon Kawali">
-        <h3>Free Delivery</h3>
-        <p>Order now and get your favorite Filipino dishes delivered to your doorstep no delivery charge for minimum orders!</p>
-      </div>
-      <div class="card">
-        <img src="https://www.nagacityguide.com/wordpress/wp-content/uploads/2023/09/photo_2023-09-06_12-13-07.jpg" alt="Pancit Canton">
-        <h3>Student Discount</h3>
-        <p>Students get 10% off on all meals! Just present your valid school ID upon checkout.</p>
-      </div>
+    <div class="card">
+      <img src="https://www.maggi.ph/sites/default/files/inline-images/Bulalo.jpg" alt="Kare-Kare">
+      <h3>Kare-Kare</h3>
+      <p>Rich peanut stew with oxtail and vegetables, best paired with bagoong (shrimp paste).</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer>
-    <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
-  </footer>
+<section>
+  <h2 class="section-title">Promotions & Deals</h2>
+  <div class="promotions">
+    <div class="card">
+      <img src="https://img.ph.my-best.com/product_images/5e045c5b532c925cf2dcb2ca7f864bc0.jpg" alt="Meal Combo">
+      <h3>Meal Combo</h3>
+      <p>Enjoy more for less! Choose from our best-selling dishes paired with rice and a drink.</p>
+    </div>
+    <div class="card">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Free Delivery">
+      <h3>Free Delivery</h3>
+      <p>Order now and get your favorite Filipino dishes delivered with no delivery charge for minimum orders!</p>
+    </div>
+    <div class="card">
+      <img src="https://www.nagacityguide.com/wordpress/wp-content/uploads/2023/09/photo_2023-09-06_12-13-07.jpg" alt="Student Discount">
+      <h3>Student Discount</h3>
+      <p>Students get 10% off on all meals! Just present your valid school ID upon checkout.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+</footer>
+
+<script>
+const toggle = document.getElementById('menu-toggle');
+const nav = document.getElementById('nav-menu');
+
+toggle.addEventListener('click', () => {
+  nav.classList.toggle('show');
+});
+</script>
 
 </body>
 </html>

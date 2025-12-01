@@ -307,8 +307,8 @@ class ContactMessageListCreateAPIView(generics.ListCreateAPIView):
 def about(request):
     return render(request, 'restaurant/about.html')
 
-from django.shortcuts import render
-from .models import Users
+from django.shortcuts import render, redirect
+from .models import Users, Orders
 
 def profile_view(request):
     # Assuming you store the logged-in user's id in the session
@@ -320,10 +320,15 @@ def profile_view(request):
 
     user = Users.objects.filter(user_id=user_id).first()
     
+    # Fetch delivered orders for this user
+    orders = Orders.objects.filter(user=user, delivered_at__isnull=False).order_by('-delivered_at')
+
     context = {
-        'user': user
+        'user': user,
+        'orders': orders,  # Pass orders to template
     }
     return render(request, 'restaurant/profile.html', context)
+
 
 from django.shortcuts import redirect
 from django.contrib.auth import logout
@@ -483,3 +488,34 @@ def confirm_order(request, order_id):
         order.save()
 
     return redirect('/admin-orders/?status=preparing')
+
+from django.shortcuts import render
+from .models import Feedback
+from .serializers import FeedbackSerializer
+
+
+def admin_feedback(request):
+    # Fetch all feedback, newest first
+    feedback_list = Feedback.objects.all().order_by('-date_submitted')
+    context = {
+        'feedback_list': feedback_list
+    }
+    return render(request, 'restaurant/admin_feedback.html', context)
+
+@api_view(['POST'])
+def submit_feedback(request):
+    # Get user from session
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return Response({'detail': 'You must be logged in to submit feedback.'}, status=status.HTTP_403_FORBIDDEN)
+
+    user = Users.objects.get(pk=user_id)
+    serializer = FeedbackSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save(user=user, date_submitted=timezone.now())
+        return Response({'message': 'Feedback submitted successfully!'}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+

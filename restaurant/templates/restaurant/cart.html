@@ -9,6 +9,7 @@
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
   body { background-color:#fffaf3; color:#2d2d2d; }
 
+  /* HEADER */
   header {
     background-color: #d62828;
     color: white;
@@ -22,10 +23,28 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
   header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; position:relative; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
+
+  nav {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    position:relative;
+  }
+  nav a {
+    color:white;
+    margin:0 10px;
+    text-decoration:none;
+    font-weight:600;
+    transition: color 0.3s;
+    position:relative;
+  }
   nav a:hover { color:#fcbf49; }
-  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
+
+  .auth-button {
+    margin-left:15px;
+    padding-left:15px;
+    border-left:2px solid rgba(255,255,255,0.3);
+  }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
 
   .cart-badge {
@@ -41,6 +60,11 @@
     display:none;
   }
 
+  /* Hamburger menu */
+  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
+  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
+
+  /* ORDER CONTENT */
   .order-wrapper { max-width:900px; margin:40px auto; background:white; border-radius:12px; padding:30px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
   h2.section-title { font-size:28px; color:#d62828; text-align:center; margin-bottom:25px; }
 
@@ -49,7 +73,7 @@
   .order-info { flex:1; text-align:justify; }
   .order-info h3 { font-size:16px; color:#d62828; margin-bottom:5px; }
   .order-info p { font-size:14px; color:#555; }
-  .order-controls { display:flex; gap:10px; align-items:center; margin-top:5px; }
+  .order-controls { display:flex; gap:10px; align-items:center; margin-top:5px; flex-wrap:wrap; }
   .order-controls button { padding:4px 8px; border:none; background:#d62828; color:white; font-weight:bold; border-radius:6px; cursor:pointer; }
   .order-price { font-weight:bold; font-size:16px; color:#27ae60; }
 
@@ -68,22 +92,39 @@
   .place-order { width:100%; background:#d62828; color:#fff; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px; transition: background 0.3s; }
   .place-order:hover { background:#f77f00; }
 
+  /* FOOTER */
   footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
 
+  /* TOAST */
   #toast { position: fixed; bottom: 20px; right: 20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .menu-toggle { display:flex; }
+    nav { flex-direction:column; width:100%; display:none; }
+    nav.show { display:flex; }
+    nav a { width:100%; text-align:center; margin:5px 0; }
+    .order-item { flex-direction:column; align-items:flex-start; }
+    .order-item .order-price { margin-top:10px; align-self:flex-end; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>KusinaExpress</h1>
-  <nav>
+  <div class="menu-toggle" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <nav id="nav-menu">
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">Cart
-      <span id="cartBadge" class="cart-badge"></span>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">
+      Cart <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="{% url 'restaurant:contact' %}">Contact</a>
@@ -135,13 +176,15 @@
 <div id="toast">Item added to cart!</div>
 
 <script>
-let cartItems = [];
-let selectedPayment = 'cod';
+// Hamburger toggle
+const toggle = document.getElementById('menu-toggle');
+const nav = document.getElementById('nav-menu');
+toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
 
-// --- CSRF Helper ---
+// CSRF helper
 function getCookie(name){
   let cookieValue = null;
-  if(document.cookie && document.cookie !== ''){
+  if(document.cookie && document.cookie!==''){
     document.cookie.split(';').forEach(cookie=>{
       if(cookie.trim().startsWith(name+'=')){
         cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
@@ -151,7 +194,7 @@ function getCookie(name){
   return cookieValue;
 }
 
-// --- Toast Notification ---
+// Toast
 function showToast(msg){
   const toast = document.getElementById('toast');
   toast.innerText = msg;
@@ -167,16 +210,17 @@ async function updateCartBadge(){
     const items = await res.json();
     const count = items.reduce((acc,i)=>acc+i.quantity,0);
     const badge = document.getElementById('cartBadge');
-    if(count > 0){
+    if(count>0){
       badge.innerText = count;
       badge.style.display = 'inline-block';
-    } else {
-      badge.style.display = 'none';
-    }
-  } catch(err){ console.error(err); }
+    } else badge.style.display = 'none';
+  }catch(err){ console.error(err); }
 }
 
-// --- Fetch Cart Items ---
+// --- Cart functionality ---
+let cartItems = [];
+let selectedPayment = 'cod';
+
 async function fetchCart(){
   try{
     const res = await fetch('/api/cart/');
@@ -187,7 +231,6 @@ async function fetchCart(){
   } catch(err){ console.error(err); }
 }
 
-// --- Display Cart ---
 function displayCart(){
   const container = document.getElementById('cartItems');
   container.innerHTML = '';
@@ -227,17 +270,14 @@ function displayCart(){
   document.getElementById('total').innerText = `₱${(subtotal + 40).toFixed(2)}`;
 }
 
-// --- Update Quantity ---
 async function updateQuantity(itemId, delta){
   const item = cartItems.find(i => i.item.item_id === itemId);
   if(!item) return;
-
   const newQty = item.quantity + delta;
   if(newQty <= 0){
     await removeItem(item.cart_id);
     return;
   }
-
   try{
     await fetch('/api/cart/add/', {
       method: 'POST',
@@ -249,11 +289,9 @@ async function updateQuantity(itemId, delta){
   } catch(err){ console.error(err); }
 }
 
-// --- Remove Item ---
 async function removeItem(cartId){
   const item = cartItems.find(i => i.cart_id === cartId);
   if(!item) return;
-
   try{
     await fetch('/api/cart/add/', {
       method: 'POST',
@@ -267,7 +305,7 @@ async function removeItem(cartId){
   } catch(err){ console.error(err); }
 }
 
-// --- Payment Selection ---
+// Payment selection
 document.querySelectorAll('.payment-options span').forEach(el=>{
   el.addEventListener('click', ()=>{
     selectedPayment = el.dataset.method;
@@ -294,10 +332,7 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   try {
     const res = await fetch('/api/orders/', {  
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCookie('csrftoken')
-      },
+      headers: {'Content-Type': 'application/json','X-CSRFToken': getCookie('csrftoken')},
       body: JSON.stringify(orderData)
     });
 
@@ -309,13 +344,9 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
       displayCart();
       updateCartBadge();
       this.reset();
-
-      // Redirect to order tracking page using order_id from API
       if(data.order_id){
         window.location.href = `/order/?order_id=${data.order_id}`; 
-        
       }
-
     } else {
       alert(data.detail || 'Failed to place order.');
     }
@@ -326,11 +357,10 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   }
 });
 
-// --- Initial Load ---
+// Initial load
 fetchCart();
 updateCartBadge();
 </script>
-
 
 </body>
 </html>

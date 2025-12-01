@@ -23,7 +23,13 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
   header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; }
+  
+  nav {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    position:relative;
+  }
   nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
   nav a:hover { color:#fcbf49; }
 
@@ -42,6 +48,10 @@
 
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
+
+  /* Hamburger menu */
+  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
+  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
 
   /* HERO SECTION */
   .about-hero {
@@ -100,14 +110,7 @@
     flex-wrap: wrap;
     gap: 15px;
   }
-  .social-links a {
-    text-decoration: none;
-    color:#d62828;
-    font-weight:600;
-    margin:0 10px;
-    transition: color 0.3s;
-    text-align:center;
-  }
+  .social-links a { text-decoration:none; color:#d62828; font-weight:600; margin:0 10px; transition: color 0.3s; text-align:center; }
   .social-links a:hover { color:#f77f00; }
 
   /* BASE FOOTER */
@@ -115,7 +118,12 @@
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
 
-  @media(max-width:768px) { 
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    nav { display:none; flex-direction:column; width:100%; gap:10px; }
+    nav.show { display:flex; }
+    nav a { width:100%; text-align:center; margin:5px 0; }
+    .menu-toggle { display:flex; }
     .about-footer { flex-direction:column; gap:15px; text-align:center; } 
     .social-links a { margin: 5px; }
   }
@@ -126,12 +134,16 @@
 <!-- HEADER -->
 <header>
   <h1>KusinaExpress</h1>
-  <nav>
+  <div class="menu-toggle" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <nav id="nav-menu">
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
     <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart
-      <span id="cartBadge" class="cart-badge"></span>
+      Cart <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="{% url 'restaurant:contact' %}">Contact</a>
@@ -211,6 +223,11 @@
 </footer>
 
 <script>
+// Hamburger toggle
+const toggle = document.getElementById('menu-toggle');
+const nav = document.getElementById('nav-menu');
+toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
+
 // Update cart badge
 async function updateCartBadge(){
   try{

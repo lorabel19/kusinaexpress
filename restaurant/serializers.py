@@ -63,3 +63,44 @@ class ContactMessageSerializer(serializers.ModelSerializer):
         model = ContactMessage
         fields = ['message_id', 'user', 'name', 'email', 'message', 'rating', 'date_submitted']
         read_only_fields = ['message_id', 'date_submitted']
+
+
+from rest_framework import serializers
+from django.utils import timezone
+from .models import Feedback, Users  # import your custom Users model
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    # Make user read-only; it will be set automatically
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Feedback
+        fields = ['feedback_id', 'user', 'message', 'rating', 'date_submitted']
+        read_only_fields = ['feedback_id', 'user', 'date_submitted']
+
+    def create(self, validated_data):
+        """
+        Automatically set the user and date_submitted when creating a Feedback.
+        """
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError("Request context is required.")
+
+        # Use your custom Users model
+        user = getattr(request, 'user', None)
+        if user is None or not user.is_authenticated:
+            # If using session manually
+            user_id = request.session.get('user_id')
+            if not user_id:
+                raise serializers.ValidationError("User must be logged in to submit feedback.")
+            user = Users.objects.get(pk=user_id)
+
+        validated_data['user'] = user
+        validated_data['date_submitted'] = timezone.now()
+        return super().create(validated_data)
+
+
+
+
+
+

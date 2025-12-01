@@ -9,28 +9,24 @@
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
   body { background-color:#fffaf3; color:#2d2d2d; }
 
+  /* HEADER */
   header { background-color:#d62828; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
   header h1 { font-size:26px; letter-spacing:1px; }
+
+  /* Hamburger */
+  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
+  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
+
   nav { display:flex; align-items:center; gap:10px; position:relative; }
   nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
   nav a:hover { color:#fcbf49; }
+
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
 
-  /* Cart badge */
-  .cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -17px;
-    background: red;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 50%;
-    display: none;
-  }
+  .cart-badge { position:absolute; top:-5px; right:-17px; background:red; color:white; font-size:12px; font-weight:bold; padding:2px 6px; border-radius:50%; display:none; }
 
+  /* SEARCH & MENU */
   .search-form { display:flex; justify-content:center; margin:30px 0; }
   .search-form input { padding:8px 12px; border-radius:6px; border:1px solid #ccc; width:250px; margin-right:5px; }
   .search-form button { padding:8px 12px; border-radius:6px; border:none; background-color:#d62828; color:white; font-weight:600; cursor:pointer; }
@@ -45,6 +41,7 @@
   .restaurant { margin-bottom:40px; }
   .restaurant h3 { color:#d62828; font-size:22px; margin-bottom:20px; border-bottom:2px solid #d62828; display:inline-block; padding-bottom:5px; }
   .menu-items { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+
   .item-card { background:white; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:15px; text-align:center; transition:transform 0.3s, box-shadow 0.3s; position:relative; }
   .item-card:hover { transform:translateY(-5px); box-shadow:0 6px 15px rgba(0,0,0,0.15); }
   .item-card img { width:100%; height:150px; object-fit:cover; border-radius:10px; margin-bottom:10px; }
@@ -53,37 +50,47 @@
   .price { display:block; font-weight:bold; color:#27ae60; margin-bottom:10px; }
   .item-card button { padding:6px 12px; border:none; background-color:#d62828; color:white; font-weight:600; border-radius:6px; cursor:pointer; }
   .item-card button:hover { background-color:#f77f00; }
-
   .sold-out { opacity:0.5; }
   .sold-out::after { content:"Not Available"; position:absolute; top:10px; left:10px; background:red; color:white; padding:5px 10px; font-size:12px; font-weight:bold; border-radius:4px; }
 
+  /* FOOTER */
   footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
 
-  /* Toast notification */
+  /* TOAST */
   #toast { position: fixed; bottom:20px; right:20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .menu-toggle { display:flex; }
+    nav { flex-direction:column; width:100%; display:none; }
+    nav.show { display:flex; }
+    nav a { width:100%; text-align:center; margin:5px 0; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>KusinaExpress</h1>
-  <nav>
+  <div class="menu-toggle" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <nav id="nav-menu">
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
     <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart
-      <span id="cartBadge" class="cart-badge"></span>
+      Cart <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="{% url 'restaurant:contact' %}">Contact</a>
     <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
-        <a href="{% url 'restaurant:profile' %}">
-          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-        </a>
+        <a href="{% url 'restaurant:profile' %}"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile"></a>
       {% endif %}
     </div>
   </nav>
@@ -127,6 +134,11 @@
 <script>
 let allMenuItems = [];
 
+// Hamburger toggle
+const toggle = document.getElementById('menu-toggle');
+const nav = document.getElementById('nav-menu');
+toggle.addEventListener('click', () => nav.classList.toggle('show'));
+
 // CSRF helper
 function getCookie(name){
   let cookieValue = null;
@@ -140,7 +152,7 @@ function getCookie(name){
   return cookieValue;
 }
 
-// Show toast
+// Toast
 function showToast(msg){
   const toast = document.getElementById('toast');
   toast.innerText = msg;
@@ -148,7 +160,7 @@ function showToast(msg){
   setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
 }
 
-// Fetch menu items
+// Fetch menu
 async function fetchMenu(){
   try{
     const res = await fetch('/api/menu/');
@@ -233,5 +245,6 @@ async function updateCartBadge(){
 
 fetchMenu();
 </script>
+
 </body>
 </html>

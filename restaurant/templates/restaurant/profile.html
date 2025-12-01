@@ -22,102 +22,60 @@
     z-index: 100;
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
-
   header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; }
+
+  nav {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    position:relative;
+  }
   nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
   nav a:hover { color:#fcbf49; }
-
-  .cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -17px;
-    background:red;
-    color:white;
-    font-size:12px;
-    font-weight:bold;
-    border-radius:50%;
-    padding:2px 6px;
-    display:none;
-  }
-
+  .cart-badge { position: absolute; top: -5px; right: -17px; background:red; color:white; font-size:12px; font-weight:bold; border-radius:50%; padding:2px 6px; display:none; }
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
 
-  /* === MAIN PROFILE CONTENT (UNCHANGED) === */
-  main {
-    max-width:1200px;
-    margin:40px auto;
-    padding:0 20px;
-  }
-  .profile-container {
-    background:#fff;
-    border-radius:20px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.1);
-    padding:40px 30px;
-  }
-  .profile-container h2 { text-align:center; color:#d62828; font-size:36px; margin-bottom:50px; font-weight:700; }
+  /* Hamburger menu */
+  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
+  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
 
+  /* === MAIN PROFILE CONTENT === */
+  main { max-width:1200px; margin:40px auto; padding:0 20px; }
+  .profile-container { background:#fff; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.1); padding:40px 30px; }
+  .profile-container h2 { text-align:center; color:#d62828; font-size:36px; margin-bottom:50px; font-weight:700; }
   .profile-summary-info h3 { font-size:28px; color:#d62828; margin-bottom:10px; }
   .profile-summary-info p { font-size:16px; color:#555; }
-
-  .profile-section {
-    background:#f8eded;
-    border-radius:15px;
-    padding:25px 30px;
-    margin-bottom:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    transition: transform 0.3s, box-shadow 0.3s;
-  }
-  .profile-section:hover {
-    transform:translateY(-3px);
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);
-  }
+  .profile-section { background:#f8eded; border-radius:15px; padding:25px 30px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; transition: transform 0.3s, box-shadow 0.3s; }
+  .profile-section:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
   .profile-section h3 { color:#d62828; font-size:20px; }
   .profile-section p { flex:1; margin:0 20px; color:#444; font-size:15px; }
-  .profile-section button {
-    background:#d62828;
-    color:white;
-    border:none;
-    padding:10px 25px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    transition:background 0.3s;
-  }
+  .profile-section button { background:#d62828; color:white; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-weight:600; transition:background 0.3s; }
   .profile-section button:hover { background:#b71c1c; }
-
-  .logout-container {
-    display:flex;
-    justify-content:center;
-    margin-top:40px;
-  }
-  .logout-container button {
-    background:#d62828;
-    color:white;
-    border:none;
-    padding:12px 35px;
-    font-size:16px;
-    font-weight:700;
-    border-radius:10px;
-    cursor:pointer;
-    transition:background 0.3s;
-  }
+  .logout-container { display:flex; justify-content:center; margin-top:40px; }
+  .logout-container button { background:#d62828; color:white; border:none; padding:12px 35px; font-size:16px; font-weight:700; border-radius:10px; cursor:pointer; transition:background 0.3s; }
   .logout-container button:hover { background:#b71c1c; }
 
   /* === FOOTER === */
-  footer {
-    background-color:#3a0ca3;
-    color:white;
-    text-align:center;
-    padding:25px;
-    margin-top:50px;
-    font-size:14px;
-  }
+  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
+
+  /* === MODAL STYLES === */
+  .modal { display:none; position:fixed; z-index:200; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.5); }
+  .modal-content { background:#fff; margin:80px auto; padding:20px; border-radius:12px; max-width:800px; box-shadow:0 8px 25px rgba(0,0,0,0.2); position:relative; }
+  .close { color:#d62828; font-size:28px; font-weight:bold; position:absolute; top:10px; right:15px; cursor:pointer; }
+  .order-table { width:100%; border-collapse:collapse; margin-top:15px; }
+  .order-table th, .order-table td { padding:12px; text-align:left; border-bottom:1px solid #ddd; }
+  .order-table th { background:#d62828; color:white; }
+
+  /* === RESPONSIVE === */
+  @media(max-width:768px){
+    nav { display:none; flex-direction:column; width:100%; gap:10px; }
+    nav.show { display:flex; }
+    nav a { width:100%; text-align:center; margin:5px 0; }
+    .menu-toggle { display:flex; }
+  }
 </style>
 </head>
 <body>
@@ -125,17 +83,20 @@
 <!-- HEADER -->
 <header>
   <h1>KusinaExpress</h1>
-  <nav>
+  <div class="menu-toggle" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <nav id="nav-menu">
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
     <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart
-      <span id="cartBadge" class="cart-badge"></span>
+      Cart <span id="cartBadge" class="cart-badge"></span>
     </a>
     <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="{% url 'restaurant:contact' %}">Contact</a>
     <a href="{% url 'restaurant:about' %}">About Us</a>
-
     <div class="auth-button">
       {% if user %}
         <a href="{% url 'restaurant:profile' %}">
@@ -146,7 +107,7 @@
   </nav>
 </header>
 
-<!-- MAIN PROFILE CONTENT (UNCHANGED) -->
+<!-- MAIN PROFILE CONTENT -->
 <main>
   <div class="profile-container">
     <h2>My Profile</h2>
@@ -160,7 +121,7 @@
     <div class="profile-section">
       <h3>Order History</h3>
       <p>Check your previous food orders and digital receipts easily.</p>
-      <button>View Orders</button>
+      <button id="viewOrdersBtn">View Orders</button>
     </div>
 
     <div class="profile-section">
@@ -187,9 +148,40 @@
         <button type="submit">Logout</button>
       </form>
     </div>
-
   </div>
 </main>
+
+<!-- MODAL FOR ORDER HISTORY -->
+<div id="orderModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeModal">&times;</span>
+    <h3>Your Delivered Orders</h3>
+    <table class="order-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          {% if order.delivered_at %}
+          <tr>
+            <td>{{ order.order_id }}</td>
+            <td>{{ order.delivered_at|date:"M d, Y H:i" }}</td>
+            <td>₱{{ order.total_amount }}</td>
+            <td>Delivered</td>
+          </tr>
+          {% endif %}
+        {% empty %}
+          <tr><td colspan="4">No delivered orders yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -197,6 +189,20 @@
 </footer>
 
 <script>
+// Hamburger toggle
+const toggle = document.getElementById('menu-toggle');
+const nav = document.getElementById('nav-menu');
+toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
+
+// Open modal
+const modal = document.getElementById('orderModal');
+const btn = document.getElementById('viewOrdersBtn');
+const span = document.getElementById('closeModal');
+btn.onclick = () => modal.style.display = "block";
+span.onclick = () => modal.style.display = "none";
+window.onclick = (event) => { if(event.target == modal) modal.style.display = "none"; }
+
+// Cart badge
 async function updateCartBadge(){
   try{
     const res = await fetch('/api/cart/');
@@ -206,9 +212,7 @@ async function updateCartBadge(){
     const badge = document.getElementById('cartBadge');
     badge.style.display = count > 0 ? 'inline-block':'none';
     if(count>0) badge.innerText = count;
-  }catch(err){
-    console.error(err);
-  }
+  }catch(err){ console.error(err); }
 }
 updateCartBadge();
 setInterval(updateCartBadge, 10000);

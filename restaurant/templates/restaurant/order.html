@@ -9,34 +9,28 @@
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
   body { background-color:#fffaf3; color:#2d2d2d; }
 
+  /* HEADER */
   header { background-color:#d62828; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
   header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
-  nav a:hover { color:#fcbf49; }
 
-  .cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -17px;
-    background:red;
-    color:white;
-    font-size:12px;
-    font-weight:bold;
-    border-radius:50%;
-    padding:2px 6px;
-    display:none; 
-  }
+  /* Hamburger */
+  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
+  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
+
+  nav { display:flex; align-items:center; gap:10px; position:relative; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
+  nav a:hover { color:#fcbf49; }
 
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
 
+  .cart-badge { position:absolute; top:-5px; right:-17px; background:red; color:white; font-size:12px; font-weight:bold; padding:2px 6px; border-radius:50%; display:none; }
+
+  /* MAIN CONTENT */
   main { padding: 30px 0; }
   .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
-
   h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
 
-  /* Order Progress Tracker */
   .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; position:relative; }
   .status-item { 
     background:white; 
@@ -49,57 +43,49 @@
     transition: all 0.3s;
     position:relative;
   }
-  .status-item::before {
-    content:'';
-    position:absolute;
-    left:-10px;
-    top:0;
-    bottom:0;
-    width:4px;
-    background:#d62828;
-    border-radius:2px;
-    opacity:0.2;
-    transition: all 0.3s;
-  }
-  .status-item.active {
-    background:#f8eded;
-    font-weight:bold;
-    border-color:#f77f00;
-  }
-  .status-item.active::before {
-    opacity:1;
-    background:#f77f00;
-  }
+  .status-item::before { content:''; position:absolute; left:-10px; top:0; bottom:0; width:4px; background:#d62828; border-radius:2px; opacity:0.2; transition: all 0.3s; }
+  .status-item.active { background:#f8eded; font-weight:bold; border-color:#f77f00; }
+  .status-item.active::before { opacity:1; background:#f77f00; }
+
+  .status-item button { margin-left:10px; padding:5px 10px; border:none; background:#d62828; color:white; border-radius:6px; cursor:pointer; font-size:13px; display:none; }
+  .status-item button:hover { background:#b71c1c; }
 
   .map-section { background:white; border:2px solid #d62828; border-radius:12px; padding:20px; }
   .map-placeholder { width:100%; height:300px; background:#f8eded; border:1px solid #f77f00; display:flex; justify-content:center; align-items:center; font-size:18px; color:#555; border-radius:10px; }
 
+  /* FOOTER */
   footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
 
-  #toast { position: fixed; bottom:20px; right:20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .menu-toggle { display:flex; }
+    nav { flex-direction:column; width:100%; display:none; }
+    nav.show { display:flex; }
+    nav a { width:100%; text-align:center; margin:5px 0; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>KusinaExpress</h1>
-  <nav>
+  <div class="menu-toggle" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <nav id="nav-menu">
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart
-      <span id="cartBadge" class="cart-badge"></span>
-    </a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">Cart <span id="cartBadge" class="cart-badge"></span></a>
     <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="{% url 'restaurant:contact' %}">Contact</a>
     <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
-        <a href="{% url 'restaurant:profile' %}">
-          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-        </a>
+        <a href="{% url 'restaurant:profile' %}"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile"></a>
       {% endif %}
     </div>
   </nav>
@@ -107,18 +93,20 @@
 
 <main>
   <div class="container">
-    <!-- Order Status -->
     <section>
       <h2 class="section-title">Order Status</h2>
       <div class="status-section">
         <div class="status-item" data-status="Order Confirmed"><p>Order Confirmed</p><p class="time">--</p></div>
         <div class="status-item" data-status="Preparing Order"><p>Preparing Order</p><p class="time">--</p></div>
         <div class="status-item" data-status="Out for Delivery"><p>Out for Delivery</p><p class="time">--</p></div>
-        <div class="status-item" data-status="Delivered"><p>Delivered</p><p class="time">--</p></div>
+        <div class="status-item" data-status="Delivered">
+          <p>Delivered</p>
+          <p class="time">--</p>
+          <button class="ack-btn">Mark as Seen</button>
+        </div>
       </div>
     </section>
 
-    <!-- Delivery Map -->
     <section>
       <h2 class="section-title">Delivery Map</h2>
       <div class="map-section">
@@ -132,40 +120,45 @@
   <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
 </footer>
 
-<div id="toast">Item added to cart!</div>
-
 <script>
+// Hamburger toggle
+const toggle = document.getElementById('menu-toggle');
+const nav = document.getElementById('nav-menu');
+toggle.addEventListener('click', () => nav.classList.toggle('show'));
+
 const orderId = "{{ order_id }}";
 
-// Fetch Order Status from API and update steps
 async function fetchOrderStatus() {
   if (!orderId) return;
   try {
     const response = await fetch(`/api/orders/${orderId}/`);
     if (!response.ok) throw new Error("Order not found");
     const data = await response.json();
-
     const timestamps = data.timestamps || {};
     const statusItems = document.querySelectorAll('.status-item');
 
-    // Loop through items and mark active if timestamp exists
-    let activateNext = false;
     statusItems.forEach(item => {
       const statusName = item.dataset.status;
       const timeEl = item.querySelector('.time');
+      const btn = item.querySelector('.ack-btn');
+
       if (timestamps[statusName]) {
         item.classList.add('active');
         timeEl.textContent = timestamps[statusName];
-        activateNext = true;
+        if (statusName === "Delivered" && btn) {
+          btn.style.display = "inline-block";
+          btn.onclick = () => {
+            statusItems.forEach(si => si.querySelector('.time').textContent = "--");
+            btn.style.display = "none";
+          };
+        }
       } else {
         item.classList.remove('active');
-        timeEl.textContent = '--';
+        timeEl.textContent = "--";
+        if (btn) btn.style.display = "none";
       }
     });
-
-  } catch (error) {
-    console.error("Error fetching order status:", error);
-  }
+  } catch (error) { console.error("Error fetching order status:", error); }
 }
 
 if (orderId) {

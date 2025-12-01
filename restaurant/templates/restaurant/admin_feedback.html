@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Feedback</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
+
+/* Sidebar */
+.sidebar {
+  width:250px;
+  background-color:#d62828;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.sidebar h2 { font-size:22px; margin-bottom:30px; }
+.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:block; transition:0.3s; }
+.sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
+
+/* Main content */
+.main-content { flex:1; max-width:1200px; overflow-y:auto; padding:30px; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+header h1 { font-size:28px; color:#d62828; }
+
+/* Feedback Table */
+table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
+th, td { padding:15px; text-align:left; }
+th { background-color:#d62828; color:white; }
+tr:nth-child(even) { background:#f8f8f8; }
+tr:hover { background:#fcbf49; color:#2d2d2d; }
+
+/* Responsive */
+@media(max-width:768px) {
+  body { flex-direction:column; }
+  .sidebar { width:100%; height:auto; position:relative; }
+  .main-content { padding:20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>KusinaAdmin</h2>
+  <a href="{% url 'restaurant:admin-dashboard' %}">Dashboard</a>
+  <a href="{% url 'restaurant:admin-menu' %}">Manage Menu</a>
+  <a href="{% url 'restaurant:admin-orders' %}">Manage Orders</a>
+  <a href="{% url 'restaurant:admin-feedback' %}">Feedback</a>
+  <a href="{% url 'restaurant:logout' %}">Logout</a>
+</div>
+
+<div class="main-content">
+  <header>
+    <h1>User Feedback</h1>
+  </header>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Feedback ID</th>
+        <th>User</th>
+        <th>Message</th>
+        <th>Rating</th>
+        <th>Date Submitted</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for feedback in feedback_list %}
+      <tr>
+        <td>{{ feedback.feedback_id }}</td>
+        <td>{{ feedback.user.first_name }} {{ feedback.user.last_name }}</td>
+        <td>{{ feedback.message }}</td>
+        <td>{% if feedback.rating %}{{ feedback.rating }}/5{% else %}-{% endif %}</td>
+        <td>{{ feedback.date_submitted|date:"M d, Y H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No feedback submitted yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+</body>
+</html>
