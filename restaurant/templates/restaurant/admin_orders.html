@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Manage Orders</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
+.sidebar { width:250px; background-color:#d62828; color:white; display:flex; flex-direction:column; padding:20px; position:sticky; top:0; height:100vh; }
+.sidebar h2 { font-size:22px; margin-bottom:30px; }
+.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:block; transition:0.3s; }
+.sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
+.main-content { flex:1; padding:30px; overflow-y:auto; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+header h1 { font-size:28px; color:#d62828; }
+.btn { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; margin-right:5px; }
+.btn-filter { background:#fcbf49; color:#2d2d2d; }
+.btn-filter:hover { background:#d62828; color:white; }
+table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-top:15px; }
+th, td { padding:12px; text-align:left; vertical-align:middle; }
+th { background-color:#d62828; color:white; }
+tr:nth-child(even) { background:#f8f8f8; }
+tr:hover { background:#fcbf49; color:#2d2d2d; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>KusinaAdmin</h2>
+  <a href="{% url 'restaurant:admin-dashboard' %}">Dashboard</a>
+  <a href="{% url 'restaurant:admin-menu' %}">Manage Menu</a>
+  <a href="{% url 'restaurant:admin-orders' %}">Manage Orders</a>
+  <a href="#">Users</a>
+  <a href="#">Feedback</a>
+  <a href="#">Logout</a>
+</div>
+
+<div class="main-content">
+  <header>
+    <h1>Manage Orders</h1>
+  </header>
+
+  <!-- Status Filter Buttons -->
+  <div style="margin-bottom:15px;">
+    <a href="?status=pending"><button class="btn btn-filter">Pending</button></a>
+    <a href="?status=preparing"><button class="btn btn-filter">Preparing</button></a>
+    <a href="?status=out_for_delivery"><button class="btn btn-filter">Out for Delivery</button></a>
+    <a href="?status=delivered"><button class="btn btn-filter">Delivered</button></a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>User</th>
+        <th>Total Amount</th>
+        <th>Status</th>
+        <th>Delivery Address</th>
+        <th>Contact Number</th>
+        <th>Payment Method</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="ordersTable">
+      {% for order in orders %}
+      <tr>
+        <td>{{ order.order_id }}</td>
+        <td>{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</td>
+        <td>₱{{ order.total_amount }}</td>
+
+        <!-- FIXED STATUS LOGIC -->
+        <td>
+          {% if order.delivered_at %}
+              Delivered
+          {% elif order.out_for_delivery_at %}
+              Out for Delivery
+          {% elif order.preparing_at %}
+              Preparing
+          {% elif order.confirmed_at %}
+              Confirmed
+          {% else %}
+              Pending
+          {% endif %}
+        </td>
+
+        <td>{{ order.delivery_address|default:"-" }}</td>
+        <td>{{ order.contact_number|default:"-" }}</td>
+        <td>{{ order.payment_method|default:"-" }}</td>
+
+        <td>
+          {% if order.delivered_at %}
+            <span>Completed</span>
+
+          {% elif order.out_for_delivery_at %}
+            <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="delivered">
+              <button class="btn btn-filter" type="submit">Delivered</button>
+            </form>
+
+          {% elif order.preparing_at %}
+            <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="out_for_delivery">
+              <button class="btn btn-filter" type="submit">Out for Delivery</button>
+            </form>
+
+          {% elif order.confirmed_at and not order.preparing_at %}
+            <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
+              {% csrf_token %}
+              <input type="hidden" name="status" value="preparing">
+              <button class="btn btn-filter" type="submit">Start Preparing</button>
+            </form>
+
+          {% else %}
+            <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}">
+              {% csrf_token %}
+              <button class="btn btn-filter" type="submit">Confirm</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+
+      {% empty %}
+      <tr><td colspan="8">No orders found.</td></tr>
+
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

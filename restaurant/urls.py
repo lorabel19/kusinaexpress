@@ -36,6 +36,15 @@ urlpatterns = [
     path('about/', views.about, name='about'),          #About Page
     path('profile/', views.profile_view, name='profile'),
     path('public-menu/', views.menu, name='public_menu'),  # public menu page
+    path('admin-dashboard/', views.admin_dashboard, name='admin-dashboard'),
+    path('admin-menu/', views.admin_menu, name='admin-menu'),
+    path('admin-menu/add/', views.admin_add_menu, name='admin-add-menu'),
+    path('admin-menu/edit/<int:item_id>/', views.admin_edit_menu, name='admin-edit-menu'),
+    path('admin-menu/delete/<int:item_id>/', views.admin_delete_menu, name='admin-delete-menu'),
+    path('admin-orders/', views.admin_orders, name='admin-orders'),
+    path('admin-orders/confirm/<int:order_id>/', views.confirm_order, name='admin-confirm-order'),
+    path('admin-orders/update/<int:order_id>/', views.admin_update_orders, name='admin-update-order-status'),
+
     
 
     # API Endpoints

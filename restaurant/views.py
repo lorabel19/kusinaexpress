@@ -46,8 +46,12 @@ def dashboard(request):
         return redirect('restaurant:login')
     return render(request, 'restaurant/index_logged_in.html', {'user': user})
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Users
+
 def login_view(request):
-    """Login / Sign Up page handling."""
+    """Login page handling for all users, redirecting admins to admin dashboard."""
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -55,16 +59,25 @@ def login_view(request):
 
         try:
             user = Users.objects.get(email=email, role=role)
+            
             if user.password == password:  # plaintext check
+                # Store user info in session
                 request.session['user_id'] = user.user_id
                 request.session['role'] = user.role
-                return redirect('restaurant:dashboard')
+
+                # Redirect based on role
+                if user.role.lower() == 'admin':
+                    return redirect('restaurant:admin-dashboard')
+                else:
+                    return redirect('restaurant:dashboard')  # regular user dashboard
+
             else:
                 messages.error(request, "Invalid password")
         except Users.DoesNotExist:
             messages.error(request, "Invalid email or role")
 
     return render(request, 'restaurant/login.html')
+
 
 def logout_view(request):
     """Log out the user."""
@@ -178,7 +191,7 @@ def remove_from_cart_api(request, cart_id):
 
 # Place Order API
 def place_order_api(request):
-    """Confirm and place the current order."""
+    """Place the current order without auto-confirming it."""
     if request.method != 'POST':
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
@@ -207,9 +220,9 @@ def place_order_api(request):
             delivery_option=data.get('delivery_option', ''),
             notes=data.get('notes', ''),
             payment_method=data.get('payment_method', ''),
-            status='Order Confirmed',
+            status='Pending',      # <-- set as Pending
             order_date=now,
-            confirmed_at=now,
+            # confirmed_at=now      # <-- REMOVE this
         )
 
         # associate cart items to order
@@ -227,6 +240,7 @@ def place_order_api(request):
 
     except Exception as e:
         return JsonResponse({"detail": f"Error placing order: {str(e)}"}, status=500)
+
 
 
 # Order Page View
@@ -333,3 +347,139 @@ def menu(request):
     }
     return render(request, 'restaurant/mainmenu.html', context)
 
+from django.shortcuts import render
+from .models import Orders, MenuItems, Users
+
+def admin_dashboard(request):
+    context = {
+        'total_orders': Orders.objects.count(),
+        'pending_orders': Orders.objects.filter(status='Pending').count(),
+        'total_menu': MenuItems.objects.count(),
+        'total_users': Users.objects.count(),
+        'orders': Orders.objects.all().order_by('-order_date')[:10]  # last 10 orders
+    }
+    return render(request, 'restaurant/admin_dashboard.html', context)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import MenuItems
+
+def admin_menu(request):
+    """Display all menu items."""
+    menu_items = MenuItems.objects.all()
+    return render(request, 'restaurant/admin_menu.html', {'menu_items': menu_items})
+
+def admin_add_menu(request):
+    """Add new menu item."""
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        price = request.POST.get("price")
+        category = request.POST.get("category")
+        image_url = request.POST.get("image_url")
+        is_available = int(request.POST.get("is_available", 1))
+
+        MenuItems.objects.create(
+            name=name,
+            description=description,
+            price=price,
+            category=category,
+            image_url=image_url,
+            is_available=is_available
+        )
+        messages.success(request, f"{name} added successfully!")
+        return redirect('restaurant:admin-menu')
+
+    return render(request, 'restaurant/admin_menu_add.html')
+
+def admin_edit_menu(request, item_id):
+    """Edit existing menu item."""
+    item = get_object_or_404(MenuItems, item_id=item_id)
+
+    if request.method == "POST":
+        item.name = request.POST.get("name")
+        item.description = request.POST.get("description")
+        item.price = request.POST.get("price")
+        item.category = request.POST.get("category")
+        item.image_url = request.POST.get("image_url")
+        item.is_available = int(request.POST.get("is_available", 1))
+        item.save()
+        messages.success(request, f"{item.name} updated successfully!")
+        return redirect('restaurant:admin-menu')
+
+    return render(request, 'restaurant/admin_menu_edit.html', {'item': item})
+
+def admin_delete_menu(request, item_id):
+    """Delete a menu item."""
+    item = get_object_or_404(MenuItems, item_id=item_id)
+    item.delete()
+    messages.success(request, f"{item.name} deleted successfully!")
+    return redirect('restaurant:admin-menu')
+
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from .models import Orders
+
+# Admin: List orders
+def admin_orders(request):
+    status_filter = request.GET.get('status', 'pending')  # Default to 'pending'
+    orders = Orders.objects.all().select_related('user')
+
+    if status_filter == 'pending':
+        orders = orders.filter(confirmed_at__isnull=True)
+    elif status_filter == 'preparing':
+        orders = orders.filter(confirmed_at__isnull=False, preparing_at__isnull=False, out_for_delivery_at__isnull=True)
+    elif status_filter == 'out_for_delivery':
+        orders = orders.filter(out_for_delivery_at__isnull=False, delivered_at__isnull=True)
+    elif status_filter == 'delivered':
+        orders = orders.filter(delivered_at__isnull=False)
+
+    return render(request, "restaurant/admin_orders.html", {
+        'orders': orders,
+        'status_filter': status_filter,
+    })
+
+
+# Admin: Update order status (via hidden input)
+def admin_update_orders(request, order_id):
+    order = get_object_or_404(Orders, order_id=order_id)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        now = timezone.now()
+
+        if new_status == "preparing":
+            order.confirmed_at = order.confirmed_at or now
+            order.preparing_at = now
+            order.status = "preparing"
+
+        elif new_status == "out_for_delivery":
+            order.preparing_at = order.preparing_at or now
+            order.out_for_delivery_at = now
+            order.status = "out_for_delivery"
+
+        elif new_status == "delivered":
+            order.confirmed_at = order.confirmed_at or now
+            order.preparing_at = order.preparing_at or now
+            order.out_for_delivery_at = order.out_for_delivery_at or now
+            order.delivered_at = now
+            order.status = "delivered"
+
+        order.save()
+        return redirect(f'/admin-orders/?status={new_status}')
+
+    return redirect("restaurant:admin-orders")
+
+
+# Admin: Confirm pending order → Preparing
+def confirm_order(request, order_id):
+    order = get_object_or_404(Orders, order_id=order_id)
+
+    if request.method == "POST":
+        now = timezone.now()
+        order.confirmed_at = now
+        order.preparing_at = now
+        order.status = "preparing"
+        order.save()
+
+    return redirect('/admin-orders/?status=preparing')

@@ -36,9 +36,40 @@
 
   h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
 
-  .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; }
-  .status-item { background:white; border:2px solid #d62828; border-radius:12px; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; transition: all 0.3s; }
-  .status-item.active { background:#f8eded; font-weight:bold; border-color:#f77f00; }
+  /* Order Progress Tracker */
+  .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; position:relative; }
+  .status-item { 
+    background:white; 
+    border:2px solid #d62828; 
+    border-radius:12px; 
+    padding:15px 20px; 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    transition: all 0.3s;
+    position:relative;
+  }
+  .status-item::before {
+    content:'';
+    position:absolute;
+    left:-10px;
+    top:0;
+    bottom:0;
+    width:4px;
+    background:#d62828;
+    border-radius:2px;
+    opacity:0.2;
+    transition: all 0.3s;
+  }
+  .status-item.active {
+    background:#f8eded;
+    font-weight:bold;
+    border-color:#f77f00;
+  }
+  .status-item.active::before {
+    opacity:1;
+    background:#f77f00;
+  }
 
   .map-section { background:white; border:2px solid #d62828; border-radius:12px; padding:20px; }
   .map-placeholder { width:100%; height:300px; background:#f8eded; border:1px solid #f77f00; display:flex; justify-content:center; align-items:center; font-size:18px; color:#555; border-radius:10px; }
@@ -104,55 +135,59 @@
 <div id="toast">Item added to cart!</div>
 
 <script>
-  const orderId = "{{ order_id }}";
+const orderId = "{{ order_id }}";
 
-  // --- Only fetch order status if order exists ---
-  async function fetchOrderStatus() {
-    if (!orderId) return; 
-    try {
-      const response = await fetch(`/api/orders/${orderId}/`);
-      if (!response.ok) throw new Error("Order not found");
-      const data = await response.json();
+// Fetch Order Status from API and update steps
+async function fetchOrderStatus() {
+  if (!orderId) return;
+  try {
+    const response = await fetch(`/api/orders/${orderId}/`);
+    if (!response.ok) throw new Error("Order not found");
+    const data = await response.json();
 
-      const timestamps = data.timestamps || {};
-      const statusItems = document.querySelectorAll('.status-item');
+    const timestamps = data.timestamps || {};
+    const statusItems = document.querySelectorAll('.status-item');
 
-      statusItems.forEach(item => {
-        const statusName = item.dataset.status;
-        const timeEl = item.querySelector('.time');
-        if (timestamps[statusName]) {
-          item.classList.add('active');
-          timeEl.textContent = timestamps[statusName];
-        } else {
-          item.classList.remove('active');
-          timeEl.textContent = '--';
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching order status:", error);
-    }
+    // Loop through items and mark active if timestamp exists
+    let activateNext = false;
+    statusItems.forEach(item => {
+      const statusName = item.dataset.status;
+      const timeEl = item.querySelector('.time');
+      if (timestamps[statusName]) {
+        item.classList.add('active');
+        timeEl.textContent = timestamps[statusName];
+        activateNext = true;
+      } else {
+        item.classList.remove('active');
+        timeEl.textContent = '--';
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching order status:", error);
   }
+}
 
-  if (orderId) {
-    fetchOrderStatus();
-    setInterval(fetchOrderStatus, 10000); 
-  }
+if (orderId) {
+  fetchOrderStatus();
+  setInterval(fetchOrderStatus, 10000);
+}
 
-  // --- Cart Badge ---
-  async function updateCartBadge() {
-    try {
-      const res = await fetch('/api/cart/');
-      if (!res.ok) return;
-      const items = await res.json();
-      const count = items.reduce((acc, i) => acc + i.quantity, 0);
-      const badge = document.getElementById('cartBadge');
-      badge.style.display = count > 0 ? 'inline-block' : 'none';
-      badge.innerText = count > 0 ? count : '';
-    } catch (err) { console.error(err); }
-  }
+// Cart Badge
+async function updateCartBadge() {
+  try {
+    const res = await fetch('/api/cart/');
+    if (!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc, i) => acc + i.quantity, 0);
+    const badge = document.getElementById('cartBadge');
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+    badge.innerText = count > 0 ? count : '';
+  } catch (err) { console.error(err); }
+}
 
-  updateCartBadge();
-  setInterval(updateCartBadge, 10000);
+updateCartBadge();
+setInterval(updateCartBadge, 10000);
 </script>
 
 </body>
