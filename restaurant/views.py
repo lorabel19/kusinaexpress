@@ -189,48 +189,69 @@ def remove_from_cart_api(request, cart_id):
         return Response({"detail": f"Error removing item: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# views.py
+from django.http import JsonResponse
+from decimal import Decimal
+from django.utils import timezone
+import json
+
+from .models import Orders, OrderItems, Cart, MenuItems, Users
+
+# Helper to get the logged-in user
+def get_logged_in_user(request):
+    user_id = request.session.get('user_id')  # set this in your login view
+    if not user_id:
+        return None
+    try:
+        return Users.objects.get(user_id=user_id)
+    except Users.DoesNotExist:
+        return None
+
 # Place Order API
 def place_order_api(request):
-    """Place the current order without auto-confirming it."""
-    if request.method != 'POST':
-        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"detail": "Method not allowed"}, status=405)
 
     user = get_logged_in_user(request)
     if not user:
         return JsonResponse({"detail": "Not logged in"}, status=401)
 
-    cart_items = Cart.objects.filter(user=user)
+    cart_items = Cart.objects.filter(user_id=user.user_id)
     if not cart_items.exists():
         return JsonResponse({"detail": "No items in cart"}, status=400)
 
     try:
-        # parse JSON data
         data = json.loads(request.body)
 
-        # compute total
-        total_amount = sum([ci.subtotal for ci in cart_items]) + Decimal('40.00')
+        # calculate total
+        subtotal = sum([ci.subtotal for ci in cart_items])
+        shipping_fee = Decimal('40.00')
+        total_amount = subtotal + shipping_fee
 
-        # create new order with local time
-        now = timezone.localtime()  
+        # create order
+        now = timezone.localtime()
         order = Orders.objects.create(
-            user=user,
+            user_id=user.user_id,  # FK to your Users table
             total_amount=total_amount,
             delivery_address=data.get('address', ''),
             contact_number=data.get('contact', ''),
             delivery_option=data.get('delivery_option', ''),
             notes=data.get('notes', ''),
             payment_method=data.get('payment_method', ''),
-            status='Pending',      # <-- set as Pending
-            order_date=now,
-            # confirmed_at=now      # <-- REMOVE this
+            status='Pending',
+            order_date=now
         )
 
-        # associate cart items to order
+        # create order items
         for ci in cart_items:
-            ci.order = order
-            ci.save()
+            OrderItems.objects.create(
+                order_id=order.order_id,  # FK to Orders
+                item_id=ci.item.item_id,  # FK to MenuItems
+                quantity=ci.quantity,
+                subtotal=ci.subtotal
+            )
 
-        # Clear cart
+        # clear cart
         cart_items.delete()
 
         return JsonResponse({
@@ -243,17 +264,24 @@ def place_order_api(request):
 
 
 
+
+
 # Order Page View
 def order_view(request):
     """Render order tracking page."""
     user = get_logged_in_user(request)
     if not user:
-        return render(request, 'restaurant/order.html', {'order_id': None})
+        return render(request, 'restaurant/order.html', {'order': None, 'order_id': None})
 
     # Get latest order
     order = Orders.objects.filter(user=user).order_by('-order_date').first()
-    context = {'order_id': order.order_id if order else None}
+    
+    context = {
+        'order': order,  # pass the full order object
+        'order_id': order.order_id if order else None  # keep for your JS
+    }
     return render(request, 'restaurant/order.html', context)
+
 
 
 
@@ -424,28 +452,57 @@ def admin_delete_menu(request, item_id):
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from .models import Orders
+from .models import Orders, OrderItems
 
-# Admin: List orders
+
+
+# =========================
+# ADMIN: LIST ORDERS
+# =========================
+from django.shortcuts import render
+from django.db.models import Prefetch
+from .models import Orders, OrderItems, MenuItems
+
 def admin_orders(request):
-    status_filter = request.GET.get('status', 'pending')  # Default to 'pending'
-    orders = Orders.objects.all().select_related('user')
+    # Get status filter from query params
+    status_filter = request.GET.get('status', 'pending')
 
+    # Base queryset with prefetch of order items and related menu item
+    orders = Orders.objects.all().prefetch_related(
+        Prefetch('items', queryset=OrderItems.objects.select_related('item'))
+    )
+
+    # Apply status filter
     if status_filter == 'pending':
         orders = orders.filter(confirmed_at__isnull=True)
     elif status_filter == 'preparing':
-        orders = orders.filter(confirmed_at__isnull=False, preparing_at__isnull=False, out_for_delivery_at__isnull=True)
+        orders = orders.filter(
+            confirmed_at__isnull=False,
+            preparing_at__isnull=False,
+            out_for_delivery_at__isnull=True
+        )
     elif status_filter == 'out_for_delivery':
-        orders = orders.filter(out_for_delivery_at__isnull=False, delivered_at__isnull=True)
+        orders = orders.filter(
+            out_for_delivery_at__isnull=False,
+            delivered_at__isnull=True
+        )
     elif status_filter == 'delivered':
         orders = orders.filter(delivered_at__isnull=False)
 
-    return render(request, "restaurant/admin_orders.html", {
-        'orders': orders,
-        'status_filter': status_filter,
-    })
+    # Render template with orders and current status filter
+    return render(
+        request,
+        "restaurant/admin_orders.html",
+        {
+            'orders': orders,
+            'status_filter': status_filter
+        }
+    )
 
 
-# Admin: Update order status (via hidden input)
+# =========================
+# ADMIN: UPDATE STATUS
+# =========================
 def admin_update_orders(request, order_id):
     order = get_object_or_404(Orders, order_id=order_id)
 
@@ -471,12 +528,19 @@ def admin_update_orders(request, order_id):
             order.status = "delivered"
 
         order.save()
+
+        # Redirect to correct filtered view
         return redirect(f'/admin-orders/?status={new_status}')
 
-    return redirect("restaurant:admin-orders")
+    # fallback redirect
+    return redirect('/admin-orders/')
 
 
-# Admin: Confirm pending order → Preparing
+
+# =========================
+# ADMIN: CONFIRM ORDER
+# (PENDING → PREPARING)
+# =========================
 def confirm_order(request, order_id):
     order = get_object_or_404(Orders, order_id=order_id)
 
@@ -488,6 +552,7 @@ def confirm_order(request, order_id):
         order.save()
 
     return redirect('/admin-orders/?status=preparing')
+
 
 from django.shortcuts import render
 from .models import Feedback
@@ -515,6 +580,25 @@ def submit_feedback(request):
         serializer.save(user=user, date_submitted=timezone.now())
         return Response({'message': 'Feedback submitted successfully!'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from .models import Orders
+
+@csrf_exempt
+def mark_order_seen(request, order_id):
+    if request.method != "POST":
+        return JsonResponse({"detail": "Method not allowed"}, status=405)
+    
+    try:
+        order = Orders.objects.get(pk=order_id)
+        # Reset timestamps (o mark all as not seen)
+        order.timestamps = {}  # assuming JSONField
+        order.save()
+        return JsonResponse({"detail": "Order marked as seen"})
+    except Orders.DoesNotExist:
+        return JsonResponse({"detail": "Order not found"}, status=404)
+
 
 
 

@@ -17,12 +17,14 @@ header { display:flex; justify-content:space-between; align-items:center; margin
 header h1 { font-size:28px; color:#d62828; }
 .btn { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; margin-right:5px; }
 .btn-filter { background:#fcbf49; color:#2d2d2d; }
-.btn-filter:hover { background:#d62828; color:white; }
+.btn-filter:hover { background-color:#d62828; color:white; }
 table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-top:15px; }
-th, td { padding:12px; text-align:left; vertical-align:middle; }
+th, td { padding:12px; text-align:left; vertical-align:top; border-bottom:1px solid #e0e0e0; }
 th { background-color:#d62828; color:white; }
-tr:nth-child(even) { background:#f8f8f8; }
 tr:hover { background:#fcbf49; color:#2d2d2d; }
+
+/* Ordered Items in Table */
+.order-item-line { font-size: 14px; margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -59,6 +61,8 @@ tr:hover { background:#fcbf49; color:#2d2d2d; }
         <th>Delivery Address</th>
         <th>Contact Number</th>
         <th>Payment Method</th>
+        <th>Item Name</th>
+        <th>Quantity</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -69,51 +73,55 @@ tr:hover { background:#fcbf49; color:#2d2d2d; }
         <td>{{ order.order_id }}</td>
         <td>{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</td>
         <td>₱{{ order.total_amount }}</td>
-
-        <!-- FIXED STATUS LOGIC -->
         <td>
-          {% if order.delivered_at %}
-              Delivered
-          {% elif order.out_for_delivery_at %}
-              Out for Delivery
-          {% elif order.preparing_at %}
-              Preparing
-          {% elif order.confirmed_at %}
-              Confirmed
-          {% else %}
-              Pending
+          {% if order.delivered_at %}Delivered
+          {% elif order.out_for_delivery_at %}Out for Delivery
+          {% elif order.preparing_at %}Preparing
+          {% elif order.confirmed_at %}Confirmed
+          {% else %}Pending
           {% endif %}
         </td>
-
         <td>{{ order.delivery_address|default:"-" }}</td>
         <td>{{ order.contact_number|default:"-" }}</td>
         <td>{{ order.payment_method|default:"-" }}</td>
 
+        <!-- Ordered Items in single cell -->
+        <td>
+          {% for item in order.items.all %}
+            <div class="order-item-line">{{ item.item.name }}</div>
+          {% empty %}
+            <div>-</div>
+          {% endfor %}
+        </td>
+        <td>
+          {% for item in order.items.all %}
+            <div class="order-item-line">{{ item.quantity }}</div>
+          {% empty %}
+            <div>-</div>
+          {% endfor %}
+        </td>
+
         <td>
           {% if order.delivered_at %}
             <span>Completed</span>
-
           {% elif order.out_for_delivery_at %}
             <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
               {% csrf_token %}
               <input type="hidden" name="status" value="delivered">
               <button class="btn btn-filter" type="submit">Delivered</button>
             </form>
-
           {% elif order.preparing_at %}
             <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
               {% csrf_token %}
               <input type="hidden" name="status" value="out_for_delivery">
               <button class="btn btn-filter" type="submit">Out for Delivery</button>
             </form>
-
           {% elif order.confirmed_at and not order.preparing_at %}
             <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
               {% csrf_token %}
               <input type="hidden" name="status" value="preparing">
               <button class="btn btn-filter" type="submit">Start Preparing</button>
             </form>
-
           {% else %}
             <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}">
               {% csrf_token %}
@@ -122,10 +130,8 @@ tr:hover { background:#fcbf49; color:#2d2d2d; }
           {% endif %}
         </td>
       </tr>
-
       {% empty %}
-      <tr><td colspan="8">No orders found.</td></tr>
-
+      <tr><td colspan="10">No orders found.</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -12,18 +12,13 @@
   /* HEADER */
   header { background-color:#d62828; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
   header h1 { font-size:26px; letter-spacing:1px; }
-
-  /* Hamburger */
   .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
   .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
-
   nav { display:flex; align-items:center; gap:10px; position:relative; }
   nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
   nav a:hover { color:#fcbf49; }
-
   .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
-
   .cart-badge { position:absolute; top:-5px; right:-17px; background:red; color:white; font-size:12px; font-weight:bold; padding:2px 6px; border-radius:50%; display:none; }
 
   /* MAIN CONTENT */
@@ -31,6 +26,16 @@
   .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
   h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
 
+  /* ORDER SUMMARY */
+  .order-summary { background:white; border:2px solid #d62828; border-radius:12px; padding:20px; margin-bottom:40px; }
+  .order-summary table { width:100%; border-collapse:collapse; }
+  .order-summary th, .order-summary td { padding:12px 15px; text-align:left; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
+  .order-summary th { background:#f77f00; color:white; text-transform:uppercase; font-size:14px; letter-spacing:0.5px; }
+  .order-summary td img { width:60px; height:60px; object-fit:cover; border-radius:8px; margin-right:10px; vertical-align:middle; }
+  .order-summary td .item-name { vertical-align:middle; }
+  .order-summary tr:last-child td { font-weight:bold; }
+
+  /* STATUS SECTION */
   .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; position:relative; }
   .status-item { 
     background:white; 
@@ -64,6 +69,8 @@
     nav { flex-direction:column; width:100%; display:none; }
     nav.show { display:flex; }
     nav a { width:100%; text-align:center; margin:5px 0; }
+    .order-summary th, .order-summary td { font-size:13px; padding:8px; }
+    .order-summary td img { width:50px; height:50px; }
   }
 </style>
 </head>
@@ -85,7 +92,9 @@
     <a href="{% url 'restaurant:about' %}">About Us</a>
     <div class="auth-button">
       {% if user %}
-        <a href="{% url 'restaurant:profile' %}"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile"></a>
+        <a href="{% url 'restaurant:profile' %}">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
+        </a>
       {% endif %}
     </div>
   </nav>
@@ -93,6 +102,61 @@
 
 <main>
   <div class="container">
+
+    <!-- ORDER SUMMARY -->
+    <section>
+      <h2 class="section-title">Your Order</h2>
+      <div class="order-summary" id="orderSummary">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="orderBody">
+
+            {% if order %}
+              {% for item in order.items.all %}
+              <tr>
+                <td>
+                  {% if item.item.image_url %}
+                   <img src="{{ item.item.image_url }}" alt="{{ item.item.name }}">
+                  {% else %}
+                  <img src="https://via.placeholder.com/60" alt="{{ item.item.name }}">
+                  {% endif %}
+                  <span class="item-name">{{ item.item.name }}</span>
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>₱{{ item.subtotal }}</td>
+              </tr>
+              {% endfor %}
+
+              <!-- Shipping Fee Display Only -->
+              <tr id="shippingRow">
+                <td colspan="2" style="text-align:right;">Shipping Fee</td>
+                <td>₱40</td>
+              </tr>
+
+              <!-- Total from BACKEND -->
+              <tr id="totalRow">
+                <td colspan="2" style="text-align:right; font-weight:bold;">Total</td>
+                <td style="font-weight:bold;">₱{{ order.total_amount }}</td>
+              </tr>
+
+            {% else %}
+              <tr id="noOrderRow">
+                <td colspan="3" style="text-align:center;">No order found.</td>
+              </tr>
+            {% endif %}
+
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STATUS SECTION -->
     <section>
       <h2 class="section-title">Order Status</h2>
       <div class="status-section">
@@ -107,12 +171,14 @@
       </div>
     </section>
 
+    <!-- MAP SECTION -->
     <section>
       <h2 class="section-title">Delivery Map</h2>
       <div class="map-section">
         <div class="map-placeholder">Map Placeholder (Delivery Route)</div>
       </div>
     </section>
+
   </div>
 </main>
 
@@ -121,12 +187,32 @@
 </footer>
 
 <script>
-// Hamburger toggle
 const toggle = document.getElementById('menu-toggle');
 const nav = document.getElementById('nav-menu');
 toggle.addEventListener('click', () => nav.classList.toggle('show'));
 
-const orderId = "{{ order_id }}";
+const orderId = "{{ order.order_id }}";
+const statusItems = document.querySelectorAll('.status-item');
+const deliveredBtn = document.querySelector('.status-item[data-status="Delivered"] .ack-btn');
+const seenKey = `order_${orderId}_seen`;
+
+function resetOrderTable(){
+  const orderBody = document.getElementById('orderBody');
+  orderBody.innerHTML = `<tr id="noOrderRow"><td colspan="3" style="text-align:center;">No order found.</td></tr>`;
+}
+
+if (localStorage.getItem(seenKey)) {
+  statusItems.forEach(si => si.querySelector('.time').textContent = "--");
+  deliveredBtn.style.display = "none";
+  resetOrderTable();
+}
+
+deliveredBtn.onclick = () => {
+  statusItems.forEach(si => si.querySelector('.time').textContent = "--");
+  deliveredBtn.style.display = "none";
+  localStorage.setItem(seenKey, "true");
+  resetOrderTable();
+};
 
 async function fetchOrderStatus() {
   if (!orderId) return;
@@ -135,30 +221,23 @@ async function fetchOrderStatus() {
     if (!response.ok) throw new Error("Order not found");
     const data = await response.json();
     const timestamps = data.timestamps || {};
-    const statusItems = document.querySelectorAll('.status-item');
 
     statusItems.forEach(item => {
       const statusName = item.dataset.status;
       const timeEl = item.querySelector('.time');
-      const btn = item.querySelector('.ack-btn');
 
-      if (timestamps[statusName]) {
+      if (timestamps[statusName] && !localStorage.getItem(seenKey)) {
         item.classList.add('active');
         timeEl.textContent = timestamps[statusName];
-        if (statusName === "Delivered" && btn) {
-          btn.style.display = "inline-block";
-          btn.onclick = () => {
-            statusItems.forEach(si => si.querySelector('.time').textContent = "--");
-            btn.style.display = "none";
-          };
-        }
+        if (statusName === "Delivered") deliveredBtn.style.display = "inline-block";
       } else {
         item.classList.remove('active');
         timeEl.textContent = "--";
-        if (btn) btn.style.display = "none";
+        if (statusName === "Delivered") deliveredBtn.style.display = "none";
       }
     });
-  } catch (error) { console.error("Error fetching order status:", error); }
+
+  } catch (err) { console.error("Error fetching order status:", err); }
 }
 
 if (orderId) {
@@ -166,7 +245,6 @@ if (orderId) {
   setInterval(fetchOrderStatus, 10000);
 }
 
-// Cart Badge
 async function updateCartBadge() {
   try {
     const res = await fetch('/api/cart/');

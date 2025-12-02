@@ -47,6 +47,7 @@ urlpatterns = [
     path('admin-orders/confirm/<int:order_id>/', views.confirm_order, name='admin-confirm-order'),
     path('admin-orders/update/<int:order_id>/', views.admin_update_orders, name='admin-update-order-status'),
     path('admin-feedback/', views.admin_feedback, name='admin-feedback'),
+    
 
     # --- API Endpoints ---
     path('api/', include(router.urls)),                       # DRF Menu API
@@ -54,6 +55,7 @@ urlpatterns = [
     path('api/cart/add/', add_to_cart_api, name='add_to_cart_api'),
     path('api/orders/', place_order_api, name='place_order_api'),
     path('api/orders/<int:order_id>/', track_order_api, name='track_order_api'),
+    path('api/orders/<int:order_id>/mark_seen/', views.mark_order_seen, name='mark_order_seen'),
 
     # --- Feedback API ---
     path('api/feedback/', views.submit_feedback, name='api-feedback'),  # New API for user feedback

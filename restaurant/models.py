@@ -78,6 +78,28 @@ class Orders(models.Model):
         managed = False
         db_table = 'orders'
 
+    
+from django.db import models
+
+class OrderItems(models.Model):
+    order_item_id = models.AutoField(primary_key=True)
+    order = models.ForeignKey(
+        'Orders',  # Make sure you have an Orders model
+        db_column='order_id',
+        related_name='items',
+        on_delete=models.DO_NOTHING
+    )
+    item = models.ForeignKey(
+        'MenuItems',  # Make sure you have a MenuItems model
+        db_column='item_id',
+        on_delete=models.DO_NOTHING
+    )
+    quantity = models.IntegerField()
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = 'OrderItems'  # This must match your MySQL table name
+        managed = False
 
 
 class Payments(models.Model):

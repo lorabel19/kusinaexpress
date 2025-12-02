@@ -8,66 +8,18 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
   body { background-color:#fffaf3; color:#2d2d2d; }
-
-  /* HEADER */
-  header {
-    background-color: #d62828;
-    color: white;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  }
+  header { background-color: #d62828; color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
   header h1 { font-size:26px; letter-spacing:1px; }
-
-  nav {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    position:relative;
-  }
-  nav a {
-    color:white;
-    margin:0 10px;
-    text-decoration:none;
-    font-weight:600;
-    transition: color 0.3s;
-    position:relative;
-  }
+  nav { display:flex; align-items:center; gap:10px; position:relative; }
+  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
   nav a:hover { color:#fcbf49; }
-
-  .auth-button {
-    margin-left:15px;
-    padding-left:15px;
-    border-left:2px solid rgba(255,255,255,0.3);
-  }
+  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
   .auth-button a img { width:30px; height:30px; border-radius:50%; }
-
-  .cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -17px;
-    background:red;
-    color:white;
-    font-size:12px;
-    font-weight:bold;
-    border-radius:50%;
-    padding:2px 6px;
-    display:none;
-  }
-
-  /* Hamburger menu */
+  .cart-badge { position: absolute; top: -5px; right: -17px; background:red; color:white; font-size:12px; font-weight:bold; border-radius:50%; padding:2px 6px; display:none; }
   .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
   .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
-
-  /* ORDER CONTENT */
   .order-wrapper { max-width:900px; margin:40px auto; background:white; border-radius:12px; padding:30px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
   h2.section-title { font-size:28px; color:#d62828; text-align:center; margin-bottom:25px; }
-
   .order-item { display:flex; align-items:center; justify-content:space-between; padding:15px; border-radius:12px; margin-bottom:15px; background:#f8eded; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
   .order-item .image-holder { width:90px; height:90px; background:#ddd; border-radius:10px; margin-right:15px; flex-shrink:0; }
   .order-info { flex:1; text-align:justify; }
@@ -76,39 +28,22 @@
   .order-controls { display:flex; gap:10px; align-items:center; margin-top:5px; flex-wrap:wrap; }
   .order-controls button { padding:4px 8px; border:none; background:#d62828; color:white; font-weight:bold; border-radius:6px; cursor:pointer; }
   .order-price { font-weight:bold; font-size:16px; color:#27ae60; }
-
   .summary-box { padding:15px; border-radius:12px; margin-top:20px; background:#f8eded; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
   .summary-item { display:flex; justify-content:space-between; margin-bottom:10px; font-size:16px; }
   .summary-item.total { font-weight:bold; font-size:18px; color:#d62828; }
-
   form label { font-weight:600; display:block; margin:15px 0 5px; font-size:14px; }
-  form input, form select, textarea { width:100%; padding:12px; font-size:14px; border:1px solid #ccc; border-radius:8px; background:#fff; margin-bottom:12px; }
+  form input, form select, textarea { width:100%; padding:12px; font-size:14px; border:1px solid #ccc; border-radius:8px; background:#fff; margin-bottom:12px; position: relative; z-index: 1; cursor: text; }
   textarea { height:80px; resize:none; }
-
   .payment-options { margin:20px 0; display:flex; flex-direction:column; gap:10px; }
   .payment-options span { display:block; text-align:center; padding:10px 12px; border-radius:8px; background:#fff; border:1px solid #d62828; color:#d62828; font-weight:600; cursor:pointer; transition: all 0.3s; }
   .payment-options span.active { background:#d62828; color:white; }
-
   .place-order { width:100%; background:#d62828; color:#fff; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px; transition: background 0.3s; }
   .place-order:hover { background:#f77f00; }
-
-  /* FOOTER */
   footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
   footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
   footer a:hover { text-decoration:underline; }
-
-  /* TOAST */
   #toast { position: fixed; bottom: 20px; right: 20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
-
-  /* RESPONSIVE */
-  @media(max-width:768px){
-    .menu-toggle { display:flex; }
-    nav { flex-direction:column; width:100%; display:none; }
-    nav.show { display:flex; }
-    nav a { width:100%; text-align:center; margin:5px 0; }
-    .order-item { flex-direction:column; align-items:flex-start; }
-    .order-item .order-price { margin-top:10px; align-self:flex-end; }
-  }
+  @media(max-width:768px){ .menu-toggle { display:flex; } nav { flex-direction:column; width:100%; display:none; } nav.show { display:flex; } nav a { width:100%; text-align:center; margin:5px 0; } .order-item { flex-direction:column; align-items:flex-start; } .order-item .order-price { margin-top:10px; align-self:flex-end; } }
 </style>
 </head>
 <body>
@@ -123,9 +58,7 @@
   <nav id="nav-menu">
     <a href="{% url 'restaurant:dashboard' %}">Home</a>
     <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart <span id="cartBadge" class="cart-badge"></span>
-    </a>
+    <a href="{% url 'restaurant:cart' %}" class="cart-button">Cart <span id="cartBadge" class="cart-badge"></span></a>
     <a href="{% url 'restaurant:order' %}">Order</a>
     <a href="{% url 'restaurant:contact' %}">Contact</a>
     <a href="{% url 'restaurant:about' %}">About Us</a>
@@ -176,12 +109,10 @@
 <div id="toast">Item added to cart!</div>
 
 <script>
-// Hamburger toggle
 const toggle = document.getElementById('menu-toggle');
 const nav = document.getElementById('nav-menu');
 toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
 
-// CSRF helper
 function getCookie(name){
   let cookieValue = null;
   if(document.cookie && document.cookie!==''){
@@ -194,7 +125,6 @@ function getCookie(name){
   return cookieValue;
 }
 
-// Toast
 function showToast(msg){
   const toast = document.getElementById('toast');
   toast.innerText = msg;
@@ -202,7 +132,6 @@ function showToast(msg){
   setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
 }
 
-// --- Cart Badge ---
 async function updateCartBadge(){
   try{
     const res = await fetch('/api/cart/');
@@ -210,14 +139,11 @@ async function updateCartBadge(){
     const items = await res.json();
     const count = items.reduce((acc,i)=>acc+i.quantity,0);
     const badge = document.getElementById('cartBadge');
-    if(count>0){
-      badge.innerText = count;
-      badge.style.display = 'inline-block';
-    } else badge.style.display = 'none';
+    if(count>0){ badge.innerText = count; badge.style.display='inline-block'; } 
+    else badge.style.display='none';
   }catch(err){ console.error(err); }
 }
 
-// --- Cart functionality ---
 let cartItems = [];
 let selectedPayment = 'cod';
 
@@ -245,8 +171,8 @@ function displayCart(){
 
   cartItems.forEach(item=>{
     const itemDiv = document.createElement('div');
-    itemDiv.className = 'order-item';
-    itemDiv.innerHTML = `
+    itemDiv.className='order-item';
+    itemDiv.innerHTML=`
       <div class="image-holder">
         <img src="${item.item.image_url || 'https://via.placeholder.com/90'}" style="width:100%;height:100%;border-radius:10px;" alt="${item.item.name}">
       </div>
@@ -267,57 +193,62 @@ function displayCart(){
   });
 
   document.getElementById('subtotal').innerText = `₱${subtotal.toFixed(2)}`;
-  document.getElementById('total').innerText = `₱${(subtotal + 40).toFixed(2)}`;
+  document.getElementById('total').innerText = `₱${(subtotal+40).toFixed(2)}`;
 }
 
 async function updateQuantity(itemId, delta){
-  const item = cartItems.find(i => i.item.item_id === itemId);
+  const item = cartItems.find(i=>i.item.item_id===itemId);
   if(!item) return;
-  const newQty = item.quantity + delta;
-  if(newQty <= 0){
-    await removeItem(item.cart_id);
-    return;
-  }
+
   try{
-    await fetch('/api/cart/add/', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
-      body: JSON.stringify({item_id: itemId, quantity: delta})
+    const res = await fetch('/api/cart/add/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body: JSON.stringify({item_id:itemId, quantity:delta})
     });
-    showToast('Cart updated!');
-    await fetchCart();
+
+    if(res.ok){
+      showToast('Cart updated!');
+      await fetchCart();
+    } else {
+      const data = await res.json();
+      alert(data.detail || 'Failed to update cart.');
+    }
   } catch(err){ console.error(err); }
 }
 
 async function removeItem(cartId){
-  const item = cartItems.find(i => i.cart_id === cartId);
+  const item = cartItems.find(i=>i.cart_id===cartId);
   if(!item) return;
+
   try{
-    await fetch('/api/cart/add/', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
-      body: JSON.stringify({item_id: item.item.item_id, quantity: -999})
+    const res = await fetch('/api/cart/add/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+      body: JSON.stringify({item_id:item.item.item_id, quantity:-item.quantity})
     });
-    cartItems = cartItems.filter(i => i.cart_id !== cartId);
-    displayCart();
-    updateCartBadge();
-    showToast('Item removed!');
+
+    if(res.ok){
+      showToast('Item removed!');
+      await fetchCart();
+    } else {
+      const data = await res.json();
+      alert(data.detail || 'Failed to remove item.');
+    }
   } catch(err){ console.error(err); }
 }
 
-// Payment selection
 document.querySelectorAll('.payment-options span').forEach(el=>{
   el.addEventListener('click', ()=>{
-    selectedPayment = el.dataset.method;
+    selectedPayment=el.dataset.method;
     document.querySelectorAll('.payment-options span').forEach(s=>s.classList.remove('active'));
     el.classList.add('active');
   });
 });
 
-// Place order
 document.getElementById('orderForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  if(cartItems.length === 0){ alert('Your cart is empty.'); return; }
+  if(cartItems.length===0){ alert('Your cart is empty.'); return; }
 
   const formData = new FormData(this);
   const orderData = {
@@ -330,9 +261,9 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   };
 
   try {
-    const res = await fetch('/api/orders/', {  
-      method: 'POST',
-      headers: {'Content-Type': 'application/json','X-CSRFToken': getCookie('csrftoken')},
+    const res = await fetch('/api/orders/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
       body: JSON.stringify(orderData)
     });
 
@@ -340,15 +271,15 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
 
     if(res.ok){
       showToast('Order placed successfully!');
-      cartItems = [];
+      cartItems=[];
       displayCart();
       updateCartBadge();
       this.reset();
       if(data.order_id){
-        window.location.href = `/order/?order_id=${data.order_id}`; 
+        window.location.href=`/order/?order_id=${data.order_id}`;
       }
     } else {
-      alert(data.detail || 'Failed to place order.');
+      alert(data.detail||'Failed to place order.');
     }
 
   } catch(err){
@@ -357,7 +288,6 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
   }
 });
 
-// Initial load
 fetchCart();
 updateCartBadge();
 </script>
