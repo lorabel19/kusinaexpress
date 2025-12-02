@@ -5,20 +5,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Manage Menu</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
 body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
 
 /* Sidebar */
-.sidebar { width:250px; background-color:#d62828; color:white; display:flex; flex-direction:column; padding:20px; position:sticky; top:0; height:100vh; }
-.sidebar h2 { font-size:22px; margin-bottom:30px; }
-.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:block; transition:0.3s; }
+.sidebar {
+  width:250px;
+  background-color:#d62828;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.sidebar h2 { font-size:22px; margin-bottom:30px; display:flex; align-items:center; gap:10px; }
+.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; transition:0.3s; font-weight:500; }
 .sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
 
 /* Main content */
-.main-content { flex:1; padding:30px; overflow-y:auto; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
-header h1 { font-size:28px; color:#d62828; }
+.main-content { flex:1; padding:30px; overflow-x:auto; }
+header { display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; margin-bottom:30px; }
+header h1 { font-size:28px; color:#d62828; margin-bottom:10px; }
+
+/* Buttons */
 .btn { padding:8px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
 .btn-add { background-color:#fcbf49; color:#2d2d2d; margin-bottom:15px; }
 .btn-add:hover { background-color:#2d2d2d; color:white; }
@@ -34,13 +47,7 @@ th { background-color:#d62828; color:white; }
 tr:nth-child(even) { background:#f8f8f8; }
 tr:hover { background: lightyellow; color:#2d2d2d; }
 td img { width:80px; height:50px; object-fit:cover; border-radius:6px; }
-
-/* Actions buttons side by side */
-td.actions {
-    display: flex;
-    gap: 5px; /* space between buttons */
-    align-items: center;
-}
+td.actions { display:flex; gap:5px; align-items:center; }
 
 /* Modal */
 .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.5); }
@@ -56,17 +63,26 @@ td.actions {
 
 /* Footer */
 footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size:14px; }
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  body { flex-direction:column; }
+  .sidebar { width:100%; height:auto; position:relative; top:0; }
+  .main-content { padding:20px; }
+  table, th, td { font-size:14px; }
+  td img { width:60px; height:40px; }
+}
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <h2>KusinaAdmin</h2>
-  <a href="{% url 'restaurant:admin-dashboard' %}">Dashboard</a>
-  <a href="{% url 'restaurant:admin-menu' %}">Manage Menu</a>
-  <a href="{% url 'restaurant:admin-orders' %}">Manage Orders</a>
-  <a href="{% url 'restaurant:admin-feedback' %}">Feedback</a>
-  <a href="{% url 'restaurant:logout' %}">Logout</a>
+  <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  <a href="{% url 'restaurant:admin-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+  <a href="{% url 'restaurant:admin-menu' %}"><i class="fas fa-hamburger"></i> Manage Menu</a>
+  <a href="{% url 'restaurant:admin-orders' %}"><i class="fas fa-receipt"></i> Manage Orders</a>
+  <a href="{% url 'restaurant:admin-feedback' %}"><i class="fas fa-comments"></i> Feedback</a>
+  <a href="{% url 'restaurant:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
 </div>
 
 <div class="main-content">
@@ -131,15 +147,12 @@ footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size
         <input type="text" name="name" placeholder="Item Name" required>
         <textarea name="description" placeholder="Description"></textarea>
         <input type="number" name="price" placeholder="Price" step="0.01" required>
-
-        <!-- Category Dropdown -->
         <select name="category" required>
           <option value="" disabled selected>Select Category</option>
           <option value="meals">Meals</option>
           <option value="drinks">Drinks</option>
           <option value="desserts">Desserts</option>
         </select>
-
         <input type="text" name="image_url" placeholder="Image URL">
         <select name="is_available">
           <option value="1" selected>Available</option>
@@ -162,14 +175,11 @@ footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size
         <input type="text" name="name" id="editName" placeholder="Item Name" required>
         <textarea name="description" id="editDescription" placeholder="Description"></textarea>
         <input type="number" name="price" id="editPrice" placeholder="Price" step="0.01" required>
-
-        <!-- Category Dropdown -->
         <select name="category" id="editCategory" required>
           <option value="meals">Meals</option>
           <option value="drinks">Drinks</option>
           <option value="desserts">Desserts</option>
         </select>
-
         <input type="text" name="image_url" id="editImage" placeholder="Image URL">
         <select name="is_available" id="editAvailable">
           <option value="1">Available</option>
@@ -179,19 +189,14 @@ footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size
       </form>
     </div>
   </div>
-
-  
 </div>
 
 <script>
-// Modal functions
 function openModal(id){ document.getElementById(id).style.display = 'block'; }
 function closeModal(id){ document.getElementById(id).style.display = 'none'; }
 window.onclick = function(event){
   if(event.target.classList.contains('modal')){ event.target.style.display = 'none'; }
 }
-
-// Edit modal pre-fill from data-* attributes
 function openEditModalFromButton(btn){
   openModal('editModal');
   document.getElementById('editForm').action = `/admin-menu/edit/${btn.dataset.id}/`;

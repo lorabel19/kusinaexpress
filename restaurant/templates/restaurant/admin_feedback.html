@@ -5,6 +5,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Feedback</title>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
 body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
@@ -21,12 +23,13 @@ body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; 
   top:0;
   height:100vh;
 }
-.sidebar h2 { font-size:22px; margin-bottom:30px; }
-.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:block; transition:0.3s; }
+.sidebar h2 { font-size:22px; margin-bottom:30px; display:flex; align-items:center; gap:10px; }
+.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; transition:0.3s; font-weight:500; }
 .sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
 
 /* Main content */
-.main-content { flex:1; max-width:1200px; overflow-y:auto; padding:30px; }
+.main-content { flex:1; max-width:1500px; overflow-y:auto; padding:30px; }
+
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
 header h1 { font-size:28px; color:#d62828; }
 
@@ -48,12 +51,12 @@ tr:hover { background:#fcbf49; color:#2d2d2d; }
 <body>
 
 <div class="sidebar">
-  <h2>KusinaAdmin</h2>
-  <a href="{% url 'restaurant:admin-dashboard' %}">Dashboard</a>
-  <a href="{% url 'restaurant:admin-menu' %}">Manage Menu</a>
-  <a href="{% url 'restaurant:admin-orders' %}">Manage Orders</a>
-  <a href="{% url 'restaurant:admin-feedback' %}">Feedback</a>
-  <a href="{% url 'restaurant:logout' %}">Logout</a>
+  <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  <a href="{% url 'restaurant:admin-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+  <a href="{% url 'restaurant:admin-menu' %}"><i class="fas fa-hamburger"></i> Manage Menu</a>
+  <a href="{% url 'restaurant:admin-orders' %}"><i class="fas fa-receipt"></i> Manage Orders</a>
+  <a href="{% url 'restaurant:admin-feedback' %}"><i class="fas fa-comments"></i> Feedback</a>
+  <a href="{% url 'restaurant:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
 </div>
 
 <div class="main-content">
@@ -87,7 +90,7 @@ tr:hover { background:#fcbf49; color:#2d2d2d; }
       {% endfor %}
     </tbody>
   </table>
-
 </div>
+
 </body>
 </html>

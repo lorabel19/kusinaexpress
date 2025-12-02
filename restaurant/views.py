@@ -285,6 +285,7 @@ def order_view(request):
 
 
 
+
 # API: Track Order
 def track_order_api(request, order_id):
     """Return order status and timestamps for tracking."""
@@ -381,17 +382,57 @@ def menu(request):
     return render(request, 'restaurant/mainmenu.html', context)
 
 from django.shortcuts import render
-from .models import Orders, MenuItems, Users
+from django.db.models import Sum
+from .models import Orders, MenuItems, Users, OrderItems
 
 def admin_dashboard(request):
+    # Summary
+    total_orders = Orders.objects.count()
+    pending_orders = Orders.objects.filter(status='Pending').count()
+    total_menu = MenuItems.objects.count()
+    total_users = Users.objects.count()
+
+    # Last 10 orders
+    orders = Orders.objects.all().order_by('-order_date')[:10]
+
+    # Best Sellers (top 5)
+    best_sellers = (
+        OrderItems.objects
+        .values('item', 'item__name', 'item__image_url')
+        .annotate(total_ordered=Sum('quantity'))
+        .order_by('-total_ordered')[:5]
+    )
+
+    # Low Sellers (bottom 5)
+    low_sellers = (
+        OrderItems.objects
+        .values('item', 'item__name', 'item__image_url')
+        .annotate(total_ordered=Sum('quantity'))
+        .order_by('total_ordered')[:5]
+    )
+
+    # Get admin user (assuming role='admin')
+    try:
+        admin_user = Users.objects.get(role='admin')
+        admin_name = f"{admin_user.first_name} {admin_user.last_name}"
+    except Users.DoesNotExist:
+        admin_name = "Admin"
+
     context = {
-        'total_orders': Orders.objects.count(),
-        'pending_orders': Orders.objects.filter(status='Pending').count(),
-        'total_menu': MenuItems.objects.count(),
-        'total_users': Users.objects.count(),
-        'orders': Orders.objects.all().order_by('-order_date')[:10]  # last 10 orders
+        'total_orders': total_orders,
+        'pending_orders': pending_orders,
+        'total_menu': total_menu,
+        'total_users': total_users,
+        'orders': orders,
+        'best_sellers': best_sellers,
+        'low_sellers': low_sellers,
+        'admin_name': admin_name,  # Greeting name
     }
+
     return render(request, 'restaurant/admin_dashboard.html', context)
+
+
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages

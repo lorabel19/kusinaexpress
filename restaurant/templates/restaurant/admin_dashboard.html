@@ -5,6 +5,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Admin Dashboard</title>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
 body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
@@ -21,31 +23,68 @@ body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; 
   top:0;
   height:100vh;
 }
-.sidebar h2 { font-size:22px; margin-bottom:30px; }
-.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:block; transition:0.3s; }
+.sidebar h2 { font-size:22px; margin-bottom:30px; display:flex; align-items:center; gap:10px; }
+.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; transition:0.3s; font-weight:500; }
 .sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
 
 /* Main content */
 .main-content { flex:1; padding:30px; overflow-y:auto; }
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
-header h1 { font-size:28px; color:#d62828; }
+header { display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; margin-bottom:30px; }
+header h1 { font-size:28px; color:#d62828; margin-bottom:10px; }
+header .welcome { font-size:20px; color:#555; }
 
 /* Summary Cards */
-.cards { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px; }
-.card { background:white; flex:1; min-width:200px; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
-.card:hover { transform:translateY(-5px); }
-.card h3 { font-size:20px; color:#d62828; margin-bottom:10px; }
-.card p { font-size:16px; color:#555; }
+.cards { display:flex; gap:30px; flex-wrap:wrap; margin-bottom:40px; }
+.card { 
+  background:white; 
+  flex:1; 
+  min-width:250px; 
+  padding:35px; 
+  border-radius:16px; 
+  box-shadow:0 6px 20px rgba(0,0,0,0.15); 
+  display:flex; 
+  align-items:center; 
+  gap:25px; 
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover { transform:translateY(-8px); box-shadow:0 12px 25px rgba(0,0,0,0.2); }
+.card i { font-size:42px; color:#d62828; }
+.card .card-info { display:flex; flex-direction:column; }
+.card h3 { font-size:20px; color:#d62828; margin-bottom:8px; }
+.card p { font-size:24px; font-weight:700; color:#2d2d2d; }
 
-/* Tables */
-table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-top:20px; }
-th, td { padding:15px; text-align:left; }
-th { background-color:#d62828; color:white; }
-tr:nth-child(even) { background:#f8f8f8; }
-tr:hover { background:#fcbf49; color:#2d2d2d; }
+/* Food Cards */
+.cards.food-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+.cards.food-cards .card {
+  background:white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  text-align: center;
+  border-radius:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cards.food-cards .card:hover { transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.2); }
+.cards.food-cards .card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.cards.food-cards .card h3 { font-size:18px; color:#d62828; margin-bottom:6px; }
+.cards.food-cards .card p { font-size:16px; font-weight:600; color:#2d2d2d; }
 
 /* Buttons */
-.btn { padding:8px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
+.btn { padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
 .btn-edit { background-color:#fcbf49; color:#2d2d2d; }
 .btn-edit:hover { background-color:#2d2d2d; color:white; }
 .btn-delete { background-color:#d62828; color:white; }
@@ -53,77 +92,90 @@ tr:hover { background:#fcbf49; color:#2d2d2d; }
 
 /* Footer */
 footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size:14px; }
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .cards { flex-direction: column; }
+  .sidebar { width:200px; }
+}
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-  <h2>KusinaAdmin</h2>
-  <a href="{% url 'restaurant:admin-dashboard' %}">Dashboard</a>
-  <a href="{% url 'restaurant:admin-menu' %}">Manage Menu</a>
-  <a href="{% url 'restaurant:admin-orders' %}">Manage Orders</a>
-  <a href="{% url 'restaurant:admin-feedback' %}">Feedback</a>
-  <a href="{% url 'restaurant:logout' %}">Logout</a>
+  <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  <a href="{% url 'restaurant:admin-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+  <a href="{% url 'restaurant:admin-menu' %}"><i class="fas fa-hamburger"></i> Manage Menu</a>
+  <a href="{% url 'restaurant:admin-orders' %}"><i class="fas fa-receipt"></i> Manage Orders</a>
+  <a href="{% url 'restaurant:admin-feedback' %}"><i class="fas fa-comments"></i> Feedback</a>
+  <a href="{% url 'restaurant:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
 </div>
 
 <div class="main-content">
   <header>
     <h1>Dashboard</h1>
+    <div class="welcome">Welcome, {{ admin_name }}!</div>
   </header>
 
   <!-- Summary Cards -->
   <div class="cards">
     <div class="card">
-      <h3>Total Orders</h3>
-      <p>{{ total_orders }}</p>
+      <i class="fas fa-shopping-cart"></i>
+      <div class="card-info">
+        <h3>Total Orders</h3>
+        <p>{{ total_orders }}</p>
+      </div>
     </div>
     <div class="card">
-      <h3>Pending Orders</h3>
-      <p>{{ pending_orders }}</p>
+      <i class="fas fa-hourglass-half"></i>
+      <div class="card-info">
+        <h3>Pending Orders</h3>
+        <p>{{ pending_orders }}</p>
+      </div>
     </div>
     <div class="card">
-      <h3>Total Menu Items</h3>
-      <p>{{ total_menu }}</p>
+      <i class="fas fa-box-open"></i>
+      <div class="card-info">
+        <h3>Total Menu Items</h3>
+        <p>{{ total_menu }}</p>
+      </div>
     </div>
     <div class="card">
-      <h3>Total Users</h3>
-      <p>{{ total_users }}</p>
+      <i class="fas fa-users"></i>
+      <div class="card-info">
+        <h3>Total Users</h3>
+        <p>{{ total_users }}</p>
+      </div>
     </div>
   </div>
 
-  <!-- Recent Orders Table -->
-  <h2 style="margin-bottom:15px; color:#d62828;">Recent Orders</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Order ID</th>
-        <th>Customer</th>
-        <th>Total Amount</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for order in orders %}
-      <tr>
-        <td>{{ order.order_id }}</td>
-        <td>{{ order.user.first_name }} {{ order.user.last_name }}</td>
-        <td>₱{{ order.total_amount }}</td>
-        <td>{{ order.status }}</td>
-        <td>
-          <a href="#" class="btn btn-edit">Edit</a>
-          <a href="#" class="btn btn-delete">Delete</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="5">No recent orders.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <!-- Best Seller Food Cards -->
+  <h2 style="margin-bottom:15px; color:#d62828;">Best Seller Food</h2>
+  <div class="cards food-cards">
+    {% for item in best_sellers %}
+    <div class="card">
+      <img src="{{ item.item__image_url }}" alt="{{ item.item__name }}">
+      <h3>{{ item.item__name }}</h3>
+      <p>Total Ordered: {{ item.total_ordered }}</p>
+    </div>
+    {% empty %}
+    <p>No orders yet.</p>
+    {% endfor %}
+  </div>
 
-
+  <!-- Low Seller Food Cards -->
+  <h2 style="margin-bottom:15px; color:#d62828;">Low Seller Food</h2>
+  <div class="cards food-cards">
+    {% for item in low_sellers %}
+    <div class="card">
+      <img src="{{ item.item__image_url }}" alt="{{ item.item__name }}">
+      <h3>{{ item.item__name }}</h3>
+      <p>Total Ordered: {{ item.total_ordered }}</p>
+    </div>
+    {% empty %}
+    <p>No low seller food yet.</p>
+    {% endfor %}
+  </div>
 </div>
 
 </body>
