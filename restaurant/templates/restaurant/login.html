@@ -4,241 +4,1406 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Login / Sign Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+/* CSS Variables for theming */
+:root {
+  --primary-color: #C62828; /* Vibrant Red */
+  --primary-dark: #8E1B1B;
+  --secondary-color: #FF9800; /* Orange */
+  --secondary-light: #FFB74D;
+  --accent-color: #FF5722; /* Deep Orange */
+  --background-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --divider-color: #E0E0E0;
+  --success-color: #4CAF50;
+  --warning-color: #F44336;
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
-body { background-color:#fffaf3; color:#2d2d2d; }
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
 
-/* HEADER */
+body { 
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color); 
+  color: var(--text-primary); 
+  line-height: 1.6;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Container for consistent width */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Modern Header --- */
 header {
-  background-color: #d62828;
-  color: white;
-  padding: 15px 30px;
+  background-color: var(--surface-color);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-light);
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
-header h1 { font-size: 24px; }
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-nav { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  color: var(--primary-color);
+  font-size: 28px;
+}
 
-nav a {
+.logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* Modern Navigation */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-color);
   color: white;
-  text-decoration: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
   font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: color 0.3s, background 0.3s;
+  line-height: 1;
 }
 
-nav a:hover { color: #d62828; background: white; }
-
-.auth-button a {
-  background-color: white;
-  color: #d62828;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  text-decoration: none;
+/* Hide cart badge when empty (0) */
+.cart-count.empty {
+  display: none;
 }
 
-.auth-button a:hover { background-color: #fcbf49; color: #2d2d2d; }
-
-/* Hamburger menu button */
+/* Hamburger menu for mobile */
 .menu-toggle {
   display: none;
   flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  gap: 4px;
+  padding: 0;
+  z-index: 1001;
 }
 
-.menu-toggle div {
-  width: 25px;
+.menu-toggle span {
+  width: 100%;
   height: 3px;
-  background-color: white;
-  transition: 0.3s;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: var(--transition);
 }
 
-/* MAIN LOGIN CONTENT */
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 320px;
+  height: 100vh;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-heavy);
+  padding: 80px 30px 30px;
+  z-index: 999;
+  transition: right 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mobile-nav a i {
+  color: var(--primary-color);
+  width: 24px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* --- Login Modal --- */
+.login-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 40px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-heavy);
+  text-align: center;
+}
+
+.modal-content i {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.modal-content h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.modal-content p {
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.modal-buttons .btn {
+  min-width: 120px;
+}
+
+/* --- MODERN LOGIN CONTENT ONLY --- */
 main {
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding:50px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(198, 40, 40, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
+  min-height: calc(100vh - 200px); /* Adjusted for better fit */
+  flex: 1;
 }
 
 .login-container {
-  display:flex;
-  width:90%;
-  max-width:1100px;
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow:0 6px 20px rgba(0,0,0,0.15);
-  background-color:#fff;
+  display: flex;
+  width: 100%;
+  max-width: 1200px; /* Increased from 1100px */
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-heavy);
+  background-color: var(--surface-color);
+  position: relative;
+  min-height: 680px; /* Increased height */
+  height: auto;
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
 }
 
 .left-side {
-  flex:3;
-  min-width:250px;
-  background:url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg') center/cover no-repeat;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  color:#fff;
-  font-size:32px;
-  font-weight:700;
-  text-shadow:0 2px 10px rgba(0,0,0,0.4);
+  flex: 1.2;
+  min-width: 300px;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
+              url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-light);
+  padding: 50px 40px; /* Increased padding */
+  text-align: center;
+  position: relative;
+}
+
+.left-side-content {
+  position: relative;
+  z-index: 2;
+  max-width: 450px; /* Increased width */
+}
+
+.left-side h2 {
+  font-size: 38px; /* Increased size */
+  font-weight: 800;
+  margin-bottom: 20px; /* Increased margin */
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.left-side p {
+  font-size: 17px; /* Slightly larger */
+  margin-bottom: 40px; /* Increased margin */
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; /* Increased gap */
+  margin-top: 40px; /* Increased margin */
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Increased gap */
+  text-align: left;
+}
+
+.feature i {
+  width: 40px; /* Larger icon */
+  height: 40px; /* Larger icon */
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px; /* Larger icon */
+  color: var(--secondary-color);
+  flex-shrink: 0;
+}
+
+.feature span {
+  font-size: 16px; /* Larger text */
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .right-side {
-  flex:2;
-  min-width:250px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:40px;
-  background-color:#fffaf3;
+  flex: 1;
+  min-width: 400px; /* Increased minimum width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 40px; /* Increased padding */
+  background: var(--surface-color);
 }
 
 .auth-container {
-  background:#fff;
-  padding:50px 40px;
-  border-radius:15px;
-  border:2px solid #d62828;
-  width:100%;
-  max-width:420px;
-  text-align:center;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  background: var(--surface-color);
+  padding: 50px 40px; /* Increased padding */
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 480px; /* Increased max width */
+  text-align: center;
+  border: 1px solid rgba(198, 40, 40, 0.1);
 }
 
-.auth-container h2 { color:#d62828; font-size:28px; margin-bottom:25px; font-weight:700; }
+.auth-header {
+  margin-bottom: 40px; /* Increased margin */
+}
 
-.role-selection { display:flex; width:100%; margin-bottom:25px; }
-.role-selection button { flex:1; padding:12px 0; border:1px solid #d62828; background:#fffaf3; color:#d62828; font-weight:bold; cursor:pointer; }
-.role-selection button:first-child { border-radius:8px 0 0 8px; border-right:none; }
-.role-selection button:last-child { border-radius:0 8px 8px 0; }
-.role-selection button.active { background:#d62828; color:#fff; }
+.auth-header h2 {
+  color: var(--text-primary);
+  font-size: 32px; /* Larger */
+  margin-bottom: 12px; /* Increased */
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
-form { display:flex; flex-direction:column; gap:15px; width:100%; }
-input { width:100%; padding:12px; border:1px solid #d62828; border-radius:6px; font-size:16px; }
-.submit-btn { background:#d62828; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
-.submit-btn:hover { background:#b71c1c; }
+.auth-header p {
+  color: var(--text-secondary);
+  font-size: 16px; /* Larger */
+  line-height: 1.6;
+}
 
-.google-login { display:flex; align-items:center; justify-content:center; gap:10px; margin-top:20px; padding:12px; border:1px solid #d62828; border-radius:8px; cursor:pointer; background:#fff; width:100%; }
-.google-login:hover { background-color:#fff4f2; }
-.google-login img { width:22px; height:22px; }
+.role-selection {
+  display: flex;
+  width: 100%;
+  margin-bottom: 40px; /* Increased */
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--divider-color);
+  background: var(--background-color);
+  padding: 6px; /* Slightly larger */
+}
 
-.switch-auth { margin-top:18px; font-size:14px; }
-.switch-auth a { color:#d62828; font-weight:600; text-decoration:none; }
-.switch-auth a:hover { text-decoration:underline; }
+.role-selection button {
+  flex: 1;
+  padding: 18px 0; /* Increased padding */
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 16px; /* Larger */
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 
-/* FOOTER */
+.role-selection button i {
+  font-size: 18px; /* Larger icon */
+}
+
+.role-selection button.active {
+  background: var(--surface-color);
+  color: var(--primary-color);
+  box-shadow: var(--shadow-light);
+}
+
+.role-selection button:hover:not(.active) {
+  background: rgba(198, 40, 40, 0.05);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px; /* Increased gap */
+  width: 100%;
+}
+
+.form-group {
+  text-align: left;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px; /* Increased */
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 15px; /* Slightly larger */
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper i {
+  position: absolute;
+  left: 20px; /* Increased from 18px */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 20px; /* Increased from 18px */
+  transition: var(--transition);
+  z-index: 2;
+}
+
+input {
+  width: 100%;
+  padding: 20px 20px 20px 60px; /* Increased padding, especially left padding for icon */
+  border: 2px solid var(--divider-color);
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  transition: var(--transition);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.1);
+}
+
+input:focus + i {
+  color: var(--primary-color);
+}
+
+/* FIXED: Password toggle positioned inside input */
+.password-toggle {
+  position: absolute;
+  right: 20px; /* Increased from 18px */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 20px; /* Increased */
+  transition: var(--transition);
+  z-index: 2;
+  padding: 0;
+  width: 30px; /* Fixed width */
+  height: 30px; /* Fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
+  background: none;
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0; /* Increased margin */
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Increased gap */
+}
+
+.remember-me input[type="checkbox"] {
+  width: 18px; /* Slightly larger */
+  height: 18px; /* Slightly larger */
+  accent-color: var(--primary-color);
+}
+
+.remember-me label {
+  margin: 0;
+  font-size: 15px; /* Larger */
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.forgot-password {
+  font-size: 15px; /* Larger */
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.forgot-password:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.submit-btn {
+  background: var(--primary-color);
+  color: var(--text-light);
+  padding: 20px; /* Increased */
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 17px; /* Larger */
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 15px; /* Increased */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.submit-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 35px 0; /* Increased */
+  color: var(--text-secondary);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--divider-color);
+}
+
+.divider span {
+  padding: 0 18px; /* Increased */
+  font-size: 15px; /* Larger */
+}
+
+.social-login {
+  display: flex;
+  gap: 18px; /* Increased */
+}
+
+.social-btn {
+  flex: 1;
+  padding: 18px; /* Increased */
+  border: 2px solid var(--divider-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  font-size: 16px; /* Larger */
+}
+
+.social-btn:hover {
+  border-color: var(--primary-color);
+  background: rgba(198, 40, 40, 0.05);
+  transform: translateY(-2px);
+}
+
+.social-btn.google:hover {
+  border-color: #DB4437;
+  color: #DB4437;
+  background: rgba(219, 68, 55, 0.05);
+}
+
+.social-btn.facebook:hover {
+  border-color: #4267B2;
+  color: #4267B2;
+  background: rgba(66, 103, 178, 0.05);
+}
+
+.social-btn i {
+  font-size: 22px; /* Larger icons */
+}
+
+.switch-auth {
+  margin-top: 35px; /* Increased */
+  font-size: 16px; /* Larger */
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.switch-auth a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  position: relative;
+}
+
+.switch-auth a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.switch-auth a:hover::after {
+  width: 100%;
+}
+
+/* --- Footer (SAME AS MENU PAGE) --- */
 footer {
-  background-color: #3a0ca3;
-  color:white;
-  text-align:center;
-  padding:25px;
-  font-size:14px;
-}
-footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
-footer a:hover { text-decoration:underline; }
-
-/* RESPONSIVE */
-@media (max-width:900px){
-  .login-container{ flex-direction:column; }
-  .left-side{ flex:none; height:250px; font-size:28px; }
-  .right-side{ flex:none; padding:30px 20px; }
+  background-color: var(--text-primary);
+  color: var(--text-light);
+  padding: 60px 0 30px;
+  margin-top: auto;
 }
 
-@media(max-width:768px){
-  .menu-toggle { display: flex; }
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
 
-  nav {
-    flex-direction: column;
-    width: 100%;
-    display: none; /* hide menu initially */
+.footer-logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-light);
+}
+
+.footer-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--secondary-color);
+  padding-left: 5px;
+}
+
+.newsletter-form {
+  display: flex;
+  margin-top: 15px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 50px 0 0 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 0 50px 50px 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1200px) {
+  .login-container {
+    max-width: 1100px;
   }
-
-  nav.show { display: flex; }
-
-  nav a { width: 100%; text-align: center; margin: 5px 0; }
-
-  header h1 { margin-bottom: 10px; }
 }
 
-@media(max-width:480px){
-  .left-side{ font-size:24px; }
-  .auth-container h2{ font-size:24px; }
+@media (max-width: 1024px) {
+  .login-container {
+    max-width: 950px;
+    min-height: 650px;
+  }
+  
+  .left-side h2 {
+    font-size: 34px;
+  }
+  
+  .auth-container {
+    padding: 45px 35px;
+  }
+}
+
+@media (max-width: 900px) {
+  .login-container {
+    max-width: 800px;
+  }
+  
+  .right-side {
+    min-width: 350px;
+  }
+  
+  .auth-container {
+    max-width: 420px;
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .menu-toggle {
+    display: flex;
+  }
+  
+  .login-container {
+    flex-direction: column;
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: auto;
+  }
+  
+  .left-side {
+    flex: none;
+    min-height: 300px; /* Taller mobile view */
+    padding: 40px 30px;
+  }
+  
+  .right-side {
+    flex: none;
+    min-width: 100%;
+    padding: 40px 30px;
+  }
+  
+  .auth-container {
+    padding: 40px 30px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .social-login {
+    flex-direction: column;
+  }
+  
+  .footer-content {
+    gap: 30px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+  
+  .modal-buttons .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 20px 15px;
+    min-height: calc(100vh - 180px);
+  }
+  
+  .login-container {
+    max-width: 100%;
+  }
+  
+  .left-side {
+    min-height: 250px;
+    padding: 30px 20px;
+  }
+  
+  .left-side h2 {
+    font-size: 28px;
+  }
+  
+  .left-side p {
+    font-size: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .feature {
+    gap: 12px;
+  }
+  
+  .feature i {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+  
+  .right-side {
+    padding: 30px 20px;
+  }
+  
+  .auth-container {
+    padding: 30px 25px;
+  }
+  
+  .auth-header h2 {
+    font-size: 26px;
+  }
+  
+  .role-selection button {
+    padding: 16px 0;
+    font-size: 15px;
+  }
+  
+  input {
+    padding: 18px 18px 18px 55px; /* Adjusted for mobile */
+    font-size: 15px;
+  }
+  
+  .input-wrapper i {
+    left: 18px;
+    font-size: 18px;
+  }
+  
+  .password-toggle {
+    right: 15px;
+    font-size: 18px;
+  }
+  
+  .submit-btn, .social-btn {
+    padding: 18px;
+    font-size: 16px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    padding: 25px 20px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+  .auth-container {
+    padding: 25px 20px;
+  }
+  
+  input {
+    padding: 16px 16px 16px 50px;
+  }
+  
+  .input-wrapper i {
+    left: 16px;
+  }
+  
+  .password-toggle {
+    right: 12px;
+  }
 }
 </style>
 </head>
 <body>
 
+<!-- Header (SAME AS MENU PAGE) -->
 <header>
-  <h1>KusinaExpress</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-  <nav id="nav-menu">
-    <a href="{% url 'restaurant:home' %}">Home</a>
-    <a href="{% url 'restaurant:public_menu' %}">Menu</a>
-    <a href="#">Cart</a>
-    <a href="#">Order</a>
-    <a href="#">Contact</a>
-    <a href="#">About Us</a>
-    <div class="auth-button">
-      <a href="{% url 'restaurant:login' %}">Login / Sign Up</a>
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h1>KusinaExpress</h1>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
+        <div class="nav-links">
+          <a href="{% url 'restaurant:home' %}">Home</a>
+          <a href="{% url 'restaurant:public_menu' %}">Menu</a>
+          <a href="#" onclick="handleProtectedLink('Order')">Order</a>
+          <a href="#" onclick="handleProtectedLink('Contact')">Contact</a>
+          <a href="#" onclick="handleProtectedLink('About Us')">About Us</a>
+        </div>
+        <div class="auth-buttons">
+          <a href="{% url 'restaurant:login' %}" class="btn btn-secondary" style="background-color: #C62828; color: white; border-color: #C62828;">
+            <i class="fas fa-user" style="color: white;"></i> Sign In
+          </a>
+          <a href="#" onclick="handleProtectedLink('Cart')" class="btn btn-primary">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count empty">0</span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-  </nav>
+  </div>
 </header>
 
+<!-- Mobile Navigation (SAME AS MENU PAGE) -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="{% url 'restaurant:home' %}">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <a href="{% url 'restaurant:public_menu' %}">
+    <i class="fas fa-utensils"></i> Menu
+  </a>
+  <a href="#" onclick="handleProtectedLink('Order')">
+    <i class="fas fa-shopping-bag"></i> Order
+  </a>
+  <a href="#" onclick="handleProtectedLink('Contact')">
+    <i class="fas fa-phone-alt"></i> Contact
+  </a>
+  <a href="#" onclick="handleProtectedLink('About Us')">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <a href="{% url 'restaurant:login' %}" class="btn" style="justify-content: center; background-color: #C62828; color: white; border-color: #C62828;">
+      <i class="fas fa-user" style="color: white;"></i> Sign In
+    </a>
+    <!-- UPDATED MOBILE CART BUTTON -->
+    <a href="#" onclick="handleProtectedLink('Cart')" 
+       class="btn" 
+       style="justify-content: center; 
+              background-color: #C62828; 
+              border-color: #C62828; 
+              color: white;">
+      <i class="fas fa-shopping-cart" style="color: white;"></i> Cart
+      <!-- Cart badge hidden by default -->
+      <span class="cart-count empty">0</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Login Modal (EXACTLY SAME AS HOMEPAGE AND MENU) -->
+<div class="login-modal" id="loginModal">
+  <div class="modal-content">
+    <i class="fas fa-user-lock"></i>
+    <h3 id="modalTitle">Login Required</h3>
+    <p id="modalMessage">You need to log in to access this feature. Sign in to continue.</p>
+    <div class="modal-buttons">
+      <a href="{% url 'restaurant:login' %}" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </a>
+      <button class="btn btn-secondary" onclick="closeLoginModal()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modern Login Content -->
 <main>
-  <div class="login-container">
-    <div class="left-side">KusinaExpress</div>
-    <div class="right-side">
-      <div class="auth-container">
-        <h2>Login</h2>
-        <div class="role-selection">
-          <button type="button" id="user-role" class="active">User</button>
-          <button type="button" id="admin-role">Admin</button>
+  <div class="container">
+    <div class="login-container">
+      <div class="left-side">
+        <div class="left-side-content">
+          <h2>Welcome Back</h2>
+          <p>Sign in to access your account and continue your culinary journey with authentic Filipino flavors.</p>
+          
+          <div class="features">
+            <div class="feature">
+              <i class="fas fa-bolt"></i>
+              <span>Fast & Secure Login</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-truck"></i>
+              <span>Track Your Orders</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-star"></i>
+              <span>Exclusive Member Offers</span>
+            </div>
+          </div>
         </div>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="role" id="role-input" value="user">
-          <input type="email" name="email" placeholder="Email" required>
-          <input type="password" name="password" placeholder="Password" required>
-          <button type="submit" class="submit-btn">Login</button>
-        </form>
-        <div class="google-login">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
-          <span>Login with Google</span>
-        </div>
-        <div class="switch-auth">
-          Don't have an account? <a href="#">Sign Up</a>
+      </div>
+      <div class="right-side">
+        <div class="auth-container">
+          <div class="auth-header">
+            <h2>Sign In</h2>
+            <p>Enter your credentials to access your account</p>
+          </div>
+          
+          <div class="role-selection">
+            <button type="button" id="user-role" class="active">
+              <i class="fas fa-user"></i> User
+            </button>
+            <button type="button" id="admin-role">
+              <i class="fas fa-crown"></i> Admin
+            </button>
+          </div>
+          
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="role" id="role-input" value="user">
+            
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input type="email" name="email" id="email" placeholder="Enter your email" required>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                <button type="button" class="password-toggle" id="passwordToggle">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="remember-forgot">
+              <div class="remember-me">
+                <input type="checkbox" id="remember">
+                <label for="remember">Remember me</label>
+              </div>
+              <a href="#" class="forgot-password">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+          </form>
+          
+          <div class="divider">
+            <span>Or continue with</span>
+          </div>
+          
+          <div class="social-login">
+            <button type="button" class="social-btn google">
+              <i class="fab fa-google"></i> Google
+            </button>
+            <button type="button" class="social-btn facebook">
+              <i class="fab fa-facebook-f"></i> Facebook
+            </button>
+          </div>
+          
+          <div class="switch-auth">
+            Don't have an account? <a href="#">Create Account</a>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
+<!-- Footer (SAME AS MENU PAGE) -->
 <footer>
-  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">KusinaExpress</div>
+        <p class="footer-description">Bringing authentic Filipino comfort food straight to your doorstep since 2020. Fast, fresh, and flavorful!</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="{% url 'restaurant:home' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:public_menu' %}">Menu</a></li>
+          <li><a href="#" onclick="handleProtectedLink('Order Online')">Order Online</a></li>
+          <li><a href="#" onclick="handleProtectedLink('Catering')">Catering</a></li>
+          <li><a href="#" onclick="handleProtectedLink('Gift Cards')">Gift Cards</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Contact Info</h3>
+        <ul class="footer-links">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> 123 Food Street, Manila, Philippines</li>
+          <li><i class="fas fa-phone-alt" style="margin-right: 10px;"></i> +63 912 345 6789</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> hello@kusinaexpress.com</li>
+          <li><i class="fas fa-clock" style="margin-right: 10px;"></i> Open Daily: 10AM - 10PM</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Newsletter</h3>
+        <p class="footer-description">Subscribe to get updates on new dishes and exclusive offers.</p>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address">
+          <button class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>© 2025 KusinaExpress. All rights reserved. | Proudly Serving Filipino Flavors</p>
+    </div>
+  </div>
 </footer>
 
 <script>
-const toggle = document.getElementById('menu-toggle');
-const nav = document.getElementById('nav-menu');
+// Check if user is logged in (simulated)
+const isLoggedIn = false; // User is not logged in on login page
 
-toggle.addEventListener('click', () => {
-  nav.classList.toggle('show');
+// Mobile menu toggle
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
+
+menuToggle.addEventListener('click', () => {
+  menuToggle.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
+});
+
+overlay.addEventListener('click', () => {
+  menuToggle.classList.remove('active');
+  mobileNav.classList.remove('active');
+  overlay.classList.remove('active');
+  document.body.style.overflow = 'auto';
+});
+
+// Handle protected links (Order, Contact, About Us, Cart)
+function handleProtectedLink(featureName) {
+  if (!isLoggedIn) {
+    // Customize modal message based on feature
+    let message = `You need to log in to access ${featureName}. Sign in to continue.`;
+    
+    if (featureName === 'Cart') {
+      message = "You need to log in to view your cart. Sign in to see your items and checkout.";
+    } else if (featureName === 'Order' || featureName === 'Order Online') {
+      message = "You need to log in to place orders. Sign in to start ordering.";
+    } else if (featureName === 'Contact') {
+      message = "You need to log in to contact us. Sign in to send us a message or get support.";
+    } else if (featureName === 'About Us') {
+      message = "You need to log in to learn more about us. Sign in to access our story and team info.";
+    } else if (featureName === 'Catering') {
+      message = "You need to log in to inquire about catering services. Sign in to get more information.";
+    } else if (featureName === 'Gift Cards') {
+      message = "You need to log in to purchase or check gift cards. Sign in to continue.";
+    }
+    
+    // Update modal content
+    document.getElementById('modalTitle').textContent = `Login Required for ${featureName}`;
+    document.getElementById('modalMessage').textContent = message;
+    
+    // Show modal
+    showLoginModal();
+    return false; // Prevent default link behavior
+  }
+  return true; // Allow the link if logged in
+}
+
+// Login Modal Functions (EXACTLY SAME AS HOMEPAGE AND MENU)
+function showLoginModal() {
+  document.getElementById('loginModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLoginModal() {
+  document.getElementById('loginModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('loginModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeLoginModal();
+  }
 });
 
 // Role selection
@@ -256,6 +1421,153 @@ adminBtn.addEventListener('click', () => {
   roleInput.value = 'admin';
   adminBtn.classList.add('active');
   userBtn.classList.remove('active');
+});
+
+// Password toggle
+const passwordToggle = document.getElementById('passwordToggle');
+const passwordInput = document.getElementById('password');
+
+passwordToggle.addEventListener('click', () => {
+  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInput.setAttribute('type', type);
+  passwordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+});
+
+// Form validation
+const form = document.querySelector('form');
+const emailInput = document.getElementById('email');
+
+form.addEventListener('submit', function(e) {
+  const email = emailInput.value;
+  const password = passwordInput.value;
+  
+  if (!email || !password) {
+    e.preventDefault();
+    showNotification('Please fill in all fields', 'error');
+    return false;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    e.preventDefault();
+    showNotification('Please enter a valid email address', 'error');
+    return false;
+  }
+  
+  if (password.length < 6) {
+    e.preventDefault();
+    showNotification('Password must be at least 6 characters long', 'error');
+    return false;
+  }
+  
+  // If all validation passes, simulate login success
+  // In a real application, this would be handled by Django backend
+  setTimeout(() => {
+    showNotification('Login successful! Redirecting...', 'success');
+    // In a real app, you would redirect here:
+    // window.location.href = "{% url 'restaurant:home' %}";
+  }, 1000);
+  
+  return true;
+});
+
+// Update cart badge function - hide when 0
+function updateCartBadge() {
+  // Update all cart count badges
+  const cartBadges = document.querySelectorAll('.cart-count');
+  cartBadges.forEach(badge => {
+    // Hide badge if cart is empty (0 items)
+    badge.classList.add('empty');
+  });
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+  // Check if notification element already exists
+  let notification = document.getElementById('notification');
+  
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--primary-color);
+      color: white;
+      padding: 15px 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-heavy);
+      z-index: 9999;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    `;
+    document.body.appendChild(notification);
+  }
+  
+  const icon = type === 'error' ? 'fas fa-exclamation-circle' : 
+              type === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle';
+  notification.innerHTML = `<i class="${icon}"></i> ${message}`;
+  
+  if (type === 'error') {
+    notification.style.background = 'var(--warning-color)';
+  } else if (type === 'success') {
+    notification.style.background = 'var(--success-color)';
+  } else {
+    notification.style.background = 'var(--primary-color)';
+  }
+  
+  // Show notification
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // Hide notification after 3 seconds
+  setTimeout(() => {
+    notification.style.transform = 'translateX(150%)';
+  }, 3000);
+}
+
+// Social button hover effects
+document.querySelectorAll('.social-btn').forEach(btn => {
+  btn.addEventListener('mouseenter', function() {
+    this.style.transform = 'translateY(-3px)';
+  });
+  
+  btn.addEventListener('mouseleave', function() {
+    this.style.transform = 'translateY(0)';
+  });
+  
+  // Add click handler for social login
+  btn.addEventListener('click', function() {
+    if (this.classList.contains('google')) {
+      showNotification('Google login coming soon!', 'info');
+    } else if (this.classList.contains('facebook')) {
+      showNotification('Facebook login coming soon!', 'info');
+    }
+  });
+});
+
+// Initialize cart badge - hide because it's 0
+window.addEventListener('DOMContentLoaded', () => {
+  updateCartBadge();
+  
+  // Prevent default behavior for protected links
+  const protectedLinks = document.querySelectorAll('a[onclick*="handleProtectedLink"]');
+  protectedLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      if (handleProtectedLink(this.textContent.trim())) {
+        // If logged in, allow the default behavior
+        return true;
+      }
+      e.preventDefault();
+      return false;
+    });
+  });
 });
 </script>
 

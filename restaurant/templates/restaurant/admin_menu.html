@@ -7,159 +7,672 @@
 <title>KusinaExpress | Manage Menu</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', 'Poppins', sans-serif; }
+:root {
+  --primary: #d62828;
+  --primary-dark: #a01f1f;
+  --secondary: #fcbf49;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #2d2d2d;
+  --text-secondary: #6c757d;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --sidebar-width: 280px;
+}
+
+body { 
+  display:flex; 
+  min-height:100vh; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+  color: var(--text-primary);
+}
 
 /* Sidebar */
 .sidebar {
-  width:250px;
-  background-color:#d62828;
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
   color:white;
   display:flex;
   flex-direction:column;
-  padding:20px;
-  position:sticky;
+  padding: 32px 24px;
+  position:fixed;
   top:0;
+  left:0;
   height:100vh;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  transition: transform 0.3s ease;
 }
-.sidebar h2 { font-size:22px; margin-bottom:30px; display:flex; align-items:center; gap:10px; }
-.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; transition:0.3s; font-weight:500; }
-.sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
 
-/* Main content */
-.main-content { flex:1; padding:30px; overflow-x:auto; }
-header { display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; margin-bottom:30px; }
-header h1 { font-size:28px; color:#d62828; margin-bottom:10px; }
+.sidebar-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar h2 { 
+  font-size: 24px; 
+  display:flex; 
+  align-items:center; 
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar a { 
+  color: rgba(255,255,255,0.85);
+  text-decoration:none; 
+  padding: 14px 16px; 
+  margin-bottom: 8px;
+  border-radius: 12px; 
+  display:flex; 
+  align-items:center; 
+  gap: 14px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--secondary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  transform: translateX(4px);
+}
+
+.sidebar a:hover::before {
+  transform: scaleY(1);
+}
+
+.sidebar a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.sidebar a i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Hamburger Menu */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  font-size: 20px;
+}
+
+.sidebar.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+/* Main Content */
+.main-content { 
+  flex: 1; 
+  margin-left: var(--sidebar-width);
+  padding: 32px;
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Header */
+.dashboard-header { 
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dashboard-header h1 { 
+  font-size: 32px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 /* Buttons */
-.btn { padding:8px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
-.btn-add { background-color:#fcbf49; color:#2d2d2d; margin-bottom:15px; }
-.btn-add:hover { background-color:#2d2d2d; color:white; }
-.btn-edit { background-color:#fcbf49; color:#2d2d2d; }
-.btn-edit:hover { background-color:#2d2d2d; color:white; }
-.btn-delete { background-color:#d62828; color:white; }
-.btn-delete:hover { background-color:#2d2d2d; color:white; }
+.btn { 
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-add { 
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(214, 40, 40, 0.3);
+}
+
+.btn-add:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(214, 40, 40, 0.4);
+}
+
+.btn-edit { 
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.btn-edit:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+.btn-delete { 
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 8px 16px;
+  font-size: 13px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-delete:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
+/* Table Container */
+.table-container {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
 
 /* Table */
-table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-top:20px; }
-th, td { padding:15px; text-align:left; vertical-align:middle; }
-th { background-color:#d62828; color:white; }
-tr:nth-child(even) { background:#f8f8f8; }
-tr:hover { background: lightyellow; color:#2d2d2d; }
-td img { width:80px; height:50px; object-fit:cover; border-radius:6px; }
-td.actions { display:flex; gap:5px; align-items:center; }
+table { 
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+th { 
+  padding: 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td { 
+  padding: 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background: rgba(214, 40, 40, 0.02);
+}
+
+td img { 
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+td.actions { 
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-available {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.badge-unavailable {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+}
 
 /* Modal */
-.modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.5); }
-.modal-content { background:white; margin:10% auto; padding:20px; border-radius:12px; width:90%; max-width:500px; }
-.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
-.modal-header h2 { color:#d62828; }
-.modal-header .close { cursor:pointer; font-size:24px; font-weight:bold; }
+.modal { 
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content { 
+  background: white;
+  margin: 5% auto;
+  padding: 0;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { 
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header { 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: linear-gradient(135deg, rgba(214, 40, 40, 0.05) 0%, rgba(252, 191, 73, 0.05) 100%);
+}
+
+.modal-header h2 { 
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-header .close { 
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.modal-header .close:hover {
+  background: rgba(214, 40, 40, 0.1);
+  color: var(--primary);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 32px;
+}
 
 /* Form */
-.modal form { display:flex; flex-direction:column; gap:10px; }
-.modal input, .modal textarea, .modal select { padding:10px; border-radius:6px; border:1px solid #ccc; width:100%; }
-.modal button { margin-top:10px; }
+.modal form { 
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-/* Footer */
-footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size:14px; }
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.modal input, .modal textarea, .modal select { 
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.08);
+  width: 100%;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.modal input:focus, .modal textarea:focus, .modal select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(214, 40, 40, 0.1);
+}
+
+.modal textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.modal button[type="submit"] { 
+  margin-top: 10px;
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
 
 /* Responsive */
 @media screen and (max-width: 768px) {
-  body { flex-direction:column; }
-  .sidebar { width:100%; height:auto; position:relative; top:0; }
-  .main-content { padding:20px; }
-  table, th, td { font-size:14px; }
-  td img { width:60px; height:40px; }
+  .menu-toggle {
+    display: block;
+  }
+  
+  .sidebar {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 80px 20px 20px;
+  }
+  
+  .dashboard-header {
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  table {
+    font-size: 13px;
+  }
+  
+  th, td {
+    padding: 12px 8px;
+  }
+  
+  td img {
+    width: 60px;
+    height: 45px;
+  }
+  
+  td.actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .btn-edit, .btn-delete {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    margin: 10% auto;
+    width: 95%;
+  }
+  
+  .modal-header {
+    padding: 20px;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+  
+  .btn-add {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
-  <a href="{% url 'restaurant:admin-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-  <a href="{% url 'restaurant:admin-menu' %}"><i class="fas fa-hamburger"></i> Manage Menu</a>
-  <a href="{% url 'restaurant:admin-orders' %}"><i class="fas fa-receipt"></i> Manage Orders</a>
-  <a href="{% url 'restaurant:admin-feedback' %}"><i class="fas fa-comments"></i> Feedback</a>
-  <a href="{% url 'restaurant:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+<button class="menu-toggle" id="menuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{% url 'restaurant:admin-dashboard' %}">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="{% url 'restaurant:admin-menu' %}" class="active">
+      <i class="fas fa-hamburger"></i> Manage Menu
+    </a>
+    <a href="{% url 'restaurant:admin-orders' %}">
+      <i class="fas fa-receipt"></i> Manage Orders
+    </a>
+    <a href="{% url 'restaurant:admin-feedback' %}">
+      <i class="fas fa-comments"></i> Feedback
+    </a>
+    <a href="{% url 'restaurant:logout' %}">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </nav>
 </div>
 
 <div class="main-content">
-  <header>
-    <h1>Manage Menu</h1>
-    <button class="btn btn-add" onclick="openModal('addModal')">Add New Item</button>
-  </header>
+  <div class="dashboard-header">
+    <h1>
+      <i class="fas fa-hamburger"></i>
+      Manage Menu
+    </h1>
+    <button class="btn btn-add" onclick="openModal('addModal')">
+      <i class="fas fa-plus"></i>
+      Add New Item
+    </button>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Item ID</th>
-        <th>Image</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Category</th>
-        <th>Available</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in menu_items %}
-      <tr>
-        <td>{{ item.item_id }}</td>
-        <td><img src="{{ item.image_url|default:'https://via.placeholder.com/80x50?text=No+Image' }}" alt="{{ item.name }}"></td>
-        <td>{{ item.name }}</td>
-        <td>{{ item.description }}</td>
-        <td>₱{{ item.price }}</td>
-        <td>{{ item.category|title }}</td>
-        <td>{% if item.is_available %}Yes{% else %}Not Available{% endif %}</td>
-        <td class="actions">
-          <button class="btn btn-edit"
-            data-id="{{ item.item_id }}"
-            data-name="{{ item.name|escapejs }}"
-            data-desc="{{ item.description|escapejs }}"
-            data-price="{{ item.price }}"
-            data-category="{{ item.category|escapejs }}"
-            data-image="{{ item.image_url|escapejs }}"
-            data-available="{{ item.is_available|default_if_none:0 }}"
-            onclick="openEditModalFromButton(this)">
-            Edit
-          </button>
-          <a href="{% url 'restaurant:admin-delete-menu' item.item_id %}" class="btn btn-delete">Delete</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="8">No menu items found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in menu_items %}
+        <tr>
+          <td><strong>#{{ item.item_id }}</strong></td>
+          <td><img src="{{ item.image_url|default:'https://via.placeholder.com/80x60?text=No+Image' }}" alt="{{ item.name }}"></td>
+          <td><strong>{{ item.name }}</strong></td>
+          <td>{{ item.description|truncatewords:10 }}</td>
+          <td><strong>₱{{ item.price }}</strong></td>
+          <td>{{ item.category|title }}</td>
+          <td>
+            {% if item.is_available %}
+              <span class="badge badge-available"><i class="fas fa-check-circle"></i> Available</span>
+            {% else %}
+              <span class="badge badge-unavailable"><i class="fas fa-times-circle"></i> Unavailable</span>
+            {% endif %}
+          </td>
+          <td class="actions">
+            <button class="btn btn-edit"
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.name|escapejs }}"
+              data-desc="{{ item.description|escapejs }}"
+              data-price="{{ item.price }}"
+              data-category="{{ item.category|escapejs }}"
+              data-image="{{ item.image_url|escapejs }}"
+              data-available="{{ item.is_available|default_if_none:0 }}"
+              onclick="openEditModalFromButton(this)">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <a href="{% url 'restaurant:admin-delete-menu' item.item_id %}" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this item?');">
+              <i class="fas fa-trash"></i> Delete
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No menu items found.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <!-- Add Modal -->
   <div id="addModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Add Menu Item</h2>
+        <h2><i class="fas fa-plus-circle"></i> Add Menu Item</h2>
         <span class="close" onclick="closeModal('addModal')">&times;</span>
       </div>
-      <form method="POST" action="{% url 'restaurant:admin-add-menu' %}">
-        {% csrf_token %}
-        <input type="text" name="name" placeholder="Item Name" required>
-        <textarea name="description" placeholder="Description"></textarea>
-        <input type="number" name="price" placeholder="Price" step="0.01" required>
-        <select name="category" required>
-          <option value="" disabled selected>Select Category</option>
-          <option value="meals">Meals</option>
-          <option value="drinks">Drinks</option>
-          <option value="desserts">Desserts</option>
-        </select>
-        <input type="text" name="image_url" placeholder="Image URL">
-        <select name="is_available">
-          <option value="1" selected>Available</option>
-          <option value="0">Not Available</option>
-        </select>
-        <button type="submit" class="btn btn-add">Add Item</button>
-      </form>
+      <div class="modal-body">
+        <form method="POST" action="{% url 'restaurant:admin-add-menu' %}">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Item Name</label>
+            <input type="text" name="name" placeholder="Enter item name" required>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" placeholder="Enter description"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Price (₱)</label>
+            <input type="number" name="price" placeholder="0.00" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" required>
+              <option value="" disabled selected>Select Category</option>
+              <option value="meals">Meals</option>
+              <option value="drinks">Drinks</option>
+              <option value="desserts">Desserts</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" name="image_url" placeholder="https://example.com/image.jpg">
+          </div>
+          <div class="form-group">
+            <label>Availability</label>
+            <select name="is_available">
+              <option value="1" selected>Available</option>
+              <option value="0">Not Available</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-add">
+            <i class="fas fa-check"></i> Add Item
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -167,31 +680,80 @@ footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size
   <div id="editModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Edit Menu Item</h2>
+        <h2><i class="fas fa-edit"></i> Edit Menu Item</h2>
         <span class="close" onclick="closeModal('editModal')">&times;</span>
       </div>
-      <form method="POST" id="editForm">
-        {% csrf_token %}
-        <input type="text" name="name" id="editName" placeholder="Item Name" required>
-        <textarea name="description" id="editDescription" placeholder="Description"></textarea>
-        <input type="number" name="price" id="editPrice" placeholder="Price" step="0.01" required>
-        <select name="category" id="editCategory" required>
-          <option value="meals">Meals</option>
-          <option value="drinks">Drinks</option>
-          <option value="desserts">Desserts</option>
-        </select>
-        <input type="text" name="image_url" id="editImage" placeholder="Image URL">
-        <select name="is_available" id="editAvailable">
-          <option value="1">Available</option>
-          <option value="0">Not Available</option>
-        </select>
-        <button type="submit" class="btn btn-add">Save Changes</button>
-      </form>
+      <div class="modal-body">
+        <form method="POST" id="editForm">
+          {% csrf_token %}
+          <div class="form-group">
+            <label>Item Name</label>
+            <input type="text" name="name" id="editName" placeholder="Enter item name" required>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" id="editDescription" placeholder="Enter description"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Price (₱)</label>
+            <input type="number" name="price" id="editPrice" placeholder="0.00" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" id="editCategory" required>
+              <option value="meals">Meals</option>
+              <option value="drinks">Drinks</option>
+              <option value="desserts">Desserts</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Image URL</label>
+            <input type="text" name="image_url" id="editImage" placeholder="https://example.com/image.jpg">
+          </div>
+          <div class="form-group">
+            <label>Availability</label>
+            <select name="is_available" id="editAvailable">
+              <option value="1">Available</option>
+              <option value="0">Not Available</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-add">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('mobile-hidden');
+});
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768) {
+    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.add('mobile-hidden');
+    }
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    sidebar.classList.remove('mobile-hidden');
+  } else {
+    sidebar.classList.add('mobile-hidden');
+  }
+});
+
+if (window.innerWidth <= 768) {
+  sidebar.classList.add('mobile-hidden');
+}
+
 function openModal(id){ document.getElementById(id).style.display = 'block'; }
 function closeModal(id){ document.getElementById(id).style.display = 'none'; }
 window.onclick = function(event){

@@ -5,167 +5,714 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Manage Orders</title>
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', 'Poppins', sans-serif; }
+:root {
+  --primary: #d62828;
+  --primary-dark: #a01f1f;
+  --secondary: #fcbf49;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #2d2d2d;
+  --text-secondary: #6c757d;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --sidebar-width: 280px;
+}
+
+body { 
+  display:flex; 
+  min-height:100vh; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+  color: var(--text-primary);
+}
 
 /* Sidebar */
 .sidebar {
-  width:250px;
-  background-color:#d62828;
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
   color:white;
   display:flex;
   flex-direction:column;
-  padding:20px;
-  position:sticky;
+  padding: 32px 24px;
+  position:fixed;
   top:0;
+  left:0;
   height:100vh;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  transition: transform 0.3s ease;
 }
-.sidebar h2 { font-size:22px; margin-bottom:30px; display:flex; align-items:center; gap:10px; }
-.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; transition:0.3s; font-weight:500; }
-.sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
 
-/* Main content */
-.main-content { flex:1; padding:30px; overflow-y:auto; }
+.sidebar-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
 
-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-header h1 { font-size:28px; color:#d62828; }
+.sidebar h2 { 
+  font-size: 24px; 
+  display:flex; 
+  align-items:center; 
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
 
-.btn { padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; margin-right:5px; }
-.btn-filter { background:#fcbf49; color:#2d2d2d; }
-.btn-filter:hover { background-color:#d62828; color:white; }
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+}
 
-table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-top:15px; }
-th, td { padding:12px; text-align:left; vertical-align:top; border-bottom:1px solid #e0e0e0; }
-th { background-color:#d62828; color:white; }
-tr:hover { background:#fcbf49; color:#2d2d2d; }
+.sidebar a { 
+  color: rgba(255,255,255,0.85);
+  text-decoration:none; 
+  padding: 14px 16px; 
+  margin-bottom: 8px;
+  border-radius: 12px; 
+  display:flex; 
+  align-items:center; 
+  gap: 14px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+}
 
-/* Ordered Items in Table */
-.order-item-line { font-size: 14px; margin-bottom: 4px; }
+.sidebar a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--secondary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  transform: translateX(4px);
+}
+
+.sidebar a:hover::before {
+  transform: scaleY(1);
+}
+
+.sidebar a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.sidebar a i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Hamburger Menu */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  font-size: 20px;
+}
+
+.sidebar.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+/* Main Content */
+.main-content { 
+  flex: 1; 
+  margin-left: var(--sidebar-width);
+  padding: 32px;
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Header */
+.dashboard-header { 
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dashboard-header h1 { 
+  font-size: 32px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Filter Buttons */
+.filter-container {
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-filter {
+  padding: 10px 20px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  color: var(--text-primary);
+  text-decoration: none;
+  border: 2px solid rgba(0,0,0,0.08);
+}
+
+.btn-filter:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(214, 40, 40, 0.3);
+}
+
+/* Order Cards */
+.orders-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.order-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.order-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+}
+
+.order-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.order-id {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-status {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);
+  color: white;
+}
+
+.status-confirmed {
+  background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+  color: white;
+}
+
+.status-preparing {
+  background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
+  color: white;
+}
+
+.status-out_for_delivery {
+  background: linear-gradient(135deg, #26c6da 0%, #00acc1 100%);
+  color: white;
+}
+
+.status-delivered {
+  background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+  color: white;
+}
+
+.order-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.order-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.order-items {
+  background: rgba(0,0,0,0.02);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.order-items-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.item-quantity {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  background: rgba(214, 40, 40, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.order-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  min-width: 150px;
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+  color: white;
+}
+
+.btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4);
+}
+
+.btn-preparing {
+  background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
+  color: white;
+}
+
+.btn-preparing:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(171, 71, 188, 0.4);
+}
+
+.btn-delivery {
+  background: linear-gradient(135deg, #26c6da 0%, #00acc1 100%);
+  color: white;
+}
+
+.btn-delivery:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(38, 198, 218, 0.4);
+}
+
+.btn-delivered {
+  background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+  color: white;
+}
+
+.btn-delivered:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+}
+
+.btn-completed {
+  background: linear-gradient(135deg, #78909c 0%, #546e7a 100%);
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
 
 /* Responsive */
 @media screen and (max-width: 768px) {
-  body { flex-direction:column; }
-  .sidebar { width:100%; height:auto; position:relative; }
-  .main-content { padding:15px; }
-  table, th, td { font-size:14px; }
+  .menu-toggle {
+    display: block;
+  }
+  
+  .sidebar {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 80px 20px 20px;
+  }
+  
+  .dashboard-header {
+    padding: 24px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .filter-container {
+    padding: 16px;
+  }
+  
+  .order-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .order-actions {
+    flex-direction: column;
+  }
+  
+  .btn-action {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
-  <a href="{% url 'restaurant:admin-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-  <a href="{% url 'restaurant:admin-menu' %}"><i class="fas fa-hamburger"></i> Manage Menu</a>
-  <a href="{% url 'restaurant:admin-orders' %}"><i class="fas fa-receipt"></i> Manage Orders</a>
-  <a href="{% url 'restaurant:admin-feedback' %}"><i class="fas fa-comments"></i> Feedback</a>
-  <a href="{% url 'restaurant:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+<button class="menu-toggle" id="menuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{% url 'restaurant:admin-dashboard' %}">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="{% url 'restaurant:admin-menu' %}">
+      <i class="fas fa-hamburger"></i> Manage Menu
+    </a>
+    <a href="{% url 'restaurant:admin-orders' %}" class="active">
+      <i class="fas fa-receipt"></i> Manage Orders
+    </a>
+    <a href="{% url 'restaurant:admin-feedback' %}">
+      <i class="fas fa-comments"></i> Feedback
+    </a>
+    <a href="{% url 'restaurant:logout' %}">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </nav>
 </div>
 
 <div class="main-content">
+  <div class="dashboard-header">
+    <h1>
+      <i class="fas fa-receipt"></i>
+      Manage Orders
+    </h1>
+  </div>
 
-<header>
-  <h1>Manage Orders</h1>
-</header>
+  <!-- Status Filter Buttons -->
+  <div class="filter-container">
+    <div class="filter-buttons">
+      <a href="?status=pending" class="btn-filter">
+        <i class="fas fa-clock"></i> Pending
+      </a>
+      <a href="?status=preparing" class="btn-filter">
+        <i class="fas fa-fire"></i> Preparing
+      </a>
+      <a href="?status=out_for_delivery" class="btn-filter">
+        <i class="fas fa-truck"></i> Out for Delivery
+      </a>
+      <a href="?status=delivered" class="btn-filter">
+        <i class="fas fa-check-circle"></i> Delivered
+      </a>
+    </div>
+  </div>
 
-<!-- Status Filter Buttons -->
-<div style="margin-bottom:15px;">
-  <a href="?status=pending"><button class="btn btn-filter">Pending</button></a>
-  <a href="?status=preparing"><button class="btn btn-filter">Preparing</button></a>
-  <a href="?status=out_for_delivery"><button class="btn btn-filter">Out for Delivery</button></a>
-  <a href="?status=delivered"><button class="btn btn-filter">Delivered</button></a>
-</div>
-
-<table>
-  <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>User</th>
-      <th>Total Amount</th>
-      <th>Status</th>
-      <th>Delivery Address</th>
-      <th>Contact Number</th>
-      <th>Payment Method</th>
-      <th>Notes</th>
-      <th>Item Name</th>
-      <th>Quantity</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-
-  <tbody id="ordersTable">
+  <!-- Orders Grid -->
+  <div class="orders-grid">
     {% for order in orders %}
-    <tr>
-      <td>{{ order.order_id }}</td>
-      <td>{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</td>
-      <td>₱{{ order.total_amount }}</td>
-      <td>
-        {% if order.delivered_at %}Delivered
-        {% elif order.out_for_delivery_at %}Out for Delivery
-        {% elif order.preparing_at %}Preparing
-        {% elif order.confirmed_at %}Confirmed
-        {% else %}Pending
-        {% endif %}
-      </td>
-      <td>{{ order.delivery_address|default:"-" }}</td>
-      <td>{{ order.contact_number|default:"-" }}</td>
-      <td>{{ order.payment_method|default:"-" }}</td>
-      <td>{{ order.notes|default:"-" }}</td>
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-id">
+          <i class="fas fa-receipt"></i>
+          Order #{{ order.order_id }}
+        </div>
+        <div class="order-status 
+          {% if order.delivered_at %}status-delivered
+          {% elif order.out_for_delivery_at %}status-out_for_delivery
+          {% elif order.preparing_at %}status-preparing
+          {% elif order.confirmed_at %}status-confirmed
+          {% else %}status-pending
+          {% endif %}">
+          {% if order.delivered_at %}
+            <i class="fas fa-check-circle"></i> Delivered
+          {% elif order.out_for_delivery_at %}
+            <i class="fas fa-truck"></i> Out for Delivery
+          {% elif order.preparing_at %}
+            <i class="fas fa-fire"></i> Preparing
+          {% elif order.confirmed_at %}
+            <i class="fas fa-check"></i> Confirmed
+          {% else %}
+            <i class="fas fa-clock"></i> Pending
+          {% endif %}
+        </div>
+      </div>
 
-      <td>
-        {% for item in order.items.all %}
-          <div class="order-item-line">{{ item.item.name }}</div>
-        {% empty %}
-          <div>-</div>
-        {% endfor %}
-      </td>
-      <td>
-        {% for item in order.items.all %}
-          <div class="order-item-line">{{ item.quantity }}</div>
-        {% empty %}
-          <div>-</div>
-        {% endfor %}
-      </td>
+      <div class="order-details">
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-user"></i> Customer</div>
+          <div class="detail-value">{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-money-bill-wave"></i> Total Amount</div>
+          <div class="detail-value order-amount">₱{{ order.total_amount }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
+          <div class="detail-value">{{ order.delivery_address|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-phone"></i> Contact Number</div>
+          <div class="detail-value">{{ order.contact_number|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-credit-card"></i> Payment Method</div>
+          <div class="detail-value">{{ order.payment_method|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-sticky-note"></i> Notes</div>
+          <div class="detail-value">{{ order.notes|default:"-" }}</div>
+        </div>
+      </div>
 
-      <td>
+      <div class="order-items">
+        <div class="order-items-title">
+          <i class="fas fa-utensils"></i>
+          Order Items
+        </div>
+        {% for item in order.items.all %}
+        <div class="item-row">
+          <div class="item-name">{{ item.item.name }}</div>
+          <div class="item-quantity">×{{ item.quantity }}</div>
+        </div>
+        {% empty %}
+        <div class="item-row">
+          <div class="item-name">No items</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="order-actions">
         {% if order.delivered_at %}
-          <span>Completed</span>
+          <button class="btn-action btn-completed" disabled>
+            <i class="fas fa-check-double"></i> Completed
+          </button>
         {% elif order.out_for_delivery_at %}
-          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
+          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
             {% csrf_token %}
             <input type="hidden" name="status" value="delivered">
-            <button class="btn btn-filter" type="submit">Delivered</button>
+            <button class="btn-action btn-delivered" type="submit">
+              <i class="fas fa-check-circle"></i> Mark as Delivered
+            </button>
           </form>
         {% elif order.preparing_at %}
-          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
+          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
             {% csrf_token %}
             <input type="hidden" name="status" value="out_for_delivery">
-            <button class="btn btn-filter" type="submit">Out for Delivery</button>
+            <button class="btn-action btn-delivery" type="submit">
+              <i class="fas fa-truck"></i> Send for Delivery
+            </button>
           </form>
         {% elif order.confirmed_at and not order.preparing_at %}
-          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}">
+          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
             {% csrf_token %}
             <input type="hidden" name="status" value="preparing">
-            <button class="btn btn-filter" type="submit">Start Preparing</button>
+            <button class="btn-action btn-preparing" type="submit">
+              <i class="fas fa-fire"></i> Start Preparing
+            </button>
           </form>
         {% else %}
-          <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}">
+          <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}" style="flex: 1;">
             {% csrf_token %}
-            <button class="btn btn-filter" type="submit">Confirm</button>
+            <button class="btn-action btn-confirm" type="submit">
+              <i class="fas fa-check"></i> Confirm Order
+            </button>
           </form>
         {% endif %}
-      </td>
-    </tr>
+      </div>
+    </div>
     {% empty %}
-    <tr><td colspan="11">No orders found.</td></tr>
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>No orders found.</p>
+    </div>
     {% endfor %}
-  </tbody>
-</table>
-
+  </div>
 </div>
+
+<script>
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('mobile-hidden');
+});
+
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768) {
+    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.add('mobile-hidden');
+    }
+  }
+});
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    sidebar.classList.remove('mobile-hidden');
+  } else {
+    sidebar.classList.add('mobile-hidden');
+  }
+});
+
+if (window.innerWidth <= 768) {
+  sidebar.classList.add('mobile-hidden');
+}
+</script>
 
 </body>
 </html>

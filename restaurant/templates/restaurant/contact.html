@@ -5,183 +5,1196 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Contact</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-  body { background-color:#fffaf3; color:#2d2d2d; }
+/* CSS Variables for theming */
+:root {
+  --primary-color: #C62828;
+  --primary-dark: #8E1B1B;
+  --secondary-color: #FF9800;
+  --secondary-light: #FFB74D;
+  --accent-color: #FF5722;
+  --background-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --divider-color: #E0E0E0;
+  --success-color: #4CAF50;
+  --warning-color: #F44336;
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
-  /* === HEADER === */
-  header {
-    background-color: #d62828;
-    color: white;
-    padding: 20px 40px;
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  font-family: 'Poppins', sans-serif;
+}
+
+body { 
+  background-color: var(--background-color); 
+  color: var(--text-primary); 
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Container for consistent width */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Modern Header --- */
+header {
+  background-color: var(--surface-color);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-light);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--primary-color);
+  font-size: 28px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* Modern Navigation */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav-links a.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Hamburger menu for mobile */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 320px;
+  height: 100vh;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-heavy);
+  padding: 80px 30px 30px;
+  z-index: 999;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: var(--transition);
+}
+
+.mobile-nav a i {
+  color: var(--primary-color);
+  width: 24px;
+}
+
+.mobile-nav a:hover {
+  color: var(--primary-color);
+  transform: translateX(5px);
+}
+
+.mobile-nav a.active {
+  color: var(--primary-color);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* FIX: Mobile cart button specific styles */
+.mobile-cart-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light) !important; /* Force white text */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  border: none;
+  width: 100%;
+  margin-top: 10px;
+  position: relative;
+}
+
+.mobile-cart-btn i {
+  color: var(--text-light) !important; /* Force white icon */
+  font-size: 16px;
+}
+
+.mobile-cart-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* FIX: Mobile profile button specific styles */
+.mobile-profile-btn {
+  background-color: transparent;
+  color: var(--primary-color) !important; /* Force primary color text */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  border: 2px solid var(--primary-color);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.mobile-profile-btn i {
+  color: var(--primary-color) !important; /* Force primary color icon */
+  font-size: 16px;
+}
+
+.mobile-profile-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light) !important;
+}
+
+.mobile-profile-btn:hover i {
+  color: var(--text-light) !important;
+}
+
+/* Navigation loading state prevention */
+.nav-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Prevent rapid clicking issues */
+.nav-links a,
+.mobile-nav a,
+.btn,
+.mobile-cart-btn,
+.mobile-profile-btn,
+.btn-action {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* --- Main Content --- */
+main { 
+  padding: 80px 0; 
+  min-height: 70vh;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+h2.section-title {
+  color: var(--text-primary);
+  font-size: 36px;
+  margin-bottom: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.title-highlight {
+  color: var(--primary-color);
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* --- Contact Grid --- */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.contact-card {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 35px;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  border: 1px solid var(--divider-color);
+  height: 100%;
+}
+
+.contact-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--primary-color);
+}
+
+.contact-card h3 {
+  color: var(--primary-color);
+  margin-bottom: 25px;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contact-card h3 i {
+  font-size: 24px;
+}
+
+.faq-item {
+  background: rgba(198, 40, 40, 0.05);
+  border-left: 4px solid var(--secondary-color);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.faq-item:hover {
+  background: rgba(198, 40, 40, 0.08);
+  transform: translateX(5px);
+}
+
+.faq-item strong {
+  color: var(--primary-color);
+}
+
+.faq-item p {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Form Styling */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-control {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--divider-color);
+  font-size: 15px;
+  transition: var(--transition);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+textarea.form-control {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Button Styles */
+.btn-action {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.btn-action:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-action.secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-action.secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.rating-stars {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 15px;
+}
+
+.star {
+  color: #ddd;
+  cursor: pointer;
+  font-size: 24px;
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.star.active {
+  color: var(--secondary-color);
+}
+
+.star:hover {
+  color: var(--secondary-light);
+}
+
+/* Contact Info */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 152, 0, 0.05);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.info-item:hover {
+  background: rgba(255, 152, 0, 0.1);
+  transform: translateX(5px);
+}
+
+.info-item i {
+  color: var(--primary-color);
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.info-item div h4 {
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+}
+
+.info-item div p {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Toast Notification */
+#toast { 
+  position: fixed; 
+  bottom:20px; 
+  right:20px; 
+  background: var(--success-color); 
+  color: var(--text-light); 
+  padding:12px 24px; 
+  border-radius: var(--border-radius); 
+  opacity:0; 
+  pointer-events:none; 
+  transition: opacity 0.5s; 
+  z-index:200; 
+  box-shadow: var(--shadow-medium);
+  font-weight: 500;
+}
+
+/* --- Footer --- */
+footer {
+  background-color: var(--text-primary);
+  color: var(--text-light);
+  padding: 60px 0 30px;
+  margin-top: 60px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-light);
+}
+
+.footer-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--secondary-color);
+  padding-left: 5px;
+}
+
+.newsletter-form {
+  display: flex;
+  margin-top: 15px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 50px 0 0 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 0 50px 50px 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .contact-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .menu-toggle {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
-  header h1 { font-size:26px; letter-spacing:1px; }
-
-  nav {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    position:relative;
+  
+  main {
+    padding: 60px 0;
   }
-  nav a { color:white; text-decoration:none; font-weight:600; margin:0 10px; position: relative; transition: color 0.3s; }
-  nav a:hover { color:#fcbf49; }
-  .cart-badge { position: absolute; top: -5px; right: -17px; background:red; color:white; font-size:12px; font-weight:bold; border-radius:50%; padding:2px 6px; display:none; }
-  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
-  .auth-button a img { width:30px; height:30px; border-radius:50%; }
-
-  /* Hamburger menu */
-  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
-  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
-
-  /* === MAIN === */
-  main { padding:60px 40px; max-width:1200px; margin:0 auto; }
-  h2.section-title { text-align:center; color:#d62828; font-size:32px; margin-bottom:40px; font-weight:700; }
-
-  .contact-container {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-    gap:30px;
-    width:100%;
+  
+  .section-header {
+    margin-bottom: 40px;
   }
-  .contact-section {
-    background:#fff;
-    padding:30px;
-    border-radius:15px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.1);
-    display:flex;
-    flex-direction:column;
-    transition: transform 0.3s, box-shadow 0.3s;
+  
+  h2.section-title {
+    font-size: 30px;
   }
-  .contact-section:hover { transform:translateY(-5px); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
-  .contact-section h3 { color:#d62828; margin-bottom:20px; font-size:22px; text-align:center; }
-  .faq-item { background:#f8eded; border-left:4px solid #f77f00; padding:12px 15px; margin-bottom:12px; border-radius:8px; font-size:15px; line-height:1.5; }
-  .contact-section p { font-size:15px; margin-bottom:15px; line-height:1.6; }
-
-  form textarea, form input, form button {
-    padding:12px 15px;
-    border-radius:8px;
-    font-size:14px;
-    border:1px solid #d62828;
-    width:100%;
-    margin-bottom:12px;
-    background-color:#fff;
+  
+  .contact-card {
+    padding: 25px;
   }
-  form textarea { resize: vertical; }
-  form button { background:#d62828; color:white; font-weight:600; border:none; cursor:pointer; transition: background 0.3s; }
-  form button:hover { background:#f77f00; }
-  button { cursor:pointer; padding:10px 15px; border-radius:8px; border:none; background:#d62828; color:white; font-weight:600; transition: background 0.3s; }
-  button:hover { background:#f77f00; }
-
-  #toast { position: fixed; bottom:20px; right:20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
-
-  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
-  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
-  footer a:hover { text-decoration:underline; }
-
-  /* === RESPONSIVE === */
-  @media(max-width:768px){
-    nav { display:none; flex-direction:column; width:100%; gap:10px; }
-    nav.show { display:flex; }
-    nav a { width:100%; text-align:center; margin:5px 0; }
-    .menu-toggle { display:flex; }
-    main { padding:40px 20px; }
+  
+  .footer-content {
+    gap: 30px;
   }
+}
+
+@media (max-width: 480px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  h2.section-title {
+    font-size: 26px;
+  }
+  
+  .contact-card {
+    padding: 20px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- Header (Same as Homepage) -->
 <header>
-  <h1>KusinaExpress</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-  <nav id="nav-menu">
-    <a href="{% url 'restaurant:dashboard' %}">Home</a>
-    <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart <span id="cartBadge" class="cart-badge"></span>
-    </a>
-    <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="{% url 'restaurant:contact' %}">Contact</a>
-    <a href="{% url 'restaurant:about' %}">About Us</a>
-    <div class="auth-button">
-      {% if user %}
-        <a href="{% url 'restaurant:profile' %}">
-          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-        </a>
-      {% endif %}
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h1>KusinaExpress</h1>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
+        <div class="nav-links">
+          <a href="{% url 'restaurant:dashboard' %}" id="home-link">Home</a>
+          <a href="{% url 'restaurant:menu' %}" id="menu-link">Menu</a>
+          <a href="{% url 'restaurant:order' %}" id="order-link">Order</a>
+          <a href="{% url 'restaurant:contact' %}" class="active" id="contact-link">Contact</a>
+          <a href="{% url 'restaurant:about' %}" id="about-link">About Us</a>
+        </div>
+        <div class="auth-buttons">
+          <!-- USER IS LOGGED IN - Changed from Sign In to Profile -->
+          <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary" id="profile-link">
+            <i class="fas fa-user-circle"></i> Profile
+          </a>
+          <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" id="cart-link">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <!-- Cart badge - will be updated by JavaScript -->
+            <span class="cart-count" id="desktop-cart-badge"></span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-  </nav>
+  </div>
 </header>
 
-<main>
-  <h2 class="section-title">Contact & Support</h2>
-  <div class="contact-container">
+<!-- Mobile Navigation (Same as Homepage) -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="{% url 'restaurant:dashboard' %}" id="mobile-home-link">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <a href="{% url 'restaurant:menu' %}" id="mobile-menu-link">
+    <i class="fas fa-utensils"></i> Menu
+  </a>
+  <a href="{% url 'restaurant:order' %}" id="mobile-order-link">
+    <i class="fas fa-shopping-bag"></i> Order
+  </a>
+  <a href="{% url 'restaurant:contact' %}" class="active" id="mobile-contact-link">
+    <i class="fas fa-phone-alt"></i> Contact
+  </a>
+  <a href="{% url 'restaurant:about' %}" id="mobile-about-link">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <!-- USER IS LOGGED IN - Changed from Sign In to Profile -->
+    <a href="{% url 'restaurant:profile' %}" class="mobile-profile-btn" id="mobile-profile-link">
+      <i class="fas fa-user-circle"></i> Profile
+    </a>
+    <!-- FIXED: Cart button for mobile with white text and icon -->
+    <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn" id="mobile-cart-link">
+      <i class="fas fa-shopping-cart"></i> Cart
+      <!-- Mobile cart badge - will be updated by JavaScript -->
+      <span class="cart-count" id="mobile-cart-badge"></span>
+    </a>
+  </div>
+</nav>
 
+<!-- Main Content -->
+<main class="container">
+  <div class="section-header">
+    <h2 class="section-title">Contact & <span class="title-highlight">Support</span></h2>
+    <p class="section-subtitle">We're here to help! Reach out to us through any of the channels below or get quick answers to common questions.</p>
+  </div>
+  
+  <div class="contact-grid">
     <!-- FAQ Section -->
-    <div class="contact-section">
-      <h3>Frequently Asked Questions (FAQs)</h3>
+    <div class="contact-card">
+      <h3><i class="fas fa-question-circle"></i> Frequently Asked Questions</h3>
       <div class="faq-item">
-        <strong>Q:</strong> How do I place an order?<br>
-        <strong>A:</strong> Go to the Menu page, choose your items, and click “Add to Order”.
+        <strong>Q:</strong> How do I place an order?
+        <p>A: Go to the Menu page, choose your items, and click "Add to Cart". Then proceed to checkout for delivery or pickup.</p>
       </div>
       <div class="faq-item">
-        <strong>Q:</strong> How can I track my delivery?<br>
-        <strong>A:</strong> Use the “Track” section to view your delivery status and map.
+        <strong>Q:</strong> How can I track my delivery?
+        <p>A: Use the "Order" section to view your delivery status and real-time tracking on the map.</p>
       </div>
       <div class="faq-item">
-        <strong>Q:</strong> What payment methods are accepted?<br>
-        <strong>A:</strong> We accept cash on delivery, debit/credit cards, and e-wallets.
+        <strong>Q:</strong> What payment methods are accepted?
+        <p>A: We accept cash on delivery, debit/credit cards, GCash, Maya, and other popular e-wallets.</p>
+      </div>
+      <div class="faq-item">
+        <strong>Q:</strong> Do you offer catering services?
+        <p>A: Yes! Contact our catering team for special events, parties, and corporate functions.</p>
       </div>
     </div>
-
-    <!-- Live Chat Section -->
-    <div class="contact-section">
-      <h3>Live Chat & Help Desk</h3>
-      <p>Need help? Connect with our customer representative through live chat or contact our help desk for inquiries.</p>
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <button>Start Live Chat</button>
-        <button>Contact Help Desk</button>
+    
+    <!-- Live Chat & Help Desk -->
+    <div class="contact-card">
+      <h3><i class="fas fa-headset"></i> Live Support</h3>
+      <p>Need immediate assistance? Connect with our customer service representatives through live chat or contact our help desk.</p>
+      
+      <div style="margin-top: 25px;">
+        <button class="btn-action" id="live-chat-btn">
+          <i class="fas fa-comment-dots"></i> Start Live Chat
+        </button>
+        <button class="btn-action secondary" id="call-help-btn">
+          <i class="fas fa-phone-alt"></i> Call Help Desk
+        </button>
+      </div>
+      
+      <div class="contact-info" style="margin-top: 30px;">
+        <div class="info-item">
+          <i class="fas fa-clock"></i>
+          <div>
+            <h4>Support Hours</h4>
+            <p>Monday - Sunday: 8:00 AM - 10:00 PM</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-envelope"></i>
+          <div>
+            <h4>Email Support</h4>
+            <p>support@kusinaexpress.com</p>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Feedback Form Section -->
-    <div class="contact-section">
-      <h3>Feedback Form</h3>
-      <p>We value your feedback! Please share your comments or suggestions below.</p>
-      <form id="feedbackForm">
+    
+    <!-- Feedback Form -->
+    <div class="contact-card">
+      <h3><i class="fas fa-comment-medical"></i> Send Feedback</h3>
+      <p>We value your feedback! Please share your comments or suggestions below to help us improve.</p>
+      
+      <form id="feedbackForm" style="margin-top: 25px;">
         {% csrf_token %}
-        <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
-        <label>Rating (1-5, optional):</label>
-        <input type="number" name="rating" min="1" max="5" placeholder="Optional">
-        <button type="submit">Submit Feedback</button>
+        <div class="form-group">
+          <label for="message">Your Message *</label>
+          <textarea name="message" id="message" class="form-control" rows="4" placeholder="Tell us about your experience..." required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Rating (Optional)</label>
+          <div class="rating-stars" id="ratingStars">
+            <span class="star" data-value="1"><i class="far fa-star"></i></span>
+            <span class="star" data-value="2"><i class="far fa-star"></i></span>
+            <span class="star" data-value="3"><i class="far fa-star"></i></span>
+            <span class="star" data-value="4"><i class="far fa-star"></i></span>
+            <span class="star" data-value="5"><i class="far fa-star"></i></span>
+          </div>
+          <input type="hidden" name="rating" id="ratingValue" value="">
+        </div>
+        
+        <button type="submit" class="btn-action" id="submit-feedback-btn">
+          <i class="fas fa-paper-plane"></i> Submit Feedback
+        </button>
       </form>
     </div>
-
   </div>
 </main>
 
+<!-- Footer (Same as Homepage) -->
 <footer>
-  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">KusinaExpress</div>
+        <p class="footer-description">Bringing authentic Filipino comfort food straight to your doorstep since 2020. Fast, fresh, and flavorful!</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="{% url 'restaurant:dashboard' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:menu' %}">Menu</a></li>
+          <li><a href="{% url 'restaurant:order' %}">Order Online</a></li>
+          <li><a href="{% url 'restaurant:contact' %}">Catering</a></li>
+          <li><a href="{% url 'restaurant:about' %}">Gift Cards</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Contact Info</h3>
+        <ul class="footer-links">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> 123 Food Street, Manila, Philippines</li>
+          <li><i class="fas fa-phone-alt" style="margin-right: 10px;"></i> +63 912 345 6789</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> hello@kusinaexpress.com</li>
+          <li><i class="fas fa-clock" style="margin-right: 10px;"></i> Open Daily: 10AM - 10PM</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Newsletter</h3>
+        <p class="footer-description">Subscribe to get updates on new dishes and exclusive offers.</p>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address">
+          <button class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>© 2025 KusinaExpress. All rights reserved. | Proudly Serving Filipino Flavors</p>
+    </div>
+  </div>
 </footer>
 
+<!-- Toast Notification -->
 <div id="toast">Item added to cart!</div>
 
 <script>
-// Hamburger toggle
-const toggle = document.getElementById('menu-toggle');
-const nav = document.getElementById('nav-menu');
-toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
+// Mobile menu toggle with improved anti-glitching
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
+
+let isMenuOpen = false;
+let isAnimating = false;
+let menuToggleTimeout = null;
+
+function toggleMobileMenu() {
+  if (isAnimating) return;
+  
+  // Clear any pending timeout
+  if (menuToggleTimeout) {
+    clearTimeout(menuToggleTimeout);
+    menuToggleTimeout = null;
+  }
+  
+  isAnimating = true;
+  isMenuOpen = !isMenuOpen;
+  
+  if (isMenuOpen) {
+    menuToggle.classList.add('active');
+    mobileNav.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Close menu when clicking a link
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMobileMenuOnClick, { once: true });
+    });
+  } else {
+    menuToggle.classList.remove('active');
+    mobileNav.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Reset animation flag after transition with a small buffer
+  menuToggleTimeout = setTimeout(() => {
+    isAnimating = false;
+    menuToggleTimeout = null;
+  }, 450);
+}
+
+function closeMobileMenuOnClick() {
+  if (isMenuOpen) {
+    toggleMobileMenu();
+  }
+}
+
+// Debounced click handler for menu toggle
+let lastClickTime = 0;
+menuToggle.addEventListener('click', (e) => {
+  const currentTime = Date.now();
+  if (currentTime - lastClickTime < 500) { // 500ms debounce
+    return;
+  }
+  lastClickTime = currentTime;
+  toggleMobileMenu();
+});
+
+overlay.addEventListener('click', toggleMobileMenu);
+
+// Prevent rapid clicking on navigation links
+function setupNavigationLinks() {
+  const navigationLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-cart-link'),
+    // Footer links
+    ...document.querySelectorAll('.footer-links a'),
+    // Action buttons
+    document.getElementById('live-chat-btn'),
+    document.getElementById('call-help-btn'),
+    document.getElementById('submit-feedback-btn')
+  ];
+  
+  navigationLinks.forEach(link => {
+    if (!link) return;
+    
+    link.addEventListener('click', function(e) {
+      // Prevent rapid clicks
+      if (this.classList.contains('nav-loading')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      
+      // If already on the same page, prevent default and just update active state
+      if (this.href && this.href === window.location.href) {
+        e.preventDefault();
+        updateActiveNavState();
+        return;
+      }
+      
+      // Add loading state to prevent rapid clicking
+      this.classList.add('nav-loading');
+      
+      // Remove loading state after 1 second
+      setTimeout(() => {
+        this.classList.remove('nav-loading');
+      }, 1000);
+    });
+  });
+}
+
+// Update active navigation state
+function updateActiveNavState() {
+  const currentPath = window.location.pathname;
+  
+  // Remove active class from all links
+  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current page
+  if (currentPath.includes('dashboard') || currentPath === '/') {
+    document.getElementById('home-link')?.classList.add('active');
+    document.getElementById('mobile-home-link')?.classList.add('active');
+  } else if (currentPath.includes('menu')) {
+    document.getElementById('menu-link')?.classList.add('active');
+    document.getElementById('mobile-menu-link')?.classList.add('active');
+  } else if (currentPath.includes('order')) {
+    document.getElementById('order-link')?.classList.add('active');
+    document.getElementById('mobile-order-link')?.classList.add('active');
+  } else if (currentPath.includes('contact')) {
+    document.getElementById('contact-link')?.classList.add('active');
+    document.getElementById('mobile-contact-link')?.classList.add('active');
+  } else if (currentPath.includes('about')) {
+    document.getElementById('about-link')?.classList.add('active');
+    document.getElementById('mobile-about-link')?.classList.add('active');
+  } else if (currentPath.includes('profile')) {
+    document.getElementById('profile-link')?.classList.add('active');
+    document.getElementById('mobile-profile-link')?.classList.add('active');
+  } else if (currentPath.includes('cart')) {
+    document.getElementById('cart-link')?.classList.add('active');
+    document.getElementById('mobile-cart-link')?.classList.add('active');
+  }
+}
 
 // CSRF helper
 function getCookie(name){
@@ -196,59 +1209,263 @@ function getCookie(name){
   return cookieValue;
 }
 
-// Show toast
+// Toast notification
 function showToast(msg){
   const toast = document.getElementById('toast');
-  toast.innerText = msg;
+  toast.innerHTML = msg;
   toast.style.opacity = 1;
-  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+  
+  // Clear any existing timeout
+  if (toast.timeoutId) {
+    clearTimeout(toast.timeoutId);
+  }
+  
+  toast.timeoutId = setTimeout(()=>{ 
+    toast.style.opacity = 0; 
+    toast.timeoutId = null;
+  }, 2000);
 }
 
-// Update cart badge
+// Update cart badge - FIXED LOGIC: Hide badge when count is 0
 async function updateCartBadge(){
   try{
     const res = await fetch('/api/cart/');
     if(!res.ok) return;
     const items = await res.json();
     const count = items.reduce((acc,i)=>acc+i.quantity,0);
-    const badge = document.getElementById('cartBadge');
-    if(count>0){
-      badge.innerText = count;
-      badge.style.display = 'inline-block';
+    
+    // Get both cart badges
+    const desktopBadge = document.getElementById('desktop-cart-badge');
+    const mobileBadge = document.getElementById('mobile-cart-badge');
+    
+    // Update desktop badge
+    if(count > 0){
+      desktopBadge.textContent = count;
+      desktopBadge.style.display = 'flex';
     } else {
-      badge.style.display = 'none';
+      desktopBadge.style.display = 'none';
+      desktopBadge.textContent = '';
     }
-  }catch(err){ console.error(err); }
+    
+    // Update mobile badge
+    if(count > 0){
+      mobileBadge.textContent = count;
+      mobileBadge.style.display = 'flex';
+    } else {
+      mobileBadge.style.display = 'none';
+      mobileBadge.textContent = '';
+    }
+    
+    return count;
+  }catch(err){ 
+    console.error('Error updating cart badge:', err); 
+    // Hide badges on error
+    document.getElementById('desktop-cart-badge').style.display = 'none';
+    document.getElementById('mobile-cart-badge').style.display = 'none';
+    return 0;
+  }
 }
-updateCartBadge();
-setInterval(updateCartBadge, 10000);
 
-// Feedback form submission
+// Star rating functionality with click prevention
+let isSelectingRating = false;
+const stars = document.querySelectorAll('.star');
+const ratingValue = document.getElementById('ratingValue');
+
+stars.forEach(star => {
+  star.addEventListener('click', () => {
+    if (isSelectingRating) return;
+    
+    isSelectingRating = true;
+    const value = star.getAttribute('data-value');
+    ratingValue.value = value;
+    
+    // Update star display
+    stars.forEach((s, index) => {
+      if(index < value) {
+        s.innerHTML = '<i class="fas fa-star"></i>';
+        s.classList.add('active');
+      } else {
+        s.innerHTML = '<i class="far fa-star"></i>';
+        s.classList.remove('active');
+      }
+    });
+    
+    setTimeout(() => {
+      isSelectingRating = false;
+    }, 300);
+  });
+  
+  // Hover effect
+  star.addEventListener('mouseenter', () => {
+    const value = star.getAttribute('data-value');
+    stars.forEach((s, index) => {
+      if(index < value) {
+        s.innerHTML = '<i class="fas fa-star"></i>';
+      } else {
+        s.innerHTML = '<i class="far fa-star"></i>';
+      }
+    });
+  });
+  
+  star.addEventListener('mouseleave', () => {
+    const currentRating = ratingValue.value;
+    stars.forEach((s, index) => {
+      if(currentRating && index < currentRating) {
+        s.innerHTML = '<i class="fas fa-star"></i>';
+      } else {
+        s.innerHTML = '<i class="far fa-star"></i>';
+      }
+    });
+  });
+});
+
+// Feedback form submission with click prevention
+let isSubmittingFeedback = false;
 const form = document.getElementById("feedbackForm");
 form.addEventListener("submit", async function(e){
   e.preventDefault();
+  
+  // Prevent multiple submissions
+  if (isSubmittingFeedback) return;
+  
+  const submitBtn = document.getElementById('submit-feedback-btn');
+  const originalText = submitBtn.innerHTML;
+  
   const csrftoken = getCookie('csrftoken');
-  const data = { message: this.message.value, rating: this.rating.value || null };
+  const data = { 
+    message: this.message.value, 
+    rating: this.rating.value || null 
+  };
 
   try{
+    isSubmittingFeedback = true;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    submitBtn.disabled = true;
+    
     const response = await fetch("{% url 'restaurant:api-feedback' %}", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+      headers: { 
+        "Content-Type": "application/json", 
+        "X-CSRFToken": csrftoken 
+      },
       body: JSON.stringify(data),
       credentials: "same-origin"
     });
+    
     const result = await response.json();
     if(response.ok){
-      alert("Feedback submitted successfully!");
+      showToast("Feedback submitted successfully!");
       form.reset();
+      ratingValue.value = '';
+      stars.forEach(star => {
+        star.innerHTML = '<i class="far fa-star"></i>';
+        star.classList.remove('active');
+      });
     } else {
       let errors = Object.entries(result).map(([field,msgs]) => `${field}: ${msgs}`).join("\n");
-      alert("Error submitting feedback:\n" + errors);
+      showToast("Error submitting feedback. Please try again.");
     }
   }catch(err){
     console.error(err);
-    alert("An error occurred. Please try again.");
+    showToast("An error occurred. Please try again.");
+  } finally {
+    // Reset button state
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+    setTimeout(() => {
+      isSubmittingFeedback = false;
+    }, 1000);
   }
+});
+
+// Live chat and call button functionality with click prevention
+let isCallingHelpDesk = false;
+let isStartingLiveChat = false;
+
+document.getElementById('live-chat-btn')?.addEventListener('click', () => {
+  if (isStartingLiveChat) return;
+  
+  isStartingLiveChat = true;
+  const btn = document.getElementById('live-chat-btn');
+  const originalText = btn.innerHTML;
+  
+  // Show loading state
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+  btn.disabled = true;
+  
+  // Simulate connection delay
+  setTimeout(() => {
+    alert('Live chat feature would open here in a real implementation.');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    isStartingLiveChat = false;
+  }, 800);
+});
+
+document.getElementById('call-help-btn')?.addEventListener('click', () => {
+  if (isCallingHelpDesk) return;
+  
+  isCallingHelpDesk = true;
+  const btn = document.getElementById('call-help-btn');
+  const originalText = btn.innerHTML;
+  
+  // Show loading state
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Dialing...';
+  btn.disabled = true;
+  
+  // Simulate dialing delay
+  setTimeout(() => {
+    alert('Calling help desk at +63 912 345 6789');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    isCallingHelpDesk = false;
+  }, 800);
+});
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up navigation
+  setupNavigationLinks();
+  updateActiveNavState();
+  
+  // Update cart badge
+  updateCartBadge();
+  
+  // Handle page visibility changes
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // Page became visible again, update cart
+      setTimeout(() => {
+        updateCartBadge();
+      }, 300);
+    }
+  });
+  
+  // Prevent rapid scrolling issues
+  let lastScrollTime = 0;
+  window.addEventListener('scroll', function() {
+    const currentTime = Date.now();
+    if (currentTime - lastScrollTime < 50) {
+      // Throttle rapid scrolling
+      return;
+    }
+    lastScrollTime = currentTime;
+  });
+  
+  // Prevent form double submission
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function() {
+      const submitBtn = this.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        setTimeout(() => {
+          submitBtn.disabled = false;
+        }, 3000);
+      }
+    });
+  });
 });
 </script>
 

@@ -1,27 +1,37 @@
-from django.shortcuts import render, redirect
+# ============================================================================
+# IMPORTS
+# ============================================================================
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from rest_framework import viewsets, status
+from django.contrib.auth import logout
+from django.http import JsonResponse
+from django.db import connection
+from django.db.models import Sum, Prefetch
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+
+from rest_framework import viewsets, status, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import MenuItems, Users, Orders, Cart
-from .serializers import MenuItemsSerializer, CartSerializer, OrdersSerializer
-from decimal import Decimal  
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from .models import Orders, Users
-import json
+
 from decimal import Decimal
-from django.utils import timezone
+import json
+from datetime import datetime
+
+from .models import (
+    MenuItems, Users, Orders, Cart, OrderItems, 
+    ContactMessage, Feedback
+)
+from .serializers import (
+    MenuItemsSerializer, CartSerializer, OrdersSerializer,
+    ContactMessageSerializer, FeedbackSerializer
+)
 
 
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
 
-# Menu Items API
-class MenuItemsViewSet(viewsets.ModelViewSet):
-    queryset = MenuItems.objects.all()
-    serializer_class = MenuItemsSerializer
-
-
-# Helper: Get logged-in user
 def get_logged_in_user(request):
     """Return currently logged-in user, or None if not logged in."""
     user_id = request.session.get('user_id')
@@ -33,22 +43,15 @@ def get_logged_in_user(request):
         request.session.flush()
         return None
 
-# Pages
-def home(request):
-    """Render home page."""
-    user = get_logged_in_user(request)
-    return render(request, 'restaurant/index.html', {'user': user})
 
-def dashboard(request):
-    """Render dashboard for logged-in users."""
-    user = get_logged_in_user(request)
-    if not user:
-        return redirect('restaurant:login')
-    return render(request, 'restaurant/index_logged_in.html', {'user': user})
+def format_time(dt):
+    """Convert datetime to string format."""
+    return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else None
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Users
+
+# ============================================================================
+# AUTHENTICATION VIEWS
+# ============================================================================
 
 def login_view(request):
     """Login page handling for all users, redirecting admins to admin dashboard."""
@@ -81,14 +84,146 @@ def login_view(request):
 
 def logout_view(request):
     """Log out the user."""
+    logout(request)  # log out the user
     request.session.flush()
     return redirect('restaurant:login')
 
-from django.db import connection
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from decimal import Decimal
+
+# ============================================================================
+# PUBLIC PAGES
+# ============================================================================
+
+def home(request):
+    """Render home page."""
+    user = get_logged_in_user(request)
+    
+    # Get featured menu items from the database
+    try:
+        # Option 1: Get available meals (you can adjust the filter)
+        featured_items = MenuItems.objects.filter(
+            is_available=1,  # Using 1 for available since it's IntegerField
+            category='meals'  # Assuming you want to feature meals
+        )[:3]
+        
+        # If you want to create a featured flag later, you can add:
+        # featured_items = MenuItems.objects.filter(is_available=1, is_featured=True)[:3]
+        
+        # Convert QuerySet to list of dictionaries for template compatibility
+        featured_items_list = []
+        for item in featured_items:
+            featured_items_list.append({
+                'name': item.name,
+                'description': item.description or '',
+                'price': float(item.price),  # Convert Decimal to float for template
+                'image_url': item.image_url or '',
+                'is_available': item.is_available == 1,
+                'item_id': item.item_id
+            })
+        
+    except Exception as e:
+        print(f"Error fetching featured items: {e}")  # For debugging
+        # Fallback to static items if database query fails
+        featured_items_list = [
+            {
+                'name': 'Adobo',
+                'description': 'Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves.',
+                'price': 180,
+                'image_url': 'https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg',
+                'is_available': True,
+                'item_id': 1
+            },
+            {
+                'name': 'Sinigang',
+                'description': 'A comforting sour soup made with tamarind, fresh vegetables, and your choice of pork.',
+                'price': 200,
+                'image_url': 'https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg',
+                'is_available': True,
+                'item_id': 2
+            }
+        ]
+    
+    context = {
+        'user': user,
+        'featured_items': featured_items_list
+    }
+    
+    return render(request, 'restaurant/index.html', context)
+
+def about(request):
+    """Render about page."""
+    return render(request, 'restaurant/about.html')
+
+
+def contact_page(request):
+    """Render contact page."""
+    return render(request, 'restaurant/contact.html')
+
+
+def menu(request):
+    """Render menu page with categories."""
+    meals = MenuItems.objects.filter(category='meals')
+    drinks = MenuItems.objects.filter(category='drinks')
+    desserts = MenuItems.objects.filter(category='desserts')
+    
+    context = {
+        'meals': meals,
+        'drinks': drinks,
+        'desserts': desserts
+    }
+    return render(request, 'restaurant/mainmenu.html', context)
+
+
+
+
+# ============================================================================
+# USER DASHBOARD & PROFILE
+# ============================================================================
+
+def dashboard(request):
+    """Render dashboard for logged-in users."""
+    user = get_logged_in_user(request)
+    if not user:
+        return redirect('restaurant:login')
+    
+    # Get featured items for logged-in users (you could customize this)
+    featured_items = MenuItems.objects.filter(is_available=1)[:6]  # Show more items on dashboard
+    
+    context = {
+        'user': user,
+        'featured_items': featured_items
+    }
+    
+    return render(request, 'restaurant/index_logged_in.html', context)
+
+
+def profile_view(request):
+    """Render user profile with order history."""
+    user_id = request.session.get('user_id')
+    
+    if not user_id:
+        return redirect('login')
+
+    user = Users.objects.filter(user_id=user_id).first()
+    
+    # Fetch delivered orders for this user
+    orders = Orders.objects.filter(user=user, delivered_at__isnull=False).order_by('-delivered_at')
+
+    context = {
+        'user': user,
+        'orders': orders,
+    }
+    return render(request, 'restaurant/profile.html', context)
+
+
+# ============================================================================
+# MENU ITEMS API
+# ============================================================================
+
+class MenuItemsViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing menu items via REST API."""
+    queryset = MenuItems.objects.all()
+    serializer_class = MenuItemsSerializer
+
 
 def menu_page(request):
     """Render menu page."""
@@ -96,6 +231,10 @@ def menu_page(request):
     items = MenuItems.objects.filter(is_available=1)
     return render(request, 'restaurant/menu.html', {'user': user, 'menu_items': items})
 
+
+# ============================================================================
+# CART VIEWS & APIs
+# ============================================================================
 
 def cart_page(request):
     """Render cart page."""
@@ -108,8 +247,6 @@ def cart_page(request):
     return render(request, 'restaurant/cart.html', {'user': user, 'cart_items': cart_items, 'total': total})
 
 
-
-# Cart APIs
 @api_view(['GET'])
 def cart_api(request):
     """Return current user's cart items."""
@@ -172,7 +309,6 @@ def add_to_cart_api(request):
         return Response({"detail": f"Error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-#remove single cart item
 @api_view(['DELETE'])
 def remove_from_cart_api(request, cart_id):
     """Remove an item from cart (manual delete since managed=False)."""
@@ -189,26 +325,12 @@ def remove_from_cart_api(request, cart_id):
         return Response({"detail": f"Error removing item: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# views.py
-from django.http import JsonResponse
-from decimal import Decimal
-from django.utils import timezone
-import json
+# ============================================================================
+# ORDER PLACEMENT & TRACKING
+# ============================================================================
 
-from .models import Orders, OrderItems, Cart, MenuItems, Users
-
-# Helper to get the logged-in user
-def get_logged_in_user(request):
-    user_id = request.session.get('user_id')  # set this in your login view
-    if not user_id:
-        return None
-    try:
-        return Users.objects.get(user_id=user_id)
-    except Users.DoesNotExist:
-        return None
-
-# Place Order API
 def place_order_api(request):
+    """Place a new order from cart items."""
     if request.method != "POST":
         return JsonResponse({"detail": "Method not allowed"}, status=405)
 
@@ -263,10 +385,6 @@ def place_order_api(request):
         return JsonResponse({"detail": f"Error placing order: {str(e)}"}, status=500)
 
 
-
-
-
-# Order Page View
 def order_view(request):
     """Render order tracking page."""
     user = get_logged_in_user(request)
@@ -283,44 +401,66 @@ def order_view(request):
     return render(request, 'restaurant/order.html', context)
 
 
-
-
-
-# API: Track Order
+@api_view(['GET'])
 def track_order_api(request, order_id):
-    """Return order status and timestamps for tracking."""
-    user = get_logged_in_user(request)
-    if not user:
-        return JsonResponse({'error': 'User not logged in'}, status=403)
+    """Return order status and timestamps for tracking with map coordinates."""
+    order = get_object_or_404(Orders, pk=order_id)
 
-    order = get_object_or_404(Orders, pk=order_id, user=user)
+    # Sample coordinates for demo (Quezon City as start)
+    START_COORDS = [14.6760, 121.0437]
+    
+    # For demo, we convert delivery_address to coordinates manually (or just use a fixed point)
+    # Example: Let's assume all deliveries go to Paranaque for demo
+    end_coords = [14.5176, 121.0509]  # You can adjust per order.delivery_address
 
     steps = ["Order Confirmed", "Preparing Order", "Out for Delivery", "Delivered"]
 
-    # convert all timestamps to localtime
+    # Prepare order timestamps
+    timestamps = {
+        "Order Confirmed": timezone.localtime(order.confirmed_at).strftime("%I:%M %p") if order.confirmed_at else None,
+        "Preparing Order": timezone.localtime(order.preparing_at).strftime("%I:%M %p") if order.preparing_at else None,
+        "Out for Delivery": timezone.localtime(order.out_for_delivery_at).strftime("%I:%M %p") if order.out_for_delivery_at else None,
+        "Delivered": timezone.localtime(order.delivered_at).strftime("%I:%M %p") if order.delivered_at else None,
+    }
+
     data = {
         'order_id': order.order_id,
         'status': order.status or "Order Confirmed",
         'order_date': timezone.localtime(order.order_date).strftime('%Y-%m-%d %H:%M') if order.order_date else None,
         'total_amount': float(order.total_amount),
         'steps': steps,
-        'timestamps': {
-            "Order Confirmed": timezone.localtime(order.confirmed_at).strftime("%I:%M %p") if order.confirmed_at else None,
-            "Preparing Order": timezone.localtime(order.preparing_at).strftime("%I:%M %p") if order.preparing_at else None,
-            "Out for Delivery": timezone.localtime(order.out_for_delivery_at).strftime("%I:%M %p") if order.out_for_delivery_at else None,
-            "Delivered": timezone.localtime(order.delivered_at).strftime("%I:%M %p") if order.delivered_at else None,
-        }
+        'timestamps': timestamps,
+        "start_lat": START_COORDS[0],
+        "start_lng": START_COORDS[1],
+        "end_lat": end_coords[0],
+        "end_lng": end_coords[1],
     }
-    return JsonResponse(data)
+    
+    return Response(data)
 
-def contact_page(request):
-    return render(request, 'restaurant/contact.html')
 
-from rest_framework import generics, permissions
-from .models import ContactMessage, Users
-from .serializers import ContactMessageSerializer
+@csrf_exempt
+def mark_order_seen(request, order_id):
+    """Mark an order as seen by user."""
+    if request.method != "POST":
+        return JsonResponse({"detail": "Method not allowed"}, status=405)
+    
+    try:
+        order = Orders.objects.get(pk=order_id)
+        # Reset timestamps (o mark all as not seen)
+        order.timestamps = {}  # assuming JSONField
+        order.save()
+        return JsonResponse({"detail": "Order marked as seen"})
+    except Orders.DoesNotExist:
+        return JsonResponse({"detail": "Order not found"}, status=404)
+
+
+# ============================================================================
+# CONTACT & FEEDBACK
+# ============================================================================
 
 class ContactMessageListCreateAPIView(generics.ListCreateAPIView):
+    """API for listing and creating contact messages."""
     queryset = ContactMessage.objects.all()
     serializer_class = ContactMessageSerializer
     permission_classes = [permissions.AllowAny]  # or IsAuthenticated if you want
@@ -331,61 +471,30 @@ class ContactMessageListCreateAPIView(generics.ListCreateAPIView):
         user_id = self.request.session.get('user_id')  
         user_instance = Users.objects.filter(user_id=user_id).first() if user_id else None
         serializer.save(user=user_instance)
-        
 
-def about(request):
-    return render(request, 'restaurant/about.html')
 
-from django.shortcuts import render, redirect
-from .models import Users, Orders
-
-def profile_view(request):
-    # Assuming you store the logged-in user's id in the session
-    user_id = request.session.get('user_id')  # Example session key
-    
+@api_view(['POST'])
+def submit_feedback(request):
+    """Submit user feedback."""
+    # Get user from session
+    user_id = request.session.get('user_id')
     if not user_id:
-        # Redirect to login page if not logged in
-        return redirect('login')  
+        return Response({'detail': 'You must be logged in to submit feedback.'}, status=status.HTTP_403_FORBIDDEN)
 
-    user = Users.objects.filter(user_id=user_id).first()
-    
-    # Fetch delivered orders for this user
-    orders = Orders.objects.filter(user=user, delivered_at__isnull=False).order_by('-delivered_at')
-
-    context = {
-        'user': user,
-        'orders': orders,  # Pass orders to template
-    }
-    return render(request, 'restaurant/profile.html', context)
+    user = Users.objects.get(pk=user_id)
+    serializer = FeedbackSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save(user=user, date_submitted=timezone.now())
+        return Response({'message': 'Feedback submitted successfully!'}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-from django.shortcuts import redirect
-from django.contrib.auth import logout
-
-def logout_view(request):
-    logout(request)  # log out the user
-    return redirect('restaurant:login')
-
-from django.shortcuts import render
-from .models import MenuItems
-
-def menu(request):
-    meals = MenuItems.objects.filter(category='meals')
-    drinks = MenuItems.objects.filter(category='drinks')
-    desserts = MenuItems.objects.filter(category='desserts')
-    
-    context = {
-        'meals': meals,
-        'drinks': drinks,
-        'desserts': desserts
-    }
-    return render(request, 'restaurant/mainmenu.html', context)
-
-from django.shortcuts import render
-from django.db.models import Sum
-from .models import Orders, MenuItems, Users, OrderItems
+# ============================================================================
+# ADMIN DASHBOARD
+# ============================================================================
 
 def admin_dashboard(request):
+    """Render admin dashboard with statistics and summaries."""
     # Summary
     total_orders = Orders.objects.count()
     pending_orders = Orders.objects.filter(status='Pending').count()
@@ -432,16 +541,15 @@ def admin_dashboard(request):
     return render(request, 'restaurant/admin_dashboard.html', context)
 
 
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import MenuItems
+# ============================================================================
+# ADMIN MENU MANAGEMENT
+# ============================================================================
 
 def admin_menu(request):
-    """Display all menu items."""
+    """Display all menu items for admin."""
     menu_items = MenuItems.objects.all()
     return render(request, 'restaurant/admin_menu.html', {'menu_items': menu_items})
+
 
 def admin_add_menu(request):
     """Add new menu item."""
@@ -466,6 +574,7 @@ def admin_add_menu(request):
 
     return render(request, 'restaurant/admin_menu_add.html')
 
+
 def admin_edit_menu(request, item_id):
     """Edit existing menu item."""
     item = get_object_or_404(MenuItems, item_id=item_id)
@@ -483,6 +592,7 @@ def admin_edit_menu(request, item_id):
 
     return render(request, 'restaurant/admin_menu_edit.html', {'item': item})
 
+
 def admin_delete_menu(request, item_id):
     """Delete a menu item."""
     item = get_object_or_404(MenuItems, item_id=item_id)
@@ -490,21 +600,13 @@ def admin_delete_menu(request, item_id):
     messages.success(request, f"{item.name} deleted successfully!")
     return redirect('restaurant:admin-menu')
 
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-from .models import Orders
-from .models import Orders, OrderItems
 
-
-
-# =========================
-# ADMIN: LIST ORDERS
-# =========================
-from django.shortcuts import render
-from django.db.models import Prefetch
-from .models import Orders, OrderItems, MenuItems
+# ============================================================================
+# ADMIN ORDER MANAGEMENT
+# ============================================================================
 
 def admin_orders(request):
+    """Display orders filtered by status for admin."""
     # Get status filter from query params
     status_filter = request.GET.get('status', 'pending')
 
@@ -541,10 +643,8 @@ def admin_orders(request):
     )
 
 
-# =========================
-# ADMIN: UPDATE STATUS
-# =========================
 def admin_update_orders(request, order_id):
+    """Update order status with timestamps."""
     order = get_object_or_404(Orders, order_id=order_id)
 
     if request.method == "POST":
@@ -577,12 +677,8 @@ def admin_update_orders(request, order_id):
     return redirect('/admin-orders/')
 
 
-
-# =========================
-# ADMIN: CONFIRM ORDER
-# (PENDING → PREPARING)
-# =========================
 def confirm_order(request, order_id):
+    """Confirm order and move from pending to preparing status."""
     order = get_object_or_404(Orders, order_id=order_id)
 
     if request.method == "POST":
@@ -595,52 +691,15 @@ def confirm_order(request, order_id):
     return redirect('/admin-orders/?status=preparing')
 
 
-from django.shortcuts import render
-from .models import Feedback
-from .serializers import FeedbackSerializer
-
+# ============================================================================
+# ADMIN FEEDBACK MANAGEMENT
+# ============================================================================
 
 def admin_feedback(request):
+    """Display all user feedback for admin."""
     # Fetch all feedback, newest first
     feedback_list = Feedback.objects.all().order_by('-date_submitted')
     context = {
         'feedback_list': feedback_list
     }
     return render(request, 'restaurant/admin_feedback.html', context)
-
-@api_view(['POST'])
-def submit_feedback(request):
-    # Get user from session
-    user_id = request.session.get('user_id')
-    if not user_id:
-        return Response({'detail': 'You must be logged in to submit feedback.'}, status=status.HTTP_403_FORBIDDEN)
-
-    user = Users.objects.get(pk=user_id)
-    serializer = FeedbackSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        serializer.save(user=user, date_submitted=timezone.now())
-        return Response({'message': 'Feedback submitted successfully!'}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from .models import Orders
-
-@csrf_exempt
-def mark_order_seen(request, order_id):
-    if request.method != "POST":
-        return JsonResponse({"detail": "Method not allowed"}, status=405)
-    
-    try:
-        order = Orders.objects.get(pk=order_id)
-        # Reset timestamps (o mark all as not seen)
-        order.timestamps = {}  # assuming JSONField
-        order.save()
-        return JsonResponse({"detail": "Order marked as seen"})
-    except Orders.DoesNotExist:
-        return JsonResponse({"detail": "Order not found"}, status=404)
-
-
-
-
-

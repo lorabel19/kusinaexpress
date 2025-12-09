@@ -74,6 +74,9 @@ class Orders(models.Model):
     out_for_delivery_at = models.DateTimeField(blank=True, null=True)
     delivered_at = models.DateTimeField(blank=True, null=True)
 
+    delivery_lat = models.FloatField(blank=True, null=True)
+    delivery_lng = models.FloatField(blank=True, null=True)
+
     class Meta:
         managed = False
         db_table = 'orders'

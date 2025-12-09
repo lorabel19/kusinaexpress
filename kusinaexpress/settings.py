@@ -13,7 +13,16 @@ SECRET_KEY = 'django-insecure-exw&&qr+q2b=nr6(xo)*hzu8h+kxd7r++16-lc_zizm2d_4d04
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://nonerrantly-unnauseated-marine.ngrok-free.dev'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'https://nonerrantly-unnauseated-marine.ngrok-free.dev'
+]
+
 
 
 # Application definition

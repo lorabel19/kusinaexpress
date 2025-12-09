@@ -4,232 +4,1356 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-body { background-color: #fffaf3; color: #2d2d2d; }
-
-header {
-  background-color: #d62828;
-  color: white;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+/* CSS Variables for theming */
+:root {
+  --primary-color: #C62828; /* Vibrant Red */
+  --primary-dark: #8E1B1B;
+  --secondary-color: #FF9800; /* Orange */
+  --secondary-light: #FFB74D;
+  --accent-color: #FF5722; /* Deep Orange */
+  --background-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --divider-color: #E0E0E0;
+  --success-color: #4CAF50;
+  --warning-color: #F44336;
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-header h1 { font-size: 24px; }
-
-nav { display: flex; align-items: center; gap: 10px; }
-
-nav a {
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: color 0.3s, background 0.3s;
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
 }
 
-nav a:hover { color: #d62828; background: white; }
-
-.auth-button a {
-  background-color: white;
-  color: #d62828;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  text-decoration: none;
+body { 
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color); 
+  color: var(--text-primary); 
+  line-height: 1.6;
+  overflow-x: hidden;
 }
 
-.auth-button a:hover { background-color: #fcbf49; color: #2d2d2d; }
-
-/* Hamburger menu button */
-.menu-toggle {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-  gap: 4px;
-}
-
-.menu-toggle div {
-  width: 25px;
-  height: 3px;
-  background-color: white;
-  transition: 0.3s;
-}
-
-/* Hero section */
-.hero {
-  background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-  url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg');
-  background-size: cover;
-  background-position: center;
-  height: 350px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  text-align: center;
+/* Container for consistent width */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 0 20px;
 }
 
-.hero h2 { font-size: 36px; margin-bottom: 10px; }
-.hero p { font-size: 16px; max-width: 500px; }
+/* --- Modern Header --- */
+header {
+  background-color: var(--surface-color);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-light);
+}
 
-section { padding: 40px 20px; }
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--primary-color);
+  font-size: 28px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* Modern Navigation */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Hide cart badge when empty (0) */
+.cart-count.empty {
+  display: none;
+}
+
+/* Hamburger menu for mobile */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 320px;
+  height: 100vh;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-heavy);
+  padding: 80px 30px 30px;
+  z-index: 999;
+  transition: right 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mobile-nav a i {
+  color: var(--primary-color);
+  width: 24px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* --- Login Modal --- */
+.login-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 40px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-heavy);
+  text-align: center;
+}
+
+.modal-content i {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.modal-content h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.modal-content p {
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.modal-buttons .btn {
+  min-width: 120px;
+}
+
+/* --- Hero Section --- */
+.hero {
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+              url('https://static.vecteezy.com/system/resources/previews/029/287/456/large_2x/ai-generated-of-a-chicken-adobo-on-a-table-free-photo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  text-align: center;
+  padding: 80px 20px;
+  position: relative;
+  margin-bottom: 60px;
+}
+
+.hero-content {
+  max-width: 800px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero h2 { 
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+
+.hero p { 
+  font-size: 18px;
+  margin-bottom: 35px;
+  line-height: 1.6;
+  opacity: 0.95;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero .btn {
+  padding: 16px 36px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: var(--shadow-heavy);
+}
+
+/* --- Stats Bar --- */
+.stats-bar {
+  background: var(--surface-color);
+  padding: 60px 0;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 60px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  text-align: center;
+}
+
+.stat-item {
+  padding: 20px;
+}
+
+.stat-number {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.stat-label {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* --- Section Styling --- */
+section { 
+  padding: 0 0 80px;
+  margin-bottom: 40px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
 
 h2.section-title {
-  text-align: center;
-  color: #d62828;
-  font-size: 28px;
-  margin-bottom: 25px;
-  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 36px;
+  margin-bottom: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.featured, .promotions {
+.title-highlight {
+  color: var(--primary-color);
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+/* --- Featured Cards --- */
+.featured-grid, .promotions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+/* Cards with Modern Style */
+.card {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  border: 1px solid var(--divider-color);
+}
+
+.card:hover { 
+  transform: translateY(-10px);
+  box-shadow: var(--shadow-heavy);
+  border-color: var(--primary-color);
+}
+
+.card-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  background: var(--divider-color);
+}
+
+.card img { 
+  width: 100%; 
+  height: 100%; 
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover img {
+  transform: scale(1.1);
+}
+
+.card-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: var(--surface-color);
+  color: var(--primary-color);
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow-medium);
+}
+
+.card-content {
+  padding: 24px;
+}
+
+.card h3 { 
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.card p { 
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px 24px;
+}
+
+.card-price {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+.card-button {
+  background: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-button:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.card-button:disabled {
+  background-color: var(--divider-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- Promo Section --- */
+.promo-wrapper {
+  background: linear-gradient(135deg, rgba(198, 40, 40, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
+  padding: 80px 0;
+  margin: 60px 0;
+  position: relative;
+}
+
+
+
+/* --- Footer --- */
+footer {
+  background-color: var(--text-primary);
+  color: var(--text-light);
+  padding: 60px 0 30px;
+  margin-top: 60px;
+}
+
+.footer-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 40px;
+  margin-bottom: 40px;
 }
 
-.card {
-  background-color: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.footer-logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-light);
 }
 
-.card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+.footer-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
 
-.card img { width: 100%; height: 180px; object-fit: cover; }
-.card h3 { color: #d62828; margin: 12px 0 8px; font-weight: 700; font-size: 18px; }
-.card p { color: #555; padding: 0 10px 15px; font-size: 14px; line-height: 1.4; }
+.social-links {
+  display: flex;
+  gap: 15px;
+}
 
-footer {
-  background-color: #3a0ca3;
-  color: white;
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--secondary-color);
+  padding-left: 5px;
+}
+
+.newsletter-form {
+  display: flex;
+  margin-top: 15px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 50px 0 0 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 0 50px 50px 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.copyright {
   text-align: center;
-  padding: 20px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 14px;
-  margin-top: 30px;
 }
 
-footer a { color: #fcbf49; text-decoration: none; font-weight: 600; }
-footer a:hover { text-decoration: underline; }
-
-/* Responsive styles */
-@media(max-width: 768px){
-  .menu-toggle { display: flex; }
-
-  nav {
-    flex-direction: column;
-    width: 100%;
-    display: none; /* hide menu initially */
+/* --- Responsive Design --- */
+@media (max-width: 1024px) {
+  .featured-grid, .promotions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
-
-  nav.show { display: flex; }
-
-  nav a { width: 100%; text-align: center; margin: 5px 0; }
-  
-  header h1 { margin-bottom: 10px; }
 }
 
-@media(max-width: 480px){
-  .hero { height: 220px; }
-  .hero h2 { font-size: 22px; }
-  .hero p { font-size: 13px; }
-  .card img { height: 150px; }
-  .card h3 { font-size: 16px; }
-  .card p { font-size: 13px; }
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .menu-toggle {
+    display: flex;
+  }
+  
+  .hero {
+    padding: 60px 20px;
+    min-height: 500px;
+    background-attachment: scroll;
+  }
+  
+  .hero h2 {
+    font-size: 36px;
+  }
+  
+  .hero p {
+    font-size: 16px;
+  }
+  
+  .stats-bar {
+    padding: 40px 0;
+  }
+  
+  .stats-grid {
+    gap: 30px;
+  }
+  
+  .stat-number {
+    font-size: 36px;
+  }
+  
+  h2.section-title {
+    font-size: 30px;
+  }
+  
+  .section-header {
+    margin-bottom: 40px;
+  }
+  
+  .promo-wrapper {
+    padding: 60px 0;
+  }
+  
+  .footer-content {
+    gap: 30px;
+  }
+  
+  .modal-content {
+    padding: 30px 25px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+  
+  .modal-buttons .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    min-height: 400px;
+    padding: 40px 20px;
+  }
+  
+  .hero h2 {
+    font-size: 28px;
+  }
+  
+  .hero p {
+    font-size: 15px;
+  }
+  
+  .cta-group {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .stat-number {
+    font-size: 32px;
+  }
+  
+  h2.section-title {
+    font-size: 26px;
+  }
+  
+  .featured-grid, .promotions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-image-wrapper {
+    height: 200px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    padding: 25px 20px;
+  }
 }
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <header>
-  <h1>KusinaExpress</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h1>KusinaExpress</h1>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
+        <div class="nav-links">
+          <a href="{% url 'restaurant:home' %}" class="active">Home</a>
+          <a href="{% url 'restaurant:public_menu' %}">Menu</a>
+          <a href="#" onclick="handleProtectedLink('Order')">Order</a>
+          <a href="#" onclick="handleProtectedLink('Contact')">Contact</a>
+          <a href="#" onclick="handleProtectedLink('About Us')">About Us</a>
+        </div>
+        <div class="auth-buttons">
+          <a href="{% url 'restaurant:login' %}" class="btn btn-secondary">
+            <i class="fas fa-user"></i> Sign In
+          </a>
+          <a href="#" onclick="handleProtectedLink('Cart')" class="btn btn-primary">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <!-- Cart badge starts at 0 -->
+            <span class="cart-count empty">0</span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
   </div>
-  <nav id="nav-menu">
-    <a href="{% url 'restaurant:home' %}">Home</a>
-    <a href="{% url 'restaurant:public_menu' %}">Menu</a>
-    <a href="{% url 'restaurant:login' %}">Cart</a>
-    <a href="{% url 'restaurant:login' %}">Order</a>
-    <a href="{% url 'restaurant:login' %}">Contact</a>
-    <a href="{% url 'restaurant:login' %}">About Us</a>
-    <div class="auth-button"><a href="/login/">Login / Sign Up</a></div>
-  </nav>
 </header>
 
+<!-- Mobile Navigation -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="{% url 'restaurant:home' %}" class="active">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <a href="{% url 'restaurant:public_menu' %}">
+    <i class="fas fa-utensils"></i> Menu
+  </a>
+  <a href="#" onclick="handleProtectedLink('Order')">
+    <i class="fas fa-shopping-bag"></i> Order
+  </a>
+  <a href="#" onclick="handleProtectedLink('Contact')">
+    <i class="fas fa-phone-alt"></i> Contact
+  </a>
+  <a href="#" onclick="handleProtectedLink('About Us')">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <a href="{% url 'restaurant:login' %}" class="btn btn-secondary" style="justify-content: center;">
+      <i class="fas fa-user"></i> Sign In
+    </a>
+    <!-- UPDATED MOBILE CART BUTTON -->
+    <a href="#" onclick="handleProtectedLink('Cart')" 
+       class="btn" 
+       style="justify-content: center; 
+              background-color: #C62828; 
+              border-color: #C62828; 
+              color: white;">
+      <i class="fas fa-shopping-cart" style="color: white;"></i> Cart
+      <!-- Cart badge hidden by default -->
+      <span class="cart-count empty">0</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Login Modal -->
+<div class="login-modal" id="loginModal">
+  <div class="modal-content">
+    <i class="fas fa-user-lock"></i>
+    <h3 id="modalTitle">Login Required</h3>
+    <p id="modalMessage">You need to log in to access this feature. Sign in to continue.</p>
+    <div class="modal-buttons">
+      <a href="{% url 'restaurant:login' %}" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </a>
+      <button class="btn btn-secondary" onclick="closeLoginModal()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Hero Section -->
 <section class="hero">
-  <h2>Welcome to KusinaExpress</h2>
-  <p>Bringing Filipino comfort food straight to your doorstep fast, fresh, and flavorful!</p>
-</section>
-
-<section>
-  <h2 class="section-title">Featured Dishes</h2>
-  <div class="featured">
-    <div class="card">
-      <img src="https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg" alt="Adobo">
-      <h3>Adobo</h3>
-      <p>Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves – a Filipino classic.</p>
-    </div>
-    <div class="card">
-      <img src="https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg" alt="Sinigang">
-      <h3>Sinigang</h3>
-      <p>A comforting sour soup made with tamarind, fresh vegetables, and your choice of pork, shrimp, or fish.</p>
-    </div>
-    <div class="card">
-      <img src="https://www.maggi.ph/sites/default/files/inline-images/Bulalo.jpg" alt="Kare-Kare">
-      <h3>Kare-Kare</h3>
-      <p>Rich peanut stew with oxtail and vegetables, best paired with bagoong (shrimp paste).</p>
+  <div class="container">
+    <div class="hero-content">
+      <h2>Welcome to KusinaExpress</h2>
+      <p>Bringing Filipino comfort food straight to your doorstep — fast, fresh, and flavorful!</p>
+      <div class="cta-group">
+        <a href="{% url 'restaurant:public_menu' %}" class="btn btn-primary">Browse Menu</a>
+        <a href="#" onclick="handleProtectedLink('Track Order')" class="btn btn-secondary">Track Order</a>
+      </div>
     </div>
   </div>
 </section>
 
-<section>
-  <h2 class="section-title">Promotions & Deals</h2>
-  <div class="promotions">
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-number">5000+</span>
+        <span class="stat-label">Happy Customers</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">50+</span>
+        <span class="stat-label">Menu Items</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">30min</span>
+        <span class="stat-label">Average Delivery</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">4.8★</span>
+        <span class="stat-label">Customer Rating</span>
+      </div>
+</div>
+  </div>
+</div>
+
+<!-- Featured Dishes Section - MODIFIED VERSION -->
+<section class="container">
+  <div class="section-header">
+    <h2 class="section-title">Our <span class="title-highlight">Featured Dishes</span></h2>
+    <p class="section-subtitle">Savor the authentic taste of Filipino cuisine</p>
+  </div>
+  <div class="featured-grid">
+    {% for item in featured_items|slice:":3" %}
     <div class="card">
-      <img src="https://img.ph.my-best.com/product_images/5e045c5b532c925cf2dcb2ca7f864bc0.jpg" alt="Meal Combo">
-      <h3>Meal Combo</h3>
-      <p>Enjoy more for less! Choose from our best-selling dishes paired with rice and a drink.</p>
+      <div class="card-image-wrapper">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+        <div class="card-badge">
+          {% if forloop.counter == 1 %}🔥 Popular
+          {% elif forloop.counter == 2 %}👨‍🍳 Chef's Pick
+          {% else %}⭐ Traditional{% endif %}
+        </div>
+      </div>
+      <div class="card-content">
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.description|truncatewords:20 }}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱{{ item.price }}</span>
+        <button class="card-button" onclick="handleAddToCart(this)" 
+                {% if item.is_available == 0 %}disabled{% endif %}>
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    </div>
+    {% empty %}
+    <!-- Fallback dishes if no featured items -->
+    <div class="card">
+      <div class="card-image-wrapper">
+        <img src="https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg" alt="Adobo">
+        <div class="card-badge">🔥 Popular</div>
+      </div>
+      <div class="card-content">
+        <h3>Adobo</h3>
+        <p>Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves.</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱180</span>
+        <button class="card-button" onclick="handleAddToCart(this)">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
     </div>
     <div class="card">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Free Delivery">
-      <h3>Free Delivery</h3>
-      <p>Order now and get your favorite Filipino dishes delivered with no delivery charge for minimum orders!</p>
+      <div class="card-image-wrapper">
+        <img src="https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg" alt="Sisig">
+        <div class="card-badge">👨‍🍳 Chef's Pick</div>
+      </div>
+      <div class="card-content">
+        <h3>Sisig</h3>
+        <p>Sizzling pork cheeks and ears with onions, chili, and calamansi - a perfect pulutan!</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱220</span>
+        <button class="card-button" onclick="handleAddToCart(this)">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
     </div>
     <div class="card">
-      <img src="https://www.nagacityguide.com/wordpress/wp-content/uploads/2023/09/photo_2023-09-06_12-13-07.jpg" alt="Student Discount">
-      <h3>Student Discount</h3>
-      <p>Students get 10% off on all meals! Just present your valid school ID upon checkout.</p>
+      <div class="card-image-wrapper">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Lechon Kawali">
+        <div class="card-badge">⭐ Traditional</div>
+      </div>
+      <div class="card-content">
+        <h3>Lechon Kawali</h3>
+        <p>Crispy deep-fried pork belly served with lechon sauce and steamed rice.</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱250</span>
+        <button class="card-button" onclick="handleAddToCart(this)">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
     </div>
+    {% endfor %}
   </div>
 </section>
 
+<!-- Promotions -->
+<div class="promo-wrapper">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title"><span class="title-highlight">Special</span> Promotions</h2>
+      <p class="section-subtitle">Limited time offers just for you</p>
+    </div>
+    <div class="promotions-grid">
+      <div class="card">
+        <div class="card-image-wrapper">
+          <img src="https://img.ph.my-best.com/product_images/5e045c5b532c925cf2dcb2ca7f864bc0.jpg" alt="Meal Combo">
+          <div class="card-badge">💰 Save 20%</div>
+        </div>
+        <div class="card-content">
+          <h3>Meal Combo</h3>
+          <p>Enjoy more for less! Choose from our best-selling dishes paired with rice and a drink.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image-wrapper">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Free Delivery">
+          <div class="card-badge">🚚 Free</div>
+        </div>
+        <div class="card-content">
+          <h3>Free Delivery</h3>
+          <p>Order now and get your favorite Filipino dishes delivered with no delivery charge for minimum orders!</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-image-wrapper">
+          <img src="https://www.nagacityguide.com/wordpress/wp-content/uploads/2023/09/photo_2023-09-06_12-13-07.jpg" alt="Student Discount">
+          <div class="card-badge">🎓 10% Off</div>
+        </div>
+        <div class="card-content">
+          <h3>Student Discount</h3>
+          <p>Students get 10% off on all meals! Just present your valid school ID upon checkout.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
 <footer>
-  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">KusinaExpress</div>
+        <p class="footer-description">Bringing authentic Filipino comfort food straight to your doorstep since 2020. Fast, fresh, and flavorful!</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="{% url 'restaurant:home' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:public_menu' %}">Menu</a></li>
+          <li><a href="#" onclick="handleProtectedLink('Order Online')">Order Online</a></li>
+          <li><a href="#" onclick="handleProtectedLink('Catering')">Catering</a></li>
+          <li><a href="#" onclick="handleProtectedLink('Gift Cards')">Gift Cards</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Contact Info</h3>
+        <ul class="footer-links">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> 123 Food Street, Manila, Philippines</li>
+          <li><i class="fas fa-phone-alt" style="margin-right: 10px;"></i> +63 912 345 6789</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> hello@kusinaexpress.com</li>
+          <li><i class="fas fa-clock" style="margin-right: 10px;"></i> Open Daily: 10AM - 10PM</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Newsletter</h3>
+        <p class="footer-description">Subscribe to get updates on new dishes and exclusive offers.</p>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address">
+          <button class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>© 2025 KusinaExpress. All rights reserved. | Proudly Serving Filipino Flavors</p>
+    </div>
+  </div>
 </footer>
 
 <script>
-const toggle = document.getElementById('menu-toggle');
-const nav = document.getElementById('nav-menu');
+// Check if user is logged in (simulated)
+// In a real app, this would check from Django context or localStorage
+const isLoggedIn = false; // Change this to true when user is logged in
 
-toggle.addEventListener('click', () => {
-  nav.classList.toggle('show');
+// Mobile menu toggle
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
+
+menuToggle.addEventListener('click', () => {
+  menuToggle.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
+});
+
+overlay.addEventListener('click', () => {
+  menuToggle.classList.remove('active');
+  mobileNav.classList.remove('active');
+  overlay.classList.remove('active');
+  document.body.style.overflow = 'auto';
+});
+
+// Handle protected links (Order, Contact, About Us, Cart, Track Order)
+function handleProtectedLink(featureName) {
+  if (!isLoggedIn) {
+    // Customize modal message based on feature
+    let message = `You need to log in to access ${featureName}. Sign in to continue.`;
+    
+    if (featureName === 'Cart') {
+      message = "You need to log in to view your cart. Sign in to see your items and checkout.";
+    } else if (featureName === 'Track Order') {
+      message = "You need to log in to track your orders. Sign in to see your order status.";
+    } else if (featureName === 'Contact') {
+      message = "You need to log in to contact us. Sign in to send us a message or get support.";
+    } else if (featureName === 'About Us') {
+      message = "You need to log in to learn more about us. Sign in to access our story and team info.";
+    }
+    
+    // Update modal content
+    document.getElementById('modalTitle').textContent = `Login Required for ${featureName}`;
+    document.getElementById('modalMessage').textContent = message;
+    
+    // Show modal
+    showLoginModal();
+  } else {
+    // User is logged in - redirect to appropriate page
+    // This would be replaced with actual URLs in a real application
+    switch(featureName) {
+      case 'Order':
+        window.location.href = "{% url 'restaurant:login' %}";
+        break;
+      case 'Cart':
+        window.location.href = "{% url 'restaurant:cart' %}";
+        break;
+      case 'Track Order':
+        window.location.href = "{% url 'restaurant:login' %}";
+        break;
+      case 'Contact':
+        window.location.href = "{% url 'restaurant:login' %}";
+        break;
+      case 'About Us':
+        window.location.href = "{% url 'restaurant:login' %}";
+        break;
+      default:
+        // Default fallback
+        window.location.href = "{% url 'restaurant:login' %}";
+    }
+  }
+}
+
+// Login Modal Functions
+function showLoginModal() {
+  document.getElementById('loginModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLoginModal() {
+  document.getElementById('loginModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('loginModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeLoginModal();
+  }
+});
+
+// Handle add to cart with login check
+function handleAddToCart(button) {
+  if (!isLoggedIn) {
+    // Show login modal if user is not logged in
+    document.getElementById('modalTitle').textContent = 'Login Required for Cart';
+    document.getElementById('modalMessage').textContent = "You need to log in to add items to your cart. Sign in to continue shopping.";
+    showLoginModal();
+    return;
+  }
+  
+  // If user is logged in, proceed with adding to cart
+  addToCart(button);
+}
+
+// Add to cart functionality (only works when logged in)
+const cartCountElements = document.querySelectorAll('.cart-count');
+let cartItems = 0; // Start with 0 items
+
+function addToCart(button) {
+  const card = button.closest('.card');
+  const itemName = card.querySelector('h3').textContent;
+  const itemPrice = card.querySelector('.card-price').textContent;
+  
+  // Animation effect
+  button.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    button.style.transform = 'scale(1)';
+  }, 150);
+  
+  // Update cart count
+  cartItems++;
+  updateCartBadge();
+  
+  // Visual feedback
+  const originalText = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-check"></i> Added!';
+  button.style.backgroundColor = '#4CAF50';
+  button.disabled = true;
+  
+  // Show notification
+  showNotification(`${itemName} added to cart!`);
+  
+  setTimeout(() => {
+    button.innerHTML = originalText;
+    button.style.backgroundColor = '';
+    button.disabled = false;
+  }, 2000);
+}
+
+// Update cart badge function - hide when 0
+function updateCartBadge() {
+  // Update all cart count badges
+  const cartBadges = document.querySelectorAll('.cart-count');
+  cartBadges.forEach(badge => {
+    badge.textContent = cartItems;
+    
+    // Hide badge if cart is empty (0 items)
+    if (cartItems === 0) {
+      badge.classList.add('empty');
+    } else {
+      badge.classList.remove('empty');
+    }
+  });
+}
+
+// Show notification function
+function showNotification(message) {
+  // Check if notification element already exists
+  let notification = document.getElementById('notification');
+  
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--primary-color);
+      color: white;
+      padding: 15px 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-heavy);
+      z-index: 9999;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    `;
+    document.body.appendChild(notification);
+  }
+  
+  notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+  
+  // Show notification
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // Hide notification after 3 seconds
+  setTimeout(() => {
+    notification.style.transform = 'translateX(150%)';
+  }, 3000);
+}
+
+// Initialize cart badge - hide because it's 0
+updateCartBadge();
+
+// Prevent default behavior for protected links
+document.addEventListener('DOMContentLoaded', function() {
+  // Add click event listeners to all protected links in footer
+  const protectedLinks = document.querySelectorAll('a[onclick*="handleProtectedLink"]');
+  protectedLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      // We'll let the onclick handler manage everything
+    });
+  });
 });
 </script>
 

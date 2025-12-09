@@ -5,217 +5,1311 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-  body { background-color:#fffaf3; color:#2d2d2d; }
+/* CSS Variables for theming - EXACT SAME AS HOMEPAGE */
+:root {
+  --primary-color: #C62828; /* Vibrant Red */
+  --primary-dark: #8E1B1B;
+  --secondary-color: #FF9800; /* Orange */
+  --secondary-light: #FFB74D;
+  --accent-color: #FF5722; /* Deep Orange */
+  --background-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --divider-color: #E0E0E0;
+  --success-color: #4CAF50;
+  --warning-color: #F44336;
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
-  /* === HEADER === */
-  header {
-    background-color: #d62828;
-    color: white;
-    padding: 20px 40px;
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+body { 
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color); 
+  color: var(--text-primary); 
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Container for consistent width */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- EXACT SAME Header as Homepage --- */
+header {
+  background-color: var(--surface-color);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-light);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--primary-color);
+  font-size: 28px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* Modern Navigation */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+.btn-secondary.active {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: none; /* FIX: Hidden by default */
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  z-index: 1;
+}
+
+/* FIX: Mobile cart button text and icon - force white */
+.mobile-nav .btn-primary {
+  color: var(--text-light) !important;
+}
+
+.mobile-nav .btn-primary i {
+  color: var(--text-light) !important;
+}
+
+/* Hamburger menu for mobile */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 320px;
+  height: 100vh;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-heavy);
+  padding: 80px 30px 30px;
+  z-index: 999;
+  transition: right 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mobile-nav a i {
+  color: var(--primary-color);
+  width: 24px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* --- Main Profile Content --- */
+main { 
+  padding: 80px 0;
+  min-height: 70vh;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.profile-header h2 {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 36px;
+  margin-bottom: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.profile-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+/* User Profile Summary */
+.user-summary {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 40px;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 40px;
+  border: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.user-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 48px;
+  font-weight: 600;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-info h3 {
+  color: var(--text-primary);
+  font-size: 28px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.user-info p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info p i {
+  color: var(--primary-color);
+  width: 20px;
+}
+
+/* HORIZONTAL Profile Cards - 4 in a row */
+.profile-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.profile-card {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  border: 1px solid var(--divider-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-heavy);
+  border-color: var(--primary-color);
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+}
+
+.profile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.profile-card-header i {
+  color: var(--primary-color);
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  background: rgba(198, 40, 40, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-card-header h3 {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.profile-card p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  flex: 1;
+}
+
+.profile-card-button {
+  background: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.profile-card-button:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: var(--text-light);
+  border-color: transparent;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Logout Section */
+.logout-section {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.logout-button {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: var(--text-light);
+  border: none;
+  padding: 16px 40px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: var(--shadow-medium);
+}
+
+.logout-button:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-heavy);
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+  background: var(--surface-color);
+  margin: 80px auto;
+  padding: 40px;
+  border-radius: var(--border-radius);
+  max-width: 900px;
+  box-shadow: var(--shadow-heavy);
+  position: relative;
+}
+
+.close {
+  color: var(--primary-color);
+  font-size: 32px;
+  font-weight: bold;
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.close:hover {
+  color: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.modal-header {
+  margin-bottom: 30px;
+}
+
+.modal-header h3 {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.order-table th {
+  background: var(--primary-color);
+  color: var(--text-light);
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-radius: 8px 8px 0 0;
+}
+
+.order-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--divider-color);
+  color: var(--text-secondary);
+}
+
+.order-table tr:hover {
+  background: rgba(198, 40, 40, 0.05);
+}
+
+.order-table .status-delivered {
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+/* --- EXACT SAME Footer as Homepage --- */
+footer {
+  background-color: var(--text-primary);
+  color: var(--text-light);
+  padding: 60px 0 30px;
+  margin-top: 60px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-light);
+}
+
+.footer-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--secondary-color);
+  padding-left: 5px;
+}
+
+.newsletter-form {
+  display: flex;
+  margin-top: 15px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 50px 0 0 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 0 50px 50px 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .profile-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .profile-cards {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .menu-toggle {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
   }
-  header h1 { font-size:26px; letter-spacing:1px; }
-
-  nav {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    position:relative;
+  
+  main {
+    padding: 60px 0;
   }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position: relative; }
-  nav a:hover { color:#fcbf49; }
-  .cart-badge { position: absolute; top: -5px; right: -17px; background:red; color:white; font-size:12px; font-weight:bold; border-radius:50%; padding:2px 6px; display:none; }
-  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
-  .auth-button a img { width:30px; height:30px; border-radius:50%; }
-
-  /* Hamburger menu */
-  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
-  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
-
-  /* === MAIN PROFILE CONTENT === */
-  main { max-width:1200px; margin:40px auto; padding:0 20px; }
-  .profile-container { background:#fff; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.1); padding:40px 30px; }
-  .profile-container h2 { text-align:center; color:#d62828; font-size:36px; margin-bottom:50px; font-weight:700; }
-  .profile-summary-info h3 { font-size:28px; color:#d62828; margin-bottom:10px; }
-  .profile-summary-info p { font-size:16px; color:#555; }
-  .profile-section { background:#f8eded; border-radius:15px; padding:25px 30px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; transition: transform 0.3s, box-shadow 0.3s; }
-  .profile-section:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
-  .profile-section h3 { color:#d62828; font-size:20px; }
-  .profile-section p { flex:1; margin:0 20px; color:#444; font-size:15px; }
-  .profile-section button { background:#d62828; color:white; border:none; padding:10px 25px; border-radius:8px; cursor:pointer; font-weight:600; transition:background 0.3s; }
-  .profile-section button:hover { background:#b71c1c; }
-  .logout-container { display:flex; justify-content:center; margin-top:40px; }
-  .logout-container button { background:#d62828; color:white; border:none; padding:12px 35px; font-size:16px; font-weight:700; border-radius:10px; cursor:pointer; transition:background 0.3s; }
-  .logout-container button:hover { background:#b71c1c; }
-
-  /* === FOOTER === */
-  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
-  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
-  footer a:hover { text-decoration:underline; }
-
-  /* === MODAL STYLES === */
-  .modal { display:none; position:fixed; z-index:200; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.5); }
-  .modal-content { background:#fff; margin:80px auto; padding:20px; border-radius:12px; max-width:800px; box-shadow:0 8px 25px rgba(0,0,0,0.2); position:relative; }
-  .close { color:#d62828; font-size:28px; font-weight:bold; position:absolute; top:10px; right:15px; cursor:pointer; }
-  .order-table { width:100%; border-collapse:collapse; margin-top:15px; }
-  .order-table th, .order-table td { padding:12px; text-align:left; border-bottom:1px solid #ddd; }
-  .order-table th { background:#d62828; color:white; }
-
-  /* === RESPONSIVE === */
-  @media(max-width:768px){
-    nav { display:none; flex-direction:column; width:100%; gap:10px; }
-    nav.show { display:flex; }
-    nav a { width:100%; text-align:center; margin:5px 0; }
-    .menu-toggle { display:flex; }
+  
+  .user-summary {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px;
   }
+  
+  .user-avatar {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+  }
+  
+  .profile-cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .modal-content {
+    margin: 40px auto;
+    padding: 30px 20px;
+  }
+  
+  .order-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .footer-content {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-header h2 {
+    font-size: 28px;
+  }
+  
+  .user-summary {
+    padding: 25px;
+  }
+  
+  .user-info h3 {
+    font-size: 24px;
+  }
+  
+  .modal-content {
+    margin: 20px auto;
+    padding: 25px 15px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- Header (EXACT SAME as Homepage) -->
 <header>
-  <h1>KusinaExpress</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-  <nav id="nav-menu">
-    <a href="{% url 'restaurant:dashboard' %}">Home</a>
-    <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">
-      Cart <span id="cartBadge" class="cart-badge"></span>
-    </a>
-    <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="{% url 'restaurant:contact' %}">Contact</a>
-    <a href="{% url 'restaurant:about' %}">About Us</a>
-    <div class="auth-button">
-      {% if user %}
-        <a href="{% url 'restaurant:profile' %}">
-          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-        </a>
-      {% endif %}
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h1>KusinaExpress</h1>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
+        <div class="nav-links">
+          <a href="{% url 'restaurant:dashboard' %}">Home</a>
+          <a href="{% url 'restaurant:menu' %}">Menu</a>
+          <a href="{% url 'restaurant:order' %}">Order</a>
+          <a href="{% url 'restaurant:contact' %}">Contact</a>
+          <a href="{% url 'restaurant:about' %}">About Us</a>
+        </div>
+        <div class="auth-buttons">
+          <!-- USER IS LOGGED IN - Profile button active -->
+          <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary active">
+            <i class="fas fa-user-circle"></i> Profile
+          </a>
+          <a href="{% url 'restaurant:cart' %}" class="btn btn-primary">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count" id="desktop-cart-badge"></span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-  </nav>
+  </div>
 </header>
 
-<!-- MAIN PROFILE CONTENT -->
-<main>
-  <div class="profile-container">
+<!-- Mobile Navigation (EXACT SAME as Homepage) -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="{% url 'restaurant:dashboard' %}">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <a href="{% url 'restaurant:menu' %}">
+    <i class="fas fa-utensils"></i> Menu
+  </a>
+  <a href="{% url 'restaurant:order' %}">
+    <i class="fas fa-shopping-bag"></i> Order
+  </a>
+  <a href="{% url 'restaurant:contact' %}">
+    <i class="fas fa-phone-alt"></i> Contact
+  </a>
+  <a href="{% url 'restaurant:about' %}">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <!-- USER IS LOGGED IN - Profile button active -->
+    <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary active" style="justify-content: center;">
+      <i class="fas fa-user-circle"></i> Profile
+    </a>
+    <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" style="justify-content: center;">
+      <i class="fas fa-shopping-cart"></i> Cart
+      <span class="cart-count" id="mobile-cart-badge"></span>
+    </a>
+  </div>
+</nav>
+
+<!-- Main Profile Content -->
+<main class="container">
+  <div class="profile-header">
     <h2>My Profile</h2>
+    <p class="profile-subtitle">Manage your account, orders, and preferences</p>
+  </div>
 
-    <div class="profile-summary-info">
+  <!-- User Summary -->
+  <div class="user-summary">
+    <div class="user-avatar">
+      {{ user.first_name|first }}{{ user.last_name|first }}
+    </div>
+    <div class="user-info">
       <h3>{{ user.first_name }} {{ user.last_name }}</h3>
-      <p>Email: {{ user.email }}</p>
-      <p>Member since: {{ user.date_joined|date:"F Y" }}</p>
+      <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+      <p><i class="fas fa-calendar-alt"></i> Member since: {{ user.date_joined|date:"F Y" }}</p>
+      <p><i class="fas fa-user-clock"></i> Last login: {{ user.last_login|date:"M d, Y H:i"|default:"Recently" }}</p>
+    </div>
+  </div>
+
+  <!-- HORIZONTAL Profile Cards - 4 in a row -->
+  <div class="profile-cards">
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="fas fa-receipt"></i>
+        <h3>Order History</h3>
+      </div>
+      <p>Check your previous food orders, view digital receipts, and track your favorite meals.</p>
+      <button class="profile-card-button" id="viewOrdersBtn">
+        <i class="fas fa-eye"></i> View Orders
+      </button>
     </div>
 
-    <div class="profile-section">
-      <h3>Order History</h3>
-      <p>Check your previous food orders and digital receipts easily.</p>
-      <button id="viewOrdersBtn">View Orders</button>
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="fas fa-map-marker-alt"></i>
+        <h3>Saved Addresses</h3>
+      </div>
+      <p>Manage and update your delivery addresses for quicker checkout and better delivery experience.</p>
+      <button class="profile-card-button">
+        <i class="fas fa-edit"></i> Manage Address
+      </button>
     </div>
 
-    <div class="profile-section">
-      <h3>Saved Addresses</h3>
-      <p>Manage and update your delivery addresses for quicker checkout.</p>
-      <button>Manage Address</button>
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="fas fa-credit-card"></i>
+        <h3>Payment Methods</h3>
+      </div>
+      <p>View or change your linked payment methods including GCash, credit cards, and other e-wallets.</p>
+      <button class="profile-card-button">
+        <i class="fas fa-wallet"></i> Manage Payment
+      </button>
     </div>
 
-    <div class="profile-section">
-      <h3>Payment Methods</h3>
-      <p>View or change your linked payment methods like GCash or cards.</p>
-      <button>Manage Payment</button>
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="fas fa-cog"></i>
+        <h3>Account Settings</h3>
+      </div>
+      <p>Edit personal information, update notification preferences, and manage your account security.</p>
+      <button class="profile-card-button">
+        <i class="fas fa-sliders-h"></i> Open Settings
+      </button>
     </div>
+  </div>
 
-    <div class="profile-section">
-      <h3>Settings</h3>
-      <p>Edit personal information and update your account preferences.</p>
-      <button>Open Settings</button>
-    </div>
-
-    <div class="logout-container">
-      <form method="POST" action="{% url 'restaurant:logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-      </form>
-    </div>
+  <!-- Logout Section -->
+  <div class="logout-section">
+    <form method="POST" action="{% url 'restaurant:logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="logout-button">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </form>
   </div>
 </main>
 
-<!-- MODAL FOR ORDER HISTORY -->
+<!-- Modal for Order History -->
 <div id="orderModal" class="modal">
   <div class="modal-content">
     <span class="close" id="closeModal">&times;</span>
-    <h3>Your Delivered Orders</h3>
-    <table class="order-table">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Date</th>
-          <th>Total</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for order in orders %}
-          {% if order.delivered_at %}
+    <div class="modal-header">
+      <h3>Your Delivered Orders</h3>
+    </div>
+    <div style="overflow-x: auto;">
+      <table class="order-table">
+        <thead>
           <tr>
-            <td>{{ order.order_id }}</td>
-            <td>{{ order.delivered_at|date:"M d, Y H:i" }}</td>
-            <td>₱{{ order.total_amount }}</td>
-            <td>Delivered</td>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
           </tr>
-          {% endif %}
-        {% empty %}
-          <tr><td colspan="4">No delivered orders yet.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            {% if order.delivered_at %}
+            <tr>
+              <td>#{{ order.order_id|stringformat:"06d" }}</td>
+              <td>{{ order.delivered_at|date:"M d, Y H:i" }}</td>
+              <td>{{ order.items_count }} items</td>
+              <td>₱{{ order.total_amount }}</td>
+              <td class="status-delivered">Delivered</td>
+            </tr>
+            {% endif %}
+          {% empty %}
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 40px;">
+                <i class="fas fa-shopping-bag" style="font-size: 48px; color: var(--divider-color); margin-bottom: 15px; display: block;"></i>
+                <p style="color: var(--text-secondary);">No delivered orders yet.</p>
+                <a href="{% url 'restaurant:menu' %}" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Start ordering →</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- FOOTER -->
+<!-- Footer (EXACT SAME as Homepage) -->
 <footer>
-  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">KusinaExpress</div>
+        <p class="footer-description">Bringing authentic Filipino comfort food straight to your doorstep since 2020. Fast, fresh, and flavorful!</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="{% url 'restaurant:dashboard' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:menu' %}">Menu</a></li>
+          <li><a href="{% url 'restaurant:order' %}">Order Online</a></li>
+          <li><a href="{% url 'restaurant:contact' %}">Catering</a></li>
+          <li><a href="{% url 'restaurant:about' %}">Gift Cards</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Contact Info</h3>
+        <ul class="footer-links">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> 123 Food Street, Manila, Philippines</li>
+          <li><i class="fas fa-phone-alt" style="margin-right: 10px;"></i> +63 912 345 6789</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> hello@kusinaexpress.com</li>
+          <li><i class="fas fa-clock" style="margin-right: 10px;"></i> Open Daily: 10AM - 10PM</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Newsletter</h3>
+        <p class="footer-description">Subscribe to get updates on new dishes and exclusive offers.</p>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address">
+          <button class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>© 2025 KusinaExpress. All rights reserved. | Proudly Serving Filipino Flavors</p>
+    </div>
+  </div>
 </footer>
 
 <script>
-// Hamburger toggle
-const toggle = document.getElementById('menu-toggle');
-const nav = document.getElementById('nav-menu');
-toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
+// ============================================
+// MOBILE MENU TOGGLE - SIMPLE
+// ============================================
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
 
-// Open modal
+let isMenuAnimating = false;
+
+menuToggle.addEventListener('click', () => {
+  if (isMenuAnimating) return;
+  
+  isMenuAnimating = true;
+  menuToggle.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
+  
+  setTimeout(() => {
+    isMenuAnimating = false;
+  }, 400);
+});
+
+overlay.addEventListener('click', () => {
+  if (isMenuAnimating) return;
+  
+  isMenuAnimating = true;
+  menuToggle.classList.remove('active');
+  mobileNav.classList.remove('active');
+  overlay.classList.remove('active');
+  document.body.style.overflow = 'auto';
+  
+  setTimeout(() => {
+    isMenuAnimating = false;
+  }, 400);
+});
+
+// ============================================
+// CART BADGE LOGIC - FIXED (Same as homepage)
+// ============================================
+// Function to update cart badges - SIMPLIFIED VERSION
+function updateCartBadges(count) {
+  const desktopBadge = document.getElementById('desktop-cart-badge');
+  const mobileBadge = document.getElementById('mobile-cart-badge');
+  
+  // FIX: Only show when count > 0
+  if (count > 0) {
+    if (desktopBadge) {
+      desktopBadge.textContent = count;
+      desktopBadge.style.display = 'flex';
+    }
+    if (mobileBadge) {
+      mobileBadge.textContent = count;
+      mobileBadge.style.display = 'flex';
+    }
+  } else {
+    // Hide badges when count is 0
+    if (desktopBadge) {
+      desktopBadge.style.display = 'none';
+      desktopBadge.textContent = '';
+    }
+    if (mobileBadge) {
+      mobileBadge.style.display = 'none';
+      mobileBadge.textContent = '';
+    }
+  }
+}
+
+// Main cart update function - FIXED with proper error handling
+async function updateCartData() {
+  try {
+    const response = await fetch('/api/cart/', {
+      method: 'GET',
+      headers: { 
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache'
+      },
+      cache: 'no-cache'
+    });
+    
+    if (!response.ok) {
+      console.warn('Cart API response not OK:', response.status);
+      updateCartBadges(0);
+      return;
+    }
+    
+    const items = await response.json();
+    
+    // Calculate total quantity safely
+    let count = 0;
+    if (Array.isArray(items)) {
+      count = items.reduce((total, item) => {
+        const qty = parseInt(item.quantity) || 0;
+        return total + qty;
+      }, 0);
+    }
+    
+    updateCartBadges(count);
+    
+  } catch (error) {
+    console.warn('Cart update error:', error);
+    // Hide badges on error
+    updateCartBadges(0);
+  }
+}
+
+// Initialize cart on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Initial update
+  setTimeout(updateCartData, 100);
+  
+  // Update when page becomes visible
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      setTimeout(updateCartData, 200);
+    }
+  });
+  
+  // Update when window gains focus
+  window.addEventListener('focus', function() {
+    setTimeout(updateCartData, 300);
+  });
+  
+  // Update when clicking on cart links (but wait a bit for the page to load)
+  document.querySelectorAll('a[href*="cart"]').forEach(link => {
+    link.addEventListener('click', function() {
+      setTimeout(updateCartData, 500);
+    });
+  });
+  
+  // Optional: Periodic update (every 60 seconds instead of 30 to reduce load)
+  setInterval(updateCartData, 60000);
+  
+  // Add hover effects to navigation links
+  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
+    link.addEventListener('mouseenter', function() {
+      this.style.color = 'var(--primary-color)';
+    });
+    link.addEventListener('mouseleave', function() {
+      // Only reset if not active
+      if (!this.classList.contains('active')) {
+        this.style.color = '';
+      }
+    });
+  });
+});
+
+// ============================================
+// MODAL FUNCTIONALITY
+// ============================================
 const modal = document.getElementById('orderModal');
 const btn = document.getElementById('viewOrdersBtn');
 const span = document.getElementById('closeModal');
-btn.onclick = () => modal.style.display = "block";
-span.onclick = () => modal.style.display = "none";
-window.onclick = (event) => { if(event.target == modal) modal.style.display = "none"; }
 
-// Cart badge
-async function updateCartBadge(){
-  try{
-    const res = await fetch('/api/cart/');
-    if(!res.ok) return;
-    const items = await res.json();
-    const count = items.reduce((acc,i)=>acc+i.quantity,0);
-    const badge = document.getElementById('cartBadge');
-    badge.style.display = count > 0 ? 'inline-block':'none';
-    if(count>0) badge.innerText = count;
-  }catch(err){ console.error(err); }
+if (btn && modal && span) {
+  btn.onclick = () => {
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
+
+  span.onclick = () => {
+    modal.style.display = "none";
+    document.body.style.overflow = "auto";
+  }
+
+  window.onclick = (event) => {
+    if(event.target == modal) {
+      modal.style.display = "none";
+      document.body.style.overflow = "auto";
+    }
+  }
 }
-updateCartBadge();
-setInterval(updateCartBadge, 10000);
+
+// ============================================
+// PROFILE CARD BUTTON FUNCTIONALITY
+// ============================================
+document.querySelectorAll('.profile-card-button').forEach(button => {
+  if(!button.id) { // Skip the View Orders button which has id
+    button.addEventListener('click', function() {
+      const cardTitle = this.closest('.profile-card').querySelector('h3').textContent;
+      
+      // Simple click prevention
+      this.disabled = true;
+      const originalText = this.innerHTML;
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      
+      setTimeout(() => {
+        this.innerHTML = originalText;
+        this.disabled = false;
+        alert(`${cardTitle} feature would open here in a real implementation.`);
+      }, 500);
+    });
+  }
+});
+
+// ============================================
+// HOVER EFFECTS FOR PROFILE CARDS
+// ============================================
+document.querySelectorAll('.profile-card').forEach(card => {
+  card.addEventListener('mouseenter', function() {
+    const icon = this.querySelector('.profile-card-header i');
+    if (icon) {
+      icon.style.transform = 'scale(1.1) rotate(5deg)';
+      icon.style.transition = 'transform 0.3s ease';
+    }
+  });
+  
+  card.addEventListener('mouseleave', function() {
+    const icon = this.querySelector('.profile-card-header i');
+    if (icon) {
+      icon.style.transform = 'scale(1) rotate(0deg)';
+    }
+  });
+});
+
+// ============================================
+// CLICK PREVENTION FOR ALL BUTTONS
+// ============================================
+// Prevent rapid clicking on all interactive elements
+document.addEventListener('DOMContentLoaded', function() {
+  const interactiveElements = document.querySelectorAll('a, button, .profile-card-button, .logout-button');
+  
+  interactiveElements.forEach(element => {
+    element.addEventListener('click', function(e) {
+      // Add click delay protection
+      if (this.dataset.lastClick && (Date.now() - this.dataset.lastClick < 500)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      this.dataset.lastClick = Date.now();
+    });
+  });
+  
+  // Update active navigation state
+  function updateActiveNav() {
+    const path = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav a');
+    
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      
+      // Simple path matching
+      if (path.includes('profile') && link.href.includes('profile')) {
+        link.classList.add('active');
+      } else if (path.includes('dashboard') && link.href.includes('dashboard')) {
+        link.classList.add('active');
+      } else if (path.includes('menu') && link.href.includes('menu')) {
+        link.classList.add('active');
+      }
+      // Add other pages as needed
+    });
+  }
+  
+  updateActiveNav();
+});
+
+// ============================================
+// LOGOUT BUTTON CONFIRMATION
+// ============================================
+const logoutForm = document.querySelector('form[action*="logout"]');
+if (logoutForm) {
+  logoutForm.addEventListener('submit', function(e) {
+    if (!confirm('Are you sure you want to logout?')) {
+      e.preventDefault();
+    }
+  });
+}
 </script>
 
 </body>

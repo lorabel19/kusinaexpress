@@ -5,178 +5,639 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Admin Dashboard</title>
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-body { display:flex; min-height:100vh; background-color:#fffaf3; color:#2d2d2d; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', 'Poppins', sans-serif; }
+:root {
+  --primary: #d62828;
+  --primary-dark: #a01f1f;
+  --secondary: #fcbf49;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #2d2d2d;
+  --text-secondary: #6c757d;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --sidebar-width: 280px;
+}
+
+body { 
+  display:flex; 
+  min-height:100vh; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+  color: var(--text-primary);
+}
 
 /* Sidebar */
 .sidebar {
-  width:250px;
-  background-color:#d62828;
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
   color:white;
   display:flex;
   flex-direction:column;
-  padding:20px;
-  position:sticky;
+  padding: 32px 24px;
+  position:fixed;
   top:0;
+  left:0;
   height:100vh;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  transition: transform 0.3s ease;
 }
-.sidebar h2 { font-size:22px; margin-bottom:30px; display:flex; align-items:center; gap:10px; }
-.sidebar a { color:white; text-decoration:none; padding:12px 15px; margin-bottom:10px; border-radius:6px; display:flex; align-items:center; gap:10px; transition:0.3s; font-weight:500; }
-.sidebar a:hover { background-color:#fcbf49; color:#2d2d2d; }
 
-/* Main content */
-.main-content { flex:1; padding:30px; overflow-y:auto; }
-header { display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; margin-bottom:30px; }
-header h1 { font-size:28px; color:#d62828; margin-bottom:10px; }
-header .welcome { font-size:20px; color:#555; }
+.sidebar-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
 
-/* Summary Cards */
-.cards { display:flex; gap:30px; flex-wrap:wrap; margin-bottom:40px; }
-.card { 
-  background:white; 
-  flex:1; 
-  min-width:250px; 
-  padding:35px; 
-  border-radius:16px; 
-  box-shadow:0 6px 20px rgba(0,0,0,0.15); 
+.sidebar h2 { 
+  font-size: 24px; 
   display:flex; 
   align-items:center; 
-  gap:25px; 
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
-.card:hover { transform:translateY(-8px); box-shadow:0 12px 25px rgba(0,0,0,0.2); }
-.card i { font-size:42px; color:#d62828; }
-.card .card-info { display:flex; flex-direction:column; }
-.card h3 { font-size:20px; color:#d62828; margin-bottom:8px; }
-.card p { font-size:24px; font-weight:700; color:#2d2d2d; }
 
-/* Food Cards */
-.cards.food-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
 }
-.cards.food-cards .card {
-  background:white;
+
+.sidebar a { 
+  color: rgba(255,255,255,0.85);
+  text-decoration:none; 
+  padding: 14px 16px; 
+  margin-bottom: 8px;
+  border-radius: 12px; 
+  display:flex; 
+  align-items:center; 
+  gap: 14px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--secondary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  transform: translateX(4px);
+}
+
+.sidebar a:hover::before {
+  transform: scaleY(1);
+}
+
+.sidebar a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.sidebar a i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Hamburger Menu */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  font-size: 20px;
+}
+
+.sidebar.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+/* Main Content */
+.main-content { 
+  flex: 1; 
+  margin-left: var(--sidebar-width);
+  padding: 32px;
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Header */
+.dashboard-header { 
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dashboard-header h1 { 
+  font-size: 32px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.welcome { 
+  font-size: 16px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe9e9 100%);
+  border-radius: 50px;
+  border: 1px solid rgba(214, 40, 40, 0.1);
+}
+
+.welcome i {
+  color: var(--primary);
+}
+
+/* Stats Cards */
+.stats-grid { 
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card { 
+  background: var(--bg-card);
+  padding: 28px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.stat-icon { 
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 25px;
-  text-align: center;
-  border-radius:16px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-size: 28px;
+  flex-shrink: 0;
 }
-.cards.food-cards .card:hover { transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.2); }
-.cards.food-cards .card img {
-  width: 120px;
-  height: 120px;
+
+.stat-card:nth-child(1) .stat-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.stat-card:nth-child(2) .stat-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.stat-card:nth-child(3) .stat-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.stat-card:nth-child(4) .stat-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.stat-info h3 { 
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-info p { 
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* Section Headers */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  font-size: 24px;
+  color: var(--text-primary);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-header h2 i {
+  color: var(--primary);
+}
+
+/* Food Cards Grid */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.food-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.food-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+}
+
+.food-card-image {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  position: relative;
+}
+
+.food-card-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  transition: transform 0.3s ease;
 }
-.cards.food-cards .card h3 { font-size:18px; color:#d62828; margin-bottom:6px; }
-.cards.food-cards .card p { font-size:16px; font-weight:600; color:#2d2d2d; }
 
-/* Buttons */
-.btn { padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
-.btn-edit { background-color:#fcbf49; color:#2d2d2d; }
-.btn-edit:hover { background-color:#2d2d2d; color:white; }
-.btn-delete { background-color:#d62828; color:white; }
-.btn-delete:hover { background-color:#2d2d2d; color:white; }
+.food-card:hover .food-card-image img {
+  transform: scale(1.1);
+}
 
-/* Footer */
-footer { margin-top:50px; text-align:center; padding:15px; color:#555; font-size:14px; }
+.food-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(214, 40, 40, 0.95);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.food-card-content {
+  padding: 20px;
+}
+
+.food-card h3 {
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.food-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.food-card-stats i {
+  color: var(--primary);
+}
+
+.food-card-stats strong {
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
 
 /* Responsive */
+@media screen and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media screen and (max-width: 768px) {
-  .cards { flex-direction: column; }
-  .sidebar { width:200px; }
+  .menu-toggle {
+    display: block;
+  }
+  
+  .sidebar {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 80px 20px 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-header {
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .food-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .food-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  
+  .stat-info p {
+    font-size: 28px;
+  }
 }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-  <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
-  <a href="{% url 'restaurant:admin-dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-  <a href="{% url 'restaurant:admin-menu' %}"><i class="fas fa-hamburger"></i> Manage Menu</a>
-  <a href="{% url 'restaurant:admin-orders' %}"><i class="fas fa-receipt"></i> Manage Orders</a>
-  <a href="{% url 'restaurant:admin-feedback' %}"><i class="fas fa-comments"></i> Feedback</a>
-  <a href="{% url 'restaurant:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+<button class="menu-toggle" id="menuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{% url 'restaurant:admin-dashboard' %}" class="active">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="{% url 'restaurant:admin-menu' %}">
+      <i class="fas fa-hamburger"></i> Manage Menu
+    </a>
+    <a href="{% url 'restaurant:admin-orders' %}">
+      <i class="fas fa-receipt"></i> Manage Orders
+    </a>
+    <a href="{% url 'restaurant:admin-feedback' %}">
+      <i class="fas fa-comments"></i> Feedback
+    </a>
+    <a href="{% url 'restaurant:logout' %}">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </nav>
 </div>
 
 <div class="main-content">
-  <header>
+  <div class="dashboard-header">
     <h1>Dashboard</h1>
-    <div class="welcome">Welcome, {{ admin_name }}!</div>
-  </header>
+    <div class="welcome">
+      <i class="fas fa-user-circle"></i>
+      Welcome, {{ admin_name }}!
+    </div>
+  </div>
 
-  <!-- Summary Cards -->
-  <div class="cards">
-    <div class="card">
-      <i class="fas fa-shopping-cart"></i>
-      <div class="card-info">
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-shopping-cart"></i>
+      </div>
+      <div class="stat-info">
         <h3>Total Orders</h3>
         <p>{{ total_orders }}</p>
       </div>
     </div>
-    <div class="card">
-      <i class="fas fa-hourglass-half"></i>
-      <div class="card-info">
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-hourglass-half"></i>
+      </div>
+      <div class="stat-info">
         <h3>Pending Orders</h3>
         <p>{{ pending_orders }}</p>
       </div>
     </div>
-    <div class="card">
-      <i class="fas fa-box-open"></i>
-      <div class="card-info">
-        <h3>Total Menu Items</h3>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-box-open"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Menu Items</h3>
         <p>{{ total_menu }}</p>
       </div>
     </div>
-    <div class="card">
-      <i class="fas fa-users"></i>
-      <div class="card-info">
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
         <h3>Total Users</h3>
         <p>{{ total_users }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Best Seller Food Cards -->
-  <h2 style="margin-bottom:15px; color:#d62828;">Best Seller Food</h2>
-  <div class="cards food-cards">
+  <!-- Best Sellers -->
+  <div class="section-header">
+    <h2>
+      <i class="fas fa-fire"></i>
+      Best Seller Food
+    </h2>
+  </div>
+  
+  <div class="food-grid">
     {% for item in best_sellers %}
-    <div class="card">
-      <img src="{{ item.item__image_url }}" alt="{{ item.item__name }}">
-      <h3>{{ item.item__name }}</h3>
-      <p>Total Ordered: {{ item.total_ordered }}</p>
+    <div class="food-card">
+      <div class="food-card-image">
+        <img src="{{ item.item__image_url }}" alt="{{ item.item__name }}">
+        <div class="food-badge">
+          <i class="fas fa-crown"></i> Best Seller
+        </div>
+      </div>
+      <div class="food-card-content">
+        <h3>{{ item.item__name }}</h3>
+        <div class="food-card-stats">
+          <i class="fas fa-chart-line"></i>
+          <span>Total Ordered: <strong>{{ item.total_ordered }}</strong></span>
+        </div>
+      </div>
     </div>
     {% empty %}
-    <p>No orders yet.</p>
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>No orders yet.</p>
+    </div>
     {% endfor %}
   </div>
 
-  <!-- Low Seller Food Cards -->
-  <h2 style="margin-bottom:15px; color:#d62828;">Low Seller Food</h2>
-  <div class="cards food-cards">
+  <!-- Low Sellers -->
+  <div class="section-header">
+    <h2>
+      <i class="fas fa-chart-line"></i>
+      Low Seller Food
+    </h2>
+  </div>
+  
+  <div class="food-grid">
     {% for item in low_sellers %}
-    <div class="card">
-      <img src="{{ item.item__image_url }}" alt="{{ item.item__name }}">
-      <h3>{{ item.item__name }}</h3>
-      <p>Total Ordered: {{ item.total_ordered }}</p>
+    <div class="food-card">
+      <div class="food-card-image">
+        <img src="{{ item.item__image_url }}" alt="{{ item.item__name }}">
+      </div>
+      <div class="food-card-content">
+        <h3>{{ item.item__name }}</h3>
+        <div class="food-card-stats">
+          <i class="fas fa-chart-line"></i>
+          <span>Total Ordered: <strong>{{ item.total_ordered }}</strong></span>
+        </div>
+      </div>
     </div>
     {% empty %}
-    <p>No low seller food yet.</p>
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>No low seller food yet.</p>
+    </div>
     {% endfor %}
   </div>
 </div>
+
+<script>
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('mobile-hidden');
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768) {
+    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.add('mobile-hidden');
+    }
+  }
+});
+
+// Handle resize
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    sidebar.classList.remove('mobile-hidden');
+  } else {
+    sidebar.classList.add('mobile-hidden');
+  }
+});
+
+// Initialize on load
+if (window.innerWidth <= 768) {
+  sidebar.classList.add('mobile-hidden');
+}
+</script>
 
 </body>
 </html>

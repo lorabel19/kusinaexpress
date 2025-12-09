@@ -5,114 +5,1276 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Cart</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-  body { background-color:#fffaf3; color:#2d2d2d; }
-  header { background-color: #d62828; color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-  header h1 { font-size:26px; letter-spacing:1px; }
-  nav { display:flex; align-items:center; gap:10px; position:relative; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
-  nav a:hover { color:#fcbf49; }
-  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
-  .auth-button a img { width:30px; height:30px; border-radius:50%; }
-  .cart-badge { position: absolute; top: -5px; right: -17px; background:red; color:white; font-size:12px; font-weight:bold; border-radius:50%; padding:2px 6px; display:none; }
-  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
-  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
-  .order-wrapper { max-width:900px; margin:40px auto; background:white; border-radius:12px; padding:30px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-  h2.section-title { font-size:28px; color:#d62828; text-align:center; margin-bottom:25px; }
-  .order-item { display:flex; align-items:center; justify-content:space-between; padding:15px; border-radius:12px; margin-bottom:15px; background:#f8eded; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
-  .order-item .image-holder { width:90px; height:90px; background:#ddd; border-radius:10px; margin-right:15px; flex-shrink:0; }
-  .order-info { flex:1; text-align:justify; }
-  .order-info h3 { font-size:16px; color:#d62828; margin-bottom:5px; }
-  .order-info p { font-size:14px; color:#555; }
-  .order-controls { display:flex; gap:10px; align-items:center; margin-top:5px; flex-wrap:wrap; }
-  .order-controls button { padding:4px 8px; border:none; background:#d62828; color:white; font-weight:bold; border-radius:6px; cursor:pointer; }
-  .order-price { font-weight:bold; font-size:16px; color:#27ae60; }
-  .summary-box { padding:15px; border-radius:12px; margin-top:20px; background:#f8eded; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
-  .summary-item { display:flex; justify-content:space-between; margin-bottom:10px; font-size:16px; }
-  .summary-item.total { font-weight:bold; font-size:18px; color:#d62828; }
-  form label { font-weight:600; display:block; margin:15px 0 5px; font-size:14px; }
-  form input, form select, textarea { width:100%; padding:12px; font-size:14px; border:1px solid #ccc; border-radius:8px; background:#fff; margin-bottom:12px; position: relative; z-index: 1; cursor: text; }
-  textarea { height:80px; resize:none; }
-  .payment-options { margin:20px 0; display:flex; flex-direction:column; gap:10px; }
-  .payment-options span { display:block; text-align:center; padding:10px 12px; border-radius:8px; background:#fff; border:1px solid #d62828; color:#d62828; font-weight:600; cursor:pointer; transition: all 0.3s; }
-  .payment-options span.active { background:#d62828; color:white; }
-  .place-order { width:100%; background:#d62828; color:#fff; border:none; padding:15px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; margin-top:10px; transition: background 0.3s; }
-  .place-order:hover { background:#f77f00; }
-  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
-  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
-  footer a:hover { text-decoration:underline; }
-  #toast { position: fixed; bottom: 20px; right: 20px; background:#27ae60; color:white; padding:10px 20px; border-radius:6px; opacity:0; pointer-events:none; transition: opacity 0.5s; z-index:200; }
-  @media(max-width:768px){ .menu-toggle { display:flex; } nav { flex-direction:column; width:100%; display:none; } nav.show { display:flex; } nav a { width:100%; text-align:center; margin:5px 0; } .order-item { flex-direction:column; align-items:flex-start; } .order-item .order-price { margin-top:10px; align-self:flex-end; } }
+/* CSS Variables for theming */
+:root {
+  --primary-color: #C62828; /* Vibrant Red */
+  --primary-dark: #8E1B1B;
+  --secondary-color: #FF9800; /* Orange */
+  --secondary-light: #FFB74D;
+  --accent-color: #FF5722; /* Deep Orange */
+  --background-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --divider-color: #E0E0E0;
+  --success-color: #4CAF50;
+  --warning-color: #F44336;
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+body { 
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color); 
+  color: var(--text-primary); 
+  line-height: 1.6;
+  overflow-x: hidden;
+  padding-bottom: 40px;
+}
+
+/* Container for consistent width */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Modern Header --- */
+header {
+  background-color: var(--surface-color);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-light);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--primary-color);
+  font-size: 28px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* Modern Navigation */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.nav-links a.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.nav-links a.active::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Hamburger menu for mobile */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 320px;
+  height: 100vh;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-heavy);
+  padding: 80px 30px 30px;
+  z-index: 999;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: var(--transition);
+}
+
+.mobile-nav a i {
+  color: var(--primary-color);
+  width: 24px;
+}
+
+.mobile-nav a:hover {
+  color: var(--primary-color);
+  transform: translateX(5px);
+}
+
+.mobile-nav a.active {
+  color: var(--primary-color);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* FIX: Mobile cart button specific styles */
+.mobile-cart-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light) !important; /* Force white text */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  border: none;
+  width: 100%;
+  margin-top: 10px;
+  position: relative;
+}
+
+.mobile-cart-btn i {
+  color: var(--text-light) !important; /* Force white icon */
+  font-size: 16px;
+}
+
+.mobile-cart-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* FIX: Mobile profile button specific styles */
+.mobile-profile-btn {
+  background-color: transparent;
+  color: var(--primary-color) !important; /* Force primary color text */
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  border: 2px solid var(--primary-color);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.mobile-profile-btn i {
+  color: var(--primary-color) !important; /* Force primary color icon */
+  font-size: 16px;
+}
+
+.mobile-profile-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light) !important;
+}
+
+.mobile-profile-btn:hover i {
+  color: var(--text-light) !important;
+}
+
+/* Navigation loading state prevention */
+.nav-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Prevent rapid clicking issues */
+.nav-links a,
+.mobile-nav a,
+.btn,
+.mobile-cart-btn,
+.mobile-profile-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* --- Cart Page Styles --- */
+.page-title {
+  text-align: center;
+  margin: 60px 0 40px;
+}
+
+.page-title h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+.page-title p {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.order-wrapper {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 40px;
+  box-shadow: var(--shadow-medium);
+  margin-bottom: 40px;
+}
+
+/* Cart Items */
+.cart-items {
+  margin-bottom: 30px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 25px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  background: rgba(198, 40, 40, 0.03);
+  border: 1px solid var(--divider-color);
+  transition: var(--transition);
+}
+
+.cart-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-light);
+}
+
+.item-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-right: 25px;
+  flex-shrink: 0;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info h3 {
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.item-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.order-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.order-controls button {
+  padding: 8px 16px;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.order-controls button:hover {
+  background: var(--primary-dark);
+}
+
+.order-controls button:first-child {
+  background: var(--warning-color);
+}
+
+.order-controls button:first-child:hover {
+  background: #d32f2f;
+}
+
+.order-controls span {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 30px;
+  text-align: center;
+}
+
+.order-price {
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--primary-color);
+  margin-left: 20px;
+  min-width: 100px;
+  text-align: right;
+}
+
+.empty-cart {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-cart i {
+  font-size: 48px;
+  color: var(--divider-color);
+  margin-bottom: 20px;
+  display: block;
+}
+
+.empty-cart h3 {
+  font-size: 20px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.empty-cart p {
+  margin-bottom: 25px;
+}
+
+/* Summary Box */
+.summary-box {
+  padding: 30px;
+  border-radius: var(--border-radius);
+  margin-top: 30px;
+  background: rgba(198, 40, 40, 0.03);
+  border: 1px solid var(--divider-color);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.summary-item.total {
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--primary-color);
+  padding-top: 15px;
+  border-top: 2px solid var(--divider-color);
+  margin-top: 15px;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 15px;
+  border: 2px solid var(--divider-color);
+  border-radius: var(--border-radius);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  transition: var(--transition);
+  font-family: 'Poppins', sans-serif;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.1);
+}
+
+textarea.form-control {
+  height: 100px;
+  resize: vertical;
+}
+
+/* Payment Options */
+.payment-options {
+  margin: 20px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.payment-option {
+  text-align: center;
+  padding: 18px 12px;
+  border-radius: var(--border-radius);
+  background: var(--surface-color);
+  border: 2px solid var(--divider-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.payment-option i {
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+.payment-option.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.payment-option.active i {
+  color: var(--text-light);
+}
+
+.payment-option:hover:not(.active) {
+  border-color: var(--primary-color);
+  background: rgba(198, 40, 40, 0.05);
+}
+
+.place-order {
+  width: 100%;
+  background: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  padding: 18px;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.place-order:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.place-order:disabled {
+  background: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- Footer --- */
+footer {
+  background-color: var(--text-primary);
+  color: var(--text-light);
+  padding: 60px 0 30px;
+  margin-top: 60px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-light);
+}
+
+.footer-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--secondary-color);
+  padding-left: 5px;
+}
+
+.newsletter-form {
+  display: flex;
+  margin-top: 15px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 50px 0 0 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 0 50px 50px 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* Toast Notification */
+#toast { 
+  position: fixed; 
+  bottom: 20px; 
+  right: 20px; 
+  background: var(--success-color); 
+  color: white; 
+  padding: 15px 25px; 
+  border-radius: var(--border-radius); 
+  opacity: 0; 
+  pointer-events: none; 
+  transition: opacity 0.5s; 
+  z-index: 200; 
+  box-shadow: var(--shadow-heavy);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .menu-toggle {
+    display: flex;
+  }
+  
+  .order-wrapper {
+    padding: 25px 20px;
+  }
+  
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  
+  .item-image {
+    width: 100%;
+    height: 200px;
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .order-price {
+    margin-left: 0;
+    margin-top: 15px;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .payment-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-content {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-wrapper {
+    padding: 20px 15px;
+  }
+  
+  .page-title h1 {
+    font-size: 28px;
+  }
+  
+  .page-title p {
+    font-size: 15px;
+  }
+  
+  .cart-item {
+    padding: 15px;
+  }
+  
+  .order-controls {
+    flex-wrap: wrap;
+  }
+  
+  .order-controls button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
 <body>
 
+<!-- Header (SAME AS MENU PAGE) -->
 <header>
-  <h1>KusinaExpress</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-  <nav id="nav-menu">
-    <a href="{% url 'restaurant:dashboard' %}">Home</a>
-    <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">Cart <span id="cartBadge" class="cart-badge"></span></a>
-    <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="{% url 'restaurant:contact' %}">Contact</a>
-    <a href="{% url 'restaurant:about' %}">About Us</a>
-    <div class="auth-button">
-      {% if user %}
-        <a href="{% url 'restaurant:profile' %}">
-          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-        </a>
-      {% endif %}
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h1>KusinaExpress</h1>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
+        <div class="nav-links">
+          <a href="{% url 'restaurant:dashboard' %}" id="home-link">Home</a>
+          <a href="{% url 'restaurant:menu' %}" id="menu-link">Menu</a>
+          <a href="{% url 'restaurant:order' %}" id="order-link">Order</a>
+          <a href="{% url 'restaurant:contact' %}" id="contact-link">Contact</a>
+          <a href="{% url 'restaurant:about' %}" id="about-link">About Us</a>
+        </div>
+        <div class="auth-buttons">
+          <!-- USER IS LOGGED IN - Show Profile button -->
+          <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary" id="profile-link">
+            <i class="fas fa-user-circle"></i> Profile
+          </a>
+          <a href="{% url 'restaurant:cart' %}" class="btn btn-primary active" id="cart-link">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <!-- Cart badge - will be updated by JavaScript -->
+            <span class="cart-count" id="desktop-cart-badge"></span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-  </nav>
+  </div>
 </header>
 
-<div class="order-wrapper">
-  <h2 class="section-title">Current Order</h2>
-  <div id="cartItems"></div>
-
-  <div class="summary-box">
-    <div class="summary-item"><span>Subtotal:</span><span id="subtotal">₱0</span></div>
-    <div class="summary-item"><span>Shipping Fee:</span><span id="shipping">₱40</span></div>
-    <div class="summary-item total"><span>Total:</span><span id="total">₱0</span></div>
+<!-- Mobile Navigation (SAME AS MENU PAGE) -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="{% url 'restaurant:dashboard' %}" id="mobile-home-link">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <a href="{% url 'restaurant:menu' %}" id="mobile-menu-link">
+    <i class="fas fa-utensils"></i> Menu
+  </a>
+  <a href="{% url 'restaurant:order' %}" id="mobile-order-link">
+    <i class="fas fa-shopping-bag"></i> Order
+  </a>
+  <a href="{% url 'restaurant:contact' %}" id="mobile-contact-link">
+    <i class="fas fa-phone-alt"></i> Contact
+  </a>
+  <a href="{% url 'restaurant:about' %}" id="mobile-about-link">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <!-- USER IS LOGGED IN - Show Profile button -->
+    <a href="{% url 'restaurant:profile' %}" class="mobile-profile-btn" id="mobile-profile-link">
+      <i class="fas fa-user-circle"></i> Profile
+    </a>
+    <!-- FIXED: Cart button for mobile with white text and icon -->
+    <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn active" id="mobile-cart-link">
+      <i class="fas fa-shopping-cart"></i> Cart
+      <!-- Mobile cart badge - will be updated by JavaScript -->
+      <span class="cart-count" id="mobile-cart-badge"></span>
+    </a>
   </div>
+</nav>
 
-  <form id="orderForm">
-    <label>Name:</label><input type="text" name="name" placeholder="Enter your full name" required>
-    <label>Delivery Address:</label><input type="text" name="address" placeholder="Enter your address" required>
-    <label>Contact Number:</label><input type="text" name="contact" placeholder="09xxxxxxxxx" required>
-    <label>Delivery Option:</label>
-    <select name="delivery_option">
-      <option value="pickup">Pick-up</option>
-      <option value="delivery">Delivery</option>
-    </select>
-    <label>Notes:</label><textarea name="notes" placeholder="Add any notes for your order"></textarea>
-    <label>Payment Options</label>
-    <div class="payment-options">
-      <span data-method="cod" class="active">Cash on Delivery</span>
-      <span data-method="gcash">GCash / E-Wallet</span>
-      <span data-method="card">Credit / Debit Card</span>
+<!-- Cart Page Content -->
+<main>
+  <div class="container">
+    <div class="page-title">
+      <h1>Your Shopping Cart</h1>
+      <p>Review your items before checkout</p>
     </div>
-    <button type="submit" class="place-order">Place Order</button>
-  </form>
-</div>
+    
+    <div class="order-wrapper">
+      <div class="cart-items" id="cartItems">
+        <!-- Cart items will be loaded here -->
+        <div class="empty-cart">
+          <i class="fas fa-shopping-cart"></i>
+          <h3>Your cart is empty</h3>
+          <p>Add some delicious Filipino dishes from our menu!</p>
+          <a href="{% url 'restaurant:menu' %}" class="btn btn-primary" id="browse-menu-btn">Browse Menu</a>
+        </div>
+      </div>
 
+      <div class="summary-box">
+        <div class="summary-item"><span>Subtotal:</span><span id="subtotal">₱0.00</span></div>
+        <div class="summary-item"><span>Shipping Fee:</span><span id="shipping">₱40.00</span></div>
+        <div class="summary-item total"><span>Total:</span><span id="total">₱40.00</span></div>
+      </div>
+
+      <form id="orderForm">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="Enter your full name" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="address">Delivery Address</label>
+          <input type="text" id="address" name="address" class="form-control" placeholder="Enter your complete address" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="contact">Contact Number</label>
+          <input type="text" id="contact" name="contact" class="form-control" placeholder="09xxxxxxxxx" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="delivery_option">Delivery Option</label>
+          <select id="delivery_option" name="delivery_option" class="form-control">
+            <option value="delivery">Delivery</option>
+            <option value="pickup">Pick-up</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="notes">Order Notes (Optional)</label>
+          <textarea id="notes" name="notes" class="form-control" placeholder="Add any special instructions for your order"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Payment Method</label>
+          <div class="payment-options">
+            <div class="payment-option active" data-method="cod">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Cash on Delivery</span>
+            </div>
+            <div class="payment-option" data-method="gcash">
+              <i class="fas fa-mobile-alt"></i>
+              <span>GCash / E-Wallet</span>
+            </div>
+            <div class="payment-option" data-method="card">
+              <i class="fas fa-credit-card"></i>
+              <span>Credit / Debit Card</span>
+            </div>
+          </div>
+          <input type="hidden" name="payment_method" id="paymentMethod" value="cod">
+        </div>
+        
+        <button type="submit" class="place-order" id="placeOrderBtn">
+          <i class="fas fa-check-circle"></i> Place Order
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
 <footer>
-  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">KusinaExpress</div>
+        <p class="footer-description">Bringing authentic Filipino comfort food straight to your doorstep since 2020. Fast, fresh, and flavorful!</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="{% url 'restaurant:dashboard' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:menu' %}">Menu</a></li>
+          <li><a href="{% url 'restaurant:order' %}">Order Online</a></li>
+          <li><a href="{% url 'restaurant:contact' %}">Catering</a></li>
+          <li><a href="{% url 'restaurant:about' %}">Gift Cards</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Contact Info</h3>
+        <ul class="footer-links">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> 123 Food Street, Manila, Philippines</li>
+          <li><i class="fas fa-phone-alt" style="margin-right: 10px;"></i> +63 912 345 6789</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> hello@kusinaexpress.com</li>
+          <li><i class="fas fa-clock" style="margin-right: 10px;"></i> Open Daily: 10AM - 10PM</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Newsletter</h3>
+        <p class="footer-description">Subscribe to get updates on new dishes and exclusive offers.</p>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address">
+          <button class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>© 2025 KusinaExpress. All rights reserved. | Proudly Serving Filipino Flavors</p>
+    </div>
+  </div>
 </footer>
 
-<div id="toast">Item added to cart!</div>
+<div id="toast"><i class="fas fa-check-circle"></i> Item added to cart!</div>
 
 <script>
-const toggle = document.getElementById('menu-toggle');
-const nav = document.getElementById('nav-menu');
-toggle.addEventListener('click', ()=> nav.classList.toggle('show'));
+// Mobile menu toggle with improved anti-glitching
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
 
+let isMenuOpen = false;
+let isAnimating = false;
+let menuToggleTimeout = null;
+
+function toggleMobileMenu() {
+  if (isAnimating) return;
+  
+  // Clear any pending timeout
+  if (menuToggleTimeout) {
+    clearTimeout(menuToggleTimeout);
+    menuToggleTimeout = null;
+  }
+  
+  isAnimating = true;
+  isMenuOpen = !isMenuOpen;
+  
+  if (isMenuOpen) {
+    menuToggle.classList.add('active');
+    mobileNav.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Close menu when clicking a link
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMobileMenuOnClick, { once: true });
+    });
+  } else {
+    menuToggle.classList.remove('active');
+    mobileNav.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Reset animation flag after transition with a small buffer
+  menuToggleTimeout = setTimeout(() => {
+    isAnimating = false;
+    menuToggleTimeout = null;
+  }, 450);
+}
+
+function closeMobileMenuOnClick() {
+  if (isMenuOpen) {
+    toggleMobileMenu();
+  }
+}
+
+// Debounced click handler for menu toggle
+let lastClickTime = 0;
+menuToggle.addEventListener('click', (e) => {
+  const currentTime = Date.now();
+  if (currentTime - lastClickTime < 500) { // 500ms debounce
+    return;
+  }
+  lastClickTime = currentTime;
+  toggleMobileMenu();
+});
+
+overlay.addEventListener('click', toggleMobileMenu);
+
+// Prevent rapid clicking on navigation links
+function setupNavigationLinks() {
+  const navigationLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-cart-link'),
+    // CTA buttons
+    document.getElementById('browse-menu-btn'),
+    document.getElementById('placeOrderBtn')
+  ];
+  
+  navigationLinks.forEach(link => {
+    if (!link) return;
+    
+    link.addEventListener('click', function(e) {
+      // Prevent rapid clicks
+      if (this.classList.contains('nav-loading')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      
+      // If already on the same page, prevent default and just update active state
+      if (this.href && this.href === window.location.href) {
+        e.preventDefault();
+        updateActiveNavState();
+        return;
+      }
+      
+      // Add loading state to prevent rapid clicking
+      this.classList.add('nav-loading');
+      
+      // Remove loading state after 1 second
+      setTimeout(() => {
+        this.classList.remove('nav-loading');
+      }, 1000);
+    });
+  });
+}
+
+// Update active navigation state
+function updateActiveNavState() {
+  const currentPath = window.location.pathname;
+  
+  // Remove active class from all links
+  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current page
+  if (currentPath.includes('dashboard') || currentPath === '/') {
+    document.getElementById('home-link')?.classList.add('active');
+    document.getElementById('mobile-home-link')?.classList.add('active');
+  } else if (currentPath.includes('menu')) {
+    document.getElementById('menu-link')?.classList.add('active');
+    document.getElementById('mobile-menu-link')?.classList.add('active');
+  } else if (currentPath.includes('order')) {
+    document.getElementById('order-link')?.classList.add('active');
+    document.getElementById('mobile-order-link')?.classList.add('active');
+  } else if (currentPath.includes('contact')) {
+    document.getElementById('contact-link')?.classList.add('active');
+    document.getElementById('mobile-contact-link')?.classList.add('active');
+  } else if (currentPath.includes('about')) {
+    document.getElementById('about-link')?.classList.add('active');
+    document.getElementById('mobile-about-link')?.classList.add('active');
+  } else if (currentPath.includes('profile')) {
+    document.getElementById('profile-link')?.classList.add('active');
+    document.getElementById('mobile-profile-link')?.classList.add('active');
+  } else if (currentPath.includes('cart')) {
+    document.getElementById('cart-link')?.classList.add('active');
+    document.getElementById('mobile-cart-link')?.classList.add('active');
+  }
+}
+
+// CSRF helper
 function getCookie(name){
   let cookieValue = null;
   if(document.cookie && document.cookie!==''){
@@ -125,28 +1287,67 @@ function getCookie(name){
   return cookieValue;
 }
 
+// Toast notification
 function showToast(msg){
   const toast = document.getElementById('toast');
-  toast.innerText = msg;
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
   toast.style.opacity = 1;
-  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+  
+  // Clear any existing timeout
+  if (toast.timeoutId) {
+    clearTimeout(toast.timeoutId);
+  }
+  
+  toast.timeoutId = setTimeout(()=>{ 
+    toast.style.opacity = 0; 
+    toast.timeoutId = null;
+  }, 2000);
 }
 
+// Update cart badge - FIXED LOGIC: Hide badge when count is 0
 async function updateCartBadge(){
   try{
     const res = await fetch('/api/cart/');
     if(!res.ok) return;
     const items = await res.json();
     const count = items.reduce((acc,i)=>acc+i.quantity,0);
-    const badge = document.getElementById('cartBadge');
-    if(count>0){ badge.innerText = count; badge.style.display='inline-block'; } 
-    else badge.style.display='none';
-  }catch(err){ console.error(err); }
+    
+    // Get both cart badges
+    const desktopBadge = document.getElementById('desktop-cart-badge');
+    const mobileBadge = document.getElementById('mobile-cart-badge');
+    
+    // Update desktop badge
+    if(count > 0){
+      desktopBadge.textContent = count;
+      desktopBadge.style.display = 'flex';
+    } else {
+      desktopBadge.style.display = 'none';
+      desktopBadge.textContent = '';
+    }
+    
+    // Update mobile badge
+    if(count > 0){
+      mobileBadge.textContent = count;
+      mobileBadge.style.display = 'flex';
+    } else {
+      mobileBadge.style.display = 'none';
+      mobileBadge.textContent = '';
+    }
+    
+    return count;
+  }catch(err){ 
+    console.error('Error updating cart badge:', err); 
+    // Hide badges on error
+    document.getElementById('desktop-cart-badge').style.display = 'none';
+    document.getElementById('mobile-cart-badge').style.display = 'none';
+    return 0;
+  }
 }
 
 let cartItems = [];
 let selectedPayment = 'cod';
 
+// Fetch cart items
 async function fetchCart(){
   try{
     const res = await fetch('/api/cart/');
@@ -154,31 +1355,53 @@ async function fetchCart(){
     cartItems = await res.json();
     displayCart();
     updateCartBadge();
-  } catch(err){ console.error(err); }
+  } catch(err){ 
+    console.error(err); 
+    // Show empty cart state on error
+    displayEmptyCart();
+  }
 }
 
+// Display empty cart state
+function displayEmptyCart() {
+  const container = document.getElementById('cartItems');
+  container.innerHTML = `
+    <div class="empty-cart">
+      <i class="fas fa-shopping-cart"></i>
+      <h3>Your cart is empty</h3>
+      <p>Add some delicious Filipino dishes from our menu!</p>
+      <a href="{% url 'restaurant:menu' %}" class="btn btn-primary" id="browse-menu-btn">Browse Menu</a>
+    </div>
+  `;
+  document.getElementById('subtotal').innerText = '₱0.00';
+  document.getElementById('total').innerText = '₱40.00';
+  document.getElementById('placeOrderBtn').disabled = true;
+}
+
+// Display cart items
 function displayCart(){
   const container = document.getElementById('cartItems');
-  container.innerHTML = '';
   let subtotal = 0;
 
   if(cartItems.length === 0){
-    container.innerHTML = '<p style="text-align:center;">Your cart is empty.</p>';
-    document.getElementById('subtotal').innerText = '₱0.00';
-    document.getElementById('total').innerText = '₱40.00';
+    displayEmptyCart();
     return;
   }
 
+  document.getElementById('placeOrderBtn').disabled = false;
+  
+  container.innerHTML = '';
+  
   cartItems.forEach(item=>{
     const itemDiv = document.createElement('div');
-    itemDiv.className='order-item';
+    itemDiv.className='cart-item';
     itemDiv.innerHTML=`
-      <div class="image-holder">
-        <img src="${item.item.image_url || 'https://via.placeholder.com/90'}" style="width:100%;height:100%;border-radius:10px;" alt="${item.item.name}">
+      <div class="item-image">
+        <img src="${item.item.image_url || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'}" alt="${item.item.name}">
       </div>
-      <div class="order-info">
+      <div class="item-info">
         <h3>${item.item.name}</h3>
-        <p>${item.item.description || ''}</p>
+        <p>${item.item.description || 'Delicious Filipino dish'}</p>
         <div class="order-controls">
           <button onclick="updateQuantity(${item.item.item_id}, -1)">-</button>
           <span>${item.quantity}</span>
@@ -196,9 +1419,20 @@ function displayCart(){
   document.getElementById('total').innerText = `₱${(subtotal+40).toFixed(2)}`;
 }
 
+// Update item quantity with click prevention
+let isUpdatingQuantity = false;
+
 async function updateQuantity(itemId, delta){
+  // Prevent multiple rapid clicks
+  if (isUpdatingQuantity) return;
+  
+  isUpdatingQuantity = true;
+  
   const item = cartItems.find(i=>i.item.item_id===itemId);
-  if(!item) return;
+  if(!item) {
+    isUpdatingQuantity = false;
+    return;
+  }
 
   try{
     const res = await fetch('/api/cart/add/', {
@@ -212,14 +1446,32 @@ async function updateQuantity(itemId, delta){
       await fetchCart();
     } else {
       const data = await res.json();
-      alert(data.detail || 'Failed to update cart.');
+      showToast(data.detail || 'Failed to update cart.');
     }
-  } catch(err){ console.error(err); }
+  } catch(err){ 
+    console.error(err); 
+  } finally {
+    // Re-enable after a short delay
+    setTimeout(() => {
+      isUpdatingQuantity = false;
+    }, 500);
+  }
 }
 
+// Remove item from cart with click prevention
+let isRemovingItem = false;
+
 async function removeItem(cartId){
+  // Prevent multiple rapid clicks
+  if (isRemovingItem) return;
+  
+  isRemovingItem = true;
+  
   const item = cartItems.find(i=>i.cart_id===cartId);
-  if(!item) return;
+  if(!item) {
+    isRemovingItem = false;
+    return;
+  }
 
   try{
     const res = await fetch('/api/cart/add/', {
@@ -233,22 +1485,49 @@ async function removeItem(cartId){
       await fetchCart();
     } else {
       const data = await res.json();
-      alert(data.detail || 'Failed to remove item.');
+      showToast(data.detail || 'Failed to remove item.');
     }
-  } catch(err){ console.error(err); }
+  } catch(err){ 
+    console.error(err); 
+  } finally {
+    // Re-enable after a short delay
+    setTimeout(() => {
+      isRemovingItem = false;
+    }, 500);
+  }
 }
 
-document.querySelectorAll('.payment-options span').forEach(el=>{
+// Payment method selection with click prevention
+let isSelectingPayment = false;
+document.querySelectorAll('.payment-option').forEach(el=>{
   el.addEventListener('click', ()=>{
+    if (isSelectingPayment) return;
+    
+    isSelectingPayment = true;
     selectedPayment=el.dataset.method;
-    document.querySelectorAll('.payment-options span').forEach(s=>s.classList.remove('active'));
+    document.getElementById('paymentMethod').value = selectedPayment;
+    document.querySelectorAll('.payment-option').forEach(s=>s.classList.remove('active'));
     el.classList.add('active');
+    
+    setTimeout(() => {
+      isSelectingPayment = false;
+    }, 300);
   });
 });
 
+// Form submission with click prevention
+let isSubmittingOrder = false;
+
 document.getElementById('orderForm').addEventListener('submit', async function(e){
   e.preventDefault();
-  if(cartItems.length===0){ alert('Your cart is empty.'); return; }
+  
+  // Prevent multiple submissions
+  if (isSubmittingOrder) return;
+  
+  if(cartItems.length===0){ 
+    showToast('Your cart is empty.'); 
+    return; 
+  }
 
   const formData = new FormData(this);
   const orderData = {
@@ -260,7 +1539,17 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
     payment_method: selectedPayment
   };
 
+  const placeOrderBtn = document.getElementById('placeOrderBtn');
+  const originalText = placeOrderBtn.innerHTML;
+  const originalDisabled = placeOrderBtn.disabled;
+  
   try {
+    isSubmittingOrder = true;
+    
+    // Show loading state
+    placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    placeOrderBtn.disabled = true;
+    
     const res = await fetch('/api/orders/', {
       method:'POST',
       headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
@@ -275,21 +1564,68 @@ document.getElementById('orderForm').addEventListener('submit', async function(e
       displayCart();
       updateCartBadge();
       this.reset();
+      
+      // Redirect to order confirmation page
       if(data.order_id){
-        window.location.href=`/order/?order_id=${data.order_id}`;
+        setTimeout(() => {
+          window.location.href=`/order/?order_id=${data.order_id}`;
+        }, 1500);
       }
     } else {
-      alert(data.detail||'Failed to place order.');
+      showToast(data.detail||'Failed to place order.');
+      placeOrderBtn.innerHTML = originalText;
+      placeOrderBtn.disabled = originalDisabled;
     }
 
   } catch(err){
     console.error(err);
-    alert('Error submitting order');
+    showToast('Error submitting order');
+    placeOrderBtn.innerHTML = originalText;
+    placeOrderBtn.disabled = originalDisabled;
+  } finally {
+    setTimeout(() => {
+      isSubmittingOrder = false;
+    }, 1000);
   }
 });
 
-fetchCart();
-updateCartBadge();
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up navigation
+  setupNavigationLinks();
+  updateActiveNavState();
+  
+  // Mark cart link as active
+  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
+    link.classList.remove('active');
+  });
+  document.getElementById('cart-link')?.classList.add('active');
+  document.getElementById('mobile-cart-link')?.classList.add('active');
+  
+  // Fetch cart data
+  fetchCart();
+  
+  // Handle page visibility changes
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // Page became visible again, update cart
+      setTimeout(() => {
+        fetchCart();
+      }, 300);
+    }
+  });
+  
+  // Prevent rapid scrolling issues
+  let lastScrollTime = 0;
+  window.addEventListener('scroll', function() {
+    const currentTime = Date.now();
+    if (currentTime - lastScrollTime < 50) {
+      // Throttle rapid scrolling
+      return;
+    }
+    lastScrollTime = currentTime;
+  });
+});
 </script>
 
 </body>

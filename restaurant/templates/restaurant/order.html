@@ -5,108 +5,878 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KusinaExpress | Track Order</title>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-  body { background-color:#fffaf3; color:#2d2d2d; }
+/* CSS Variables for theming - Same as homepage */
+:root {
+  --primary-color: #C62828; /* Vibrant Red */
+  --primary-dark: #8E1B1B;
+  --secondary-color: #FF9800; /* Orange */
+  --secondary-light: #FFB74D;
+  --accent-color: #FF5722; /* Deep Orange */
+  --background-color: #FAFAFA;
+  --surface-color: #FFFFFF;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --text-light: #FFFFFF;
+  --divider-color: #E0E0E0;
+  --success-color: #4CAF50;
+  --warning-color: #F44336;
+  --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
-  /* HEADER */
-  header { background-color:#d62828; color:white; padding:20px 40px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
-  header h1 { font-size:26px; letter-spacing:1px; }
-  .menu-toggle { display:none; flex-direction:column; cursor:pointer; gap:4px; }
-  .menu-toggle div { width:25px; height:3px; background:white; transition:0.3s; }
-  nav { display:flex; align-items:center; gap:10px; position:relative; }
-  nav a { color:white; margin:0 10px; text-decoration:none; font-weight:600; transition: color 0.3s; position:relative; }
-  nav a:hover { color:#fcbf49; }
-  .auth-button { margin-left:15px; padding-left:15px; border-left:2px solid rgba(255,255,255,0.3); }
-  .auth-button a img { width:30px; height:30px; border-radius:50%; }
-  .cart-badge { position:absolute; top:-5px; right:-17px; background:red; color:white; font-size:12px; font-weight:bold; padding:2px 6px; border-radius:50%; display:none; }
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  font-family: 'Poppins', sans-serif;
+}
 
-  /* MAIN CONTENT */
-  main { padding: 30px 0; }
-  .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
-  h2.section-title { text-align:center; margin-bottom:25px; color:#d62828; font-size:28px; font-weight:700; }
+body { 
+  background-color: var(--background-color); 
+  color: var(--text-primary); 
+  line-height: 1.6;
+  overflow-x: hidden;
+}
 
-  /* ORDER SUMMARY */
-  .order-summary { background:white; border:2px solid #d62828; border-radius:12px; padding:20px; margin-bottom:40px; }
-  .order-summary table { width:100%; border-collapse:collapse; }
-  .order-summary th, .order-summary td { padding:12px 15px; text-align:left; border-bottom:1px solid #f0f0f0; vertical-align:middle; }
-  .order-summary th { background:#f77f00; color:white; text-transform:uppercase; font-size:14px; letter-spacing:0.5px; }
-  .order-summary td img { width:60px; height:60px; object-fit:cover; border-radius:8px; margin-right:10px; vertical-align:middle; }
-  .order-summary td .item-name { vertical-align:middle; }
-  .order-summary tr:last-child td { font-weight:bold; }
+/* Container for consistent width */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
-  /* STATUS SECTION */
-  .status-section { display:flex; flex-direction:column; gap:15px; margin-bottom:40px; position:relative; }
-  .status-item { 
-    background:white; 
-    border:2px solid #d62828; 
-    border-radius:12px; 
-    padding:15px 20px; 
-    display:flex; 
-    justify-content:space-between; 
-    align-items:center; 
-    transition: all 0.3s;
-    position:relative;
+/* --- Modern Header (From Homepage) --- */
+header {
+  background-color: var(--surface-color);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-light);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  color: var(--primary-color);
+  font-size: 28px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* Modern Navigation */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-links a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  padding: 5px 0;
+  transition: var(--transition);
+}
+
+.nav-links a:hover {
+  color: var(--primary-color);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  transform: translateY(-2px);
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: none; /* HIDDEN BY DEFAULT - FIX */
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  z-index: 1;
+}
+
+/* Fix for mobile cart button text and icon */
+.mobile-nav .btn-primary {
+  color: var(--text-light) !important;
+}
+
+.mobile-nav .btn-primary i {
+  color: var(--text-light) !important;
+}
+
+/* Hamburger menu for mobile */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.menu-toggle span {
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  transition: var(--transition);
+}
+
+.menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 320px;
+  height: 100vh;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-heavy);
+  padding: 80px 30px 30px;
+  z-index: 999;
+  transition: right 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.mobile-nav.active {
+  right: 0;
+}
+
+.mobile-nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mobile-nav a i {
+  color: var(--primary-color);
+  width: 24px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* --- Main Content Styles --- */
+main {
+  padding: 40px 0 60px;
+}
+
+h2.section-title {
+  color: var(--text-primary);
+  font-size: 36px;
+  margin-bottom: 12px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+.title-highlight {
+  color: var(--primary-color);
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Order Summary Section */
+.order-summary {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 50px;
+  border: 1px solid var(--divider-color);
+}
+
+.order-summary table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-summary th {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  font-weight: 600;
+  text-align: left;
+  padding: 18px 15px;
+  font-size: 16px;
+}
+
+.order-summary td {
+  padding: 20px 15px;
+  border-bottom: 1px solid var(--divider-color);
+  vertical-align: middle;
+}
+
+.order-summary tr:last-child td {
+  border-bottom: none;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.order-summary tr:nth-child(even) {
+  background-color: rgba(198, 40, 40, 0.02);
+}
+
+.order-summary td img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 15px;
+  vertical-align: middle;
+  border: 1px solid var(--divider-color);
+}
+
+.order-summary .item-name {
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.order-summary td:last-child {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Status Timeline Section */
+.status-section {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 50px;
+  border: 1px solid var(--divider-color);
+  position: relative;
+}
+
+.status-timeline {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 40px;
+}
+
+.status-timeline::before {
+  content: '';
+  position: absolute;
+  top: 25px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--divider-color);
+  z-index: 1;
+}
+
+.status-progress {
+  position: absolute;
+  top: 25px;
+  left: 0;
+  height: 3px;
+  background-color: var(--success-color);
+  z-index: 2;
+  transition: width 0.5s ease;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 3;
+  flex: 1;
+}
+
+.status-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--surface-color);
+  border: 3px solid var(--divider-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  transition: var(--transition);
+}
+
+.status-item.active .status-icon {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--text-light);
+  transform: scale(1.1);
+}
+
+.status-item.completed .status-icon {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+  color: var(--text-light);
+}
+
+.status-label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.status-time {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  min-height: 20px;
+}
+
+.status-btn {
+  margin-top: 15px;
+  padding: 8px 20px;
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+}
+
+.status-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* Map Section */
+.map-section {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 50px;
+  border: 1px solid var(--divider-color);
+}
+
+#map {
+  width: 100%;
+  height: 400px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  border: 1px solid var(--divider-color);
+}
+
+/* Delivery Info */
+.delivery-info {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: var(--shadow-light);
+  margin-bottom: 50px;
+  border: 1px solid var(--divider-color);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.info-icon {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(198, 40, 40, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.info-content h4 {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+}
+
+.info-content p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+/* --- Footer (From Homepage) --- */
+footer {
+  background-color: var(--text-primary);
+  color: var(--text-light);
+  padding: 60px 0 30px;
+  margin-top: 60px;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 15px;
+  color: var(--text-light);
+}
+
+.footer-description {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.social-link:hover {
+  background-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.footer-heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-light);
+}
+
+.footer-links {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--secondary-color);
+  padding-left: 5px;
+}
+
+.newsletter-form {
+  display: flex;
+  margin-top: 15px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 50px 0 0 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 0 50px 50px 0;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newsletter-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 15px;
   }
-  .status-item::before { content:''; position:absolute; left:-10px; top:0; bottom:0; width:4px; background:#d62828; border-radius:2px; opacity:0.2; transition: all 0.3s; }
-  .status-item.active { background:#f8eded; font-weight:bold; border-color:#f77f00; }
-  .status-item.active::before { opacity:1; background:#f77f00; }
-
-  .status-item button { margin-left:10px; padding:5px 10px; border:none; background:#d62828; color:white; border-radius:6px; cursor:pointer; font-size:13px; display:none; }
-  .status-item button:hover { background:#b71c1c; }
-
-  .map-section { background:white; border:2px solid #d62828; border-radius:12px; padding:20px; }
-  .map-placeholder { width:100%; height:300px; background:#f8eded; border:1px solid #f77f00; display:flex; justify-content:center; align-items:center; font-size:18px; color:#555; border-radius:10px; }
-
-  /* FOOTER */
-  footer { background-color:#3a0ca3; color:white; text-align:center; padding:25px; margin-top:50px; font-size:14px; }
-  footer a { color:#fcbf49; text-decoration:none; font-weight:600; }
-  footer a:hover { text-decoration:underline; }
-
-  /* RESPONSIVE */
-  @media(max-width:768px){
-    .menu-toggle { display:flex; }
-    nav { flex-direction:column; width:100%; display:none; }
-    nav.show { display:flex; }
-    nav a { width:100%; text-align:center; margin:5px 0; }
-    .order-summary th, .order-summary td { font-size:13px; padding:8px; }
-    .order-summary td img { width:50px; height:50px; }
+  
+  .desktop-nav {
+    display: none;
   }
+  
+  .menu-toggle {
+    display: flex;
+  }
+  
+  h2.section-title {
+    font-size: 30px;
+  }
+  
+  .order-summary {
+    padding: 20px;
+  }
+  
+  .order-summary th, .order-summary td {
+    padding: 15px 10px;
+  }
+  
+  .order-summary td img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .status-timeline {
+    flex-direction: column;
+    gap: 30px;
+    align-items: flex-start;
+  }
+  
+  .status-timeline::before {
+    display: none;
+  }
+  
+  .status-progress {
+    display: none;
+  }
+  
+  .status-item {
+    flex-direction: row;
+    width: 100%;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  
+  .status-icon {
+    margin-bottom: 0;
+  }
+  
+  .status-content {
+    flex: 1;
+  }
+  
+  .status-label, .status-time {
+    text-align: left;
+  }
+  
+  #map {
+    height: 300px;
+  }
+  
+  .footer-content {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  h2.section-title {
+    font-size: 26px;
+  }
+  
+  .order-summary {
+    overflow-x: auto;
+  }
+  
+  .order-summary table {
+    min-width: 500px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading state for navigation */
+.nav-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Prevent rapid clicking issues */
+.nav-links a,
+.mobile-nav a,
+.btn,
+.btn-primary,
+.btn-secondary,
+.status-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
 </style>
 </head>
 <body>
 
+<!-- Modern Header (Same as Homepage) -->
 <header>
-  <h1>KusinaExpress</h1>
-  <div class="menu-toggle" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-  <nav id="nav-menu">
-    <a href="{% url 'restaurant:dashboard' %}">Home</a>
-    <a href="{% url 'restaurant:menu' %}">Menu</a>
-    <a href="{% url 'restaurant:cart' %}" class="cart-button">Cart <span id="cartBadge" class="cart-badge"></span></a>
-    <a href="{% url 'restaurant:order' %}">Order</a>
-    <a href="{% url 'restaurant:contact' %}">Contact</a>
-    <a href="{% url 'restaurant:about' %}">About Us</a>
-    <div class="auth-button">
-      {% if user %}
-        <a href="{% url 'restaurant:profile' %}">
-          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
-        </a>
-      {% endif %}
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <h1>KusinaExpress</h1>
+      </div>
+      
+      <!-- Desktop Navigation -->
+      <nav class="desktop-nav">
+        <div class="nav-links">
+          <a href="{% url 'restaurant:dashboard' %}" id="home-link">Home</a>
+          <a href="{% url 'restaurant:menu' %}" id="menu-link">Menu</a>
+          <a href="{% url 'restaurant:order' %}" class="active" id="order-link">Order</a>
+          <a href="{% url 'restaurant:contact' %}" id="contact-link">Contact</a>
+          <a href="{% url 'restaurant:about' %}" id="about-link">About Us</a>
+        </div>
+        <div class="auth-buttons">
+          {% if user %}
+            <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary" id="profile-link">
+              <i class="fas fa-user-circle"></i> Profile
+            </a>
+          {% else %}
+            <a href="{% url 'restaurant:login' %}" class="btn btn-secondary" id="login-link">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+            </a>
+          {% endif %}
+          <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" id="cart-link">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count" id="desktop-cart-badge"></span>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
-  </nav>
+  </div>
 </header>
+
+<!-- Mobile Navigation (Same as Homepage) -->
+<div class="overlay" id="overlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <a href="{% url 'restaurant:dashboard' %}" id="mobile-home-link">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <a href="{% url 'restaurant:menu' %}" id="mobile-menu-link">
+    <i class="fas fa-utensils"></i> Menu
+  </a>
+  <a href="{% url 'restaurant:order' %}" class="active" id="mobile-order-link">
+    <i class="fas fa-shopping-bag"></i> Order
+  </a>
+  <a href="{% url 'restaurant:contact' %}" id="mobile-contact-link">
+    <i class="fas fa-phone-alt"></i> Contact
+  </a>
+  <a href="{% url 'restaurant:about' %}" id="mobile-about-link">
+    <i class="fas fa-info-circle"></i> About Us
+  </a>
+  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+    {% if user %}
+      <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary" style="justify-content: center;" id="mobile-profile-link">
+        <i class="fas fa-user-circle"></i> Profile
+      </a>
+    {% else %}
+      <a href="{% url 'restaurant:login' %}" class="btn btn-secondary" style="justify-content: center;" id="mobile-login-link">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </a>
+    {% endif %}
+    <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" style="justify-content: center;" id="mobile-cart-link">
+      <i class="fas fa-shopping-cart"></i> Cart
+      <span class="cart-count" id="mobile-cart-badge"></span>
+    </a>
+  </div>
+</nav>
 
 <main>
   <div class="container">
-
-    <!-- ORDER SUMMARY -->
+    <!-- Order Summary Section -->
     <section>
-      <h2 class="section-title">Your Order</h2>
-      <div class="order-summary" id="orderSummary">
+      <h2 class="section-title">Your <span class="title-highlight">Order</span> Details</h2>
+      <p class="section-subtitle">Review your order items and total</p>
+      
+      <div class="order-summary">
         <table>
           <thead>
             <tr>
@@ -116,15 +886,14 @@
             </tr>
           </thead>
           <tbody id="orderBody">
-
             {% if order %}
               {% for item in order.items.all %}
               <tr>
                 <td>
                   {% if item.item.image_url %}
-                   <img src="{{ item.item.image_url }}" alt="{{ item.item.name }}">
+                    <img src="{{ item.item.image_url }}" alt="{{ item.item.name }}">
                   {% else %}
-                  <img src="https://via.placeholder.com/60" alt="{{ item.item.name }}">
+                    <img src="https://via.placeholder.com/70" alt="{{ item.item.name }}">
                   {% endif %}
                   <span class="item-name">{{ item.item.name }}</span>
                 </td>
@@ -132,133 +901,657 @@
                 <td>₱{{ item.subtotal }}</td>
               </tr>
               {% endfor %}
-
-              <!-- Shipping Fee Display Only -->
-              <tr id="shippingRow">
-                <td colspan="2" style="text-align:right;">Shipping Fee</td>
+              <tr>
+                <td colspan="2" style="text-align:right; font-weight:600;">Shipping Fee</td>
                 <td>₱40</td>
               </tr>
-
-              <!-- Total from BACKEND -->
-              <tr id="totalRow">
-                <td colspan="2" style="text-align:right; font-weight:bold;">Total</td>
-                <td style="font-weight:bold;">₱{{ order.total_amount }}</td>
+              <tr>
+                <td colspan="2" style="text-align:right; font-weight:700; font-size:18px;">Total Amount</td>
+                <td style="font-weight:700; font-size:18px; color:var(--primary-color);">₱{{ order.total_amount }}</td>
               </tr>
-
             {% else %}
-              <tr id="noOrderRow">
-                <td colspan="3" style="text-align:center;">No order found.</td>
+              <tr>
+                <td colspan="3" style="text-align:center; padding:40px;">
+                  <i class="fas fa-shopping-cart" style="font-size:48px; color:var(--divider-color); margin-bottom:20px; display:block;"></i>
+                  <p style="color:var(--text-secondary);">No active order found.</p>
+                </td>
               </tr>
             {% endif %}
-
           </tbody>
         </table>
       </div>
     </section>
 
-    <!-- STATUS SECTION -->
+    <!-- Order Status Timeline -->
     <section>
-      <h2 class="section-title">Order Status</h2>
+      <h2 class="section-title">Order <span class="title-highlight">Status</span></h2>
+      <p class="section-subtitle">Track your order in real-time</p>
+      
       <div class="status-section">
-        <div class="status-item" data-status="Order Confirmed"><p>Order Confirmed</p><p class="time">--</p></div>
-        <div class="status-item" data-status="Preparing Order"><p>Preparing Order</p><p class="time">--</p></div>
-        <div class="status-item" data-status="Out for Delivery"><p>Out for Delivery</p><p class="time">--</p></div>
-        <div class="status-item" data-status="Delivered">
-          <p>Delivered</p>
-          <p class="time">--</p>
-          <button class="ack-btn">Mark as Seen</button>
+        <div class="status-timeline">
+          <div class="status-progress" id="statusProgress"></div>
+          
+          <div class="status-item" data-status="Order Confirmed">
+            <div class="status-icon">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="status-content">
+              <div class="status-label">Order Confirmed</div>
+              <div class="status-time" id="timeConfirmed">--</div>
+            </div>
+          </div>
+          
+          <div class="status-item" data-status="Preparing Order">
+            <div class="status-icon">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <div class="status-content">
+              <div class="status-label">Preparing Order</div>
+              <div class="status-time" id="timePreparing">--</div>
+            </div>
+          </div>
+          
+          <div class="status-item" data-status="Out for Delivery">
+            <div class="status-icon">
+              <i class="fas fa-motorcycle"></i>
+            </div>
+            <div class="status-content">
+              <div class="status-label">Out for Delivery</div>
+              <div class="status-time" id="timeDelivery">--</div>
+            </div>
+          </div>
+          
+          <div class="status-item" data-status="Delivered">
+            <div class="status-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <div class="status-content">
+              <div class="status-label">Delivered</div>
+              <div class="status-time" id="timeDelivered">--</div>
+              <button class="status-btn" id="ackBtn" style="display: none;">Mark as Received</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- MAP SECTION -->
-    <section>
-      <h2 class="section-title">Delivery Map</h2>
-      <div class="map-section">
-        <div class="map-placeholder">Map Placeholder (Delivery Route)</div>
+    <!-- Delivery Information -->
+    <section class="delivery-info">
+      <h2 class="section-title">Delivery <span class="title-highlight">Information</span></h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="info-content">
+            <h4>Estimated Delivery</h4>
+            <p>30-45 minutes</p>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <div class="info-content">
+            <h4>Delivery Address</h4>
+            <p id="deliveryAddress">Loading address...</p>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-phone-alt"></i>
+          </div>
+          <div class="info-content">
+            <h4>Contact Number</h4>
+            <p id="contactNumber">+63 912 345 6789</p>
+          </div>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-icon">
+            <i class="fas fa-info-circle"></i>
+          </div>
+          <div class="info-content">
+            <h4>Order ID</h4>
+            <p id="orderIdDisplay">{{ order.order_id|default:"N/A" }}</p>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- Delivery Map -->
+    <section>
+      <h2 class="section-title">Delivery <span class="title-highlight">Map</span></h2>
+      <p class="section-subtitle">Track your order on the map</p>
+      
+      <div class="map-section">
+        <div id="map"></div>
+      </div>
+    </section>
   </div>
 </main>
 
+<!-- Footer (Same as Homepage) -->
 <footer>
-  <p>© 2025 KusinaExpress | Proudly Serving Filipino Flavors</p>
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">KusinaExpress</div>
+        <p class="footer-description">Bringing authentic Filipino comfort food straight to your doorstep since 2020. Fast, fresh, and flavorful!</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="{% url 'restaurant:dashboard' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:menu' %}">Menu</a></li>
+          <li><a href="{% url 'restaurant:order' %}">Order Online</a></li>
+          <li><a href="{% url 'restaurant:contact' %}">Catering</a></li>
+          <li><a href="{% url 'restaurant:about' %}">Gift Cards</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Contact Info</h3>
+        <ul class="footer-links">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> 123 Food Street, Manila, Philippines</li>
+          <li><i class="fas fa-phone-alt" style="margin-right: 10px;"></i> +63 912 345 6789</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i> hello@kusinaexpress.com</li>
+          <li><i class="fas fa-clock" style="margin-right: 10px;"></i> Open Daily: 10AM - 10PM</li>
+        </ul>
+      </div>
+      
+      <div class="footer-col">
+        <h3 class="footer-heading">Newsletter</h3>
+        <p class="footer-description">Subscribe to get updates on new dishes and exclusive offers.</p>
+        <div class="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address">
+          <button class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>© 2025 KusinaExpress. All rights reserved. | Proudly Serving Filipino Flavors</p>
+    </div>
+  </div>
 </footer>
 
-<script>
-const toggle = document.getElementById('menu-toggle');
-const nav = document.getElementById('nav-menu');
-toggle.addEventListener('click', () => nav.classList.toggle('show'));
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
+<script>
+// ============================================
+// MOBILE MENU TOGGLE - SIMPLIFIED
+// ============================================
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
+
+let isMenuAnimating = false;
+
+menuToggle.addEventListener('click', () => {
+  if (isMenuAnimating) return;
+  
+  isMenuAnimating = true;
+  menuToggle.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
+  
+  setTimeout(() => {
+    isMenuAnimating = false;
+  }, 400);
+});
+
+overlay.addEventListener('click', () => {
+  if (isMenuAnimating) return;
+  
+  isMenuAnimating = true;
+  menuToggle.classList.remove('active');
+  mobileNav.classList.remove('active');
+  overlay.classList.remove('active');
+  document.body.style.overflow = 'auto';
+  
+  setTimeout(() => {
+    isMenuAnimating = false;
+  }, 400);
+});
+
+// ============================================
+// CART BADGE LOGIC - SIMPLIFIED NO GLITCH
+// ============================================
+let cartUpdating = false;
+let lastCartCount = -1;
+
+async function updateCartBadge() {
+  // Prevent multiple simultaneous calls
+  if (cartUpdating) return;
+  
+  cartUpdating = true;
+  
+  try {
+    const response = await fetch('/api/cart/', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store' // Always fetch fresh data
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch cart');
+    }
+    
+    const items = await response.json();
+    const count = Array.isArray(items) ? 
+      items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0) : 0;
+    
+    // Only update if count changed
+    if (count !== lastCartCount) {
+      const desktopBadge = document.getElementById('desktop-cart-badge');
+      const mobileBadge = document.getElementById('mobile-cart-badge');
+      
+      if (count > 0) {
+        desktopBadge.textContent = count;
+        desktopBadge.style.display = 'flex';
+        mobileBadge.textContent = count;
+        mobileBadge.style.display = 'flex';
+      } else {
+        desktopBadge.style.display = 'none';
+        desktopBadge.textContent = '';
+        mobileBadge.style.display = 'none';
+        mobileBadge.textContent = '';
+      }
+      
+      lastCartCount = count;
+    }
+  } catch (error) {
+    console.warn('Cart update error:', error);
+    // Hide badges on error
+    document.getElementById('desktop-cart-badge').style.display = 'none';
+    document.getElementById('mobile-cart-badge').style.display = 'none';
+  } finally {
+    cartUpdating = false;
+  }
+}
+
+// ============================================
+// NAVIGATION CLICK HANDLER - FIX GLITCHING
+// ============================================
+function setupNavigation() {
+  // Get all navigation links
+  const navLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('login-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-login-link'),
+    document.getElementById('mobile-cart-link'),
+    // Footer links
+    ...document.querySelectorAll('.footer-links a')
+  ];
+  
+  // Track last click time per link
+  const lastClickTimes = new Map();
+  
+  navLinks.forEach(link => {
+    if (!link) return;
+    
+    link.addEventListener('click', function(e) {
+      // Get current time
+      const now = Date.now();
+      const lastClick = lastClickTimes.get(link) || 0;
+      
+      // Prevent rapid clicks (500ms debounce)
+      if (now - lastClick < 500) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      
+      // Update last click time
+      lastClickTimes.set(link, now);
+      
+      // Add loading state to prevent rapid navigation
+      if (!this.classList.contains('btn')) {
+        this.classList.add('nav-loading');
+        
+        // Remove loading state after navigation or timeout
+        setTimeout(() => {
+          this.classList.remove('nav-loading');
+        }, 1000);
+      }
+      
+      // If clicking the cart link, update cart badge
+      if (this.id.includes('cart')) {
+        setTimeout(updateCartBadge, 100);
+      }
+    });
+  });
+}
+
+// ============================================
+// PAGE INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+  // Setup navigation click handlers
+  setupNavigation();
+  
+  // Initial cart badge update
+  setTimeout(updateCartBadge, 200);
+  
+  // Update cart when page becomes visible
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      setTimeout(updateCartBadge, 300);
+    }
+  });
+  
+  // Update cart on window focus
+  window.addEventListener('focus', function() {
+    setTimeout(updateCartBadge, 300);
+  });
+  
+  // Periodic cart update (every 30 seconds)
+  setInterval(updateCartBadge, 30000);
+});
+
+// ============================================
+// ORDER STATUS & MAP LOGIC
+// ============================================
 const orderId = "{{ order.order_id }}";
 const statusItems = document.querySelectorAll('.status-item');
-const deliveredBtn = document.querySelector('.status-item[data-status="Delivered"] .ack-btn');
+const ackBtn = document.getElementById('ackBtn');
+const statusProgress = document.getElementById('statusProgress');
 const seenKey = `order_${orderId}_seen`;
+
+// Status time elements
+const timeElements = {
+  'Order Confirmed': document.getElementById('timeConfirmed'),
+  'Preparing Order': document.getElementById('timePreparing'),
+  'Out for Delivery': document.getElementById('timeDelivery'),
+  'Delivered': document.getElementById('timeDelivered')
+};
 
 function resetOrderTable(){
   const orderBody = document.getElementById('orderBody');
-  orderBody.innerHTML = `<tr id="noOrderRow"><td colspan="3" style="text-align:center;">No order found.</td></tr>`;
+  orderBody.innerHTML = `
+    <tr>
+      <td colspan="3" style="text-align:center; padding:40px;">
+        <i class="fas fa-shopping-cart" style="font-size:48px; color:var(--divider-color); margin-bottom:20px; display:block;"></i>
+        <p style="color:var(--text-secondary);">No active order found.</p>
+      </td>
+    </tr>`;
 }
 
+// Check if order has been marked as seen
 if (localStorage.getItem(seenKey)) {
-  statusItems.forEach(si => si.querySelector('.time').textContent = "--");
-  deliveredBtn.style.display = "none";
+  statusItems.forEach(item => {
+    item.classList.remove('active', 'completed');
+    const statusName = item.dataset.status;
+    if (timeElements[statusName]) {
+      timeElements[statusName].textContent = "--";
+    }
+  });
+  ackBtn.style.display = "none";
+  statusProgress.style.width = "0%";
   resetOrderTable();
 }
 
-deliveredBtn.onclick = () => {
-  statusItems.forEach(si => si.querySelector('.time').textContent = "--");
-  deliveredBtn.style.display = "none";
+// Mark as received button handler
+ackBtn.onclick = () => {
+  statusItems.forEach(item => {
+    item.classList.remove('active');
+    const statusName = item.dataset.status;
+    if (timeElements[statusName]) {
+      timeElements[statusName].textContent = "--";
+    }
+  });
+  ackBtn.style.display = "none";
+  statusProgress.style.width = "0%";
   localStorage.setItem(seenKey, "true");
   resetOrderTable();
+  
+  // Show confirmation message
+  showNotification('Order marked as received! Thank you for your order.');
 };
+
+// Map & Animation
+let motoAnimating = false;
+let motoProgress = 0;
+let mapInitialized = false;
+let map, route, motoMarker;
 
 async function fetchOrderStatus() {
   if (!orderId) return;
   try {
-    const response = await fetch(`/api/orders/${orderId}/`);
-    if (!response.ok) throw new Error("Order not found");
-    const data = await response.json();
+    const res = await fetch(`/api/orders/${orderId}/`);
+    if (!res.ok) throw new Error("Order not found");
+    const data = await res.json();
+
     const timestamps = data.timestamps || {};
-
-    statusItems.forEach(item => {
+    const start = [data.start_lat || 14.6760, data.start_lng || 121.0437];
+    const end = [data.end_lat || 14.6760, data.end_lng || 121.0437];
+    const currentStatus = (data.status || "").toLowerCase().replace(/\s/g,"");
+    
+    // Update status timeline
+    let activeIndex = -1;
+    
+    statusItems.forEach((item, index) => {
       const statusName = item.dataset.status;
-      const timeEl = item.querySelector('.time');
-
+      const timeEl = timeElements[statusName];
+      
       if (timestamps[statusName] && !localStorage.getItem(seenKey)) {
-        item.classList.add('active');
-        timeEl.textContent = timestamps[statusName];
-        if (statusName === "Delivered") deliveredBtn.style.display = "inline-block";
+        item.classList.add('completed');
+        if (timeEl) timeEl.textContent = timestamps[statusName];
+        
+        // Find the current active status
+        if (statusName.toLowerCase().replace(/\s/g,"") === currentStatus) {
+          item.classList.add('active');
+          activeIndex = index;
+        }
+        
+        if (statusName === "Delivered") {
+          ackBtn.style.display = "inline-block";
+        }
       } else {
-        item.classList.remove('active');
-        timeEl.textContent = "--";
-        if (statusName === "Delivered") deliveredBtn.style.display = "none";
+        item.classList.remove('active', 'completed');
+        if (timeEl) timeEl.textContent = "--";
+        if (statusName === "Delivered") ackBtn.style.display = "none";
       }
     });
+    
+    // Update progress bar
+    if (activeIndex >= 0) {
+      const progressPercentage = ((activeIndex + 1) / statusItems.length) * 100;
+      statusProgress.style.width = `${progressPercentage}%`;
+    }
+    
+    // Initialize map if not already done
+    if (!mapInitialized) {
+      map = L.map('map').setView(start, 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+      
+      // Add restaurant marker
+      L.marker(start, {
+        icon: L.divIcon({
+          html: '<i class="fas fa-utensils" style="color: #C62828; font-size: 24px;"></i>',
+          iconSize: [30, 30],
+          className: 'restaurant-marker'
+        })
+      }).addTo(map).bindPopup('<b>KusinaExpress</b><br>Restaurant Location');
+      
+      // Add destination marker
+      L.marker(end, {
+        icon: L.divIcon({
+          html: '<i class="fas fa-home" style="color: #4CAF50; font-size: 24px;"></i>',
+          iconSize: [30, 30],
+          className: 'destination-marker'
+        })
+      }).addTo(map).bindPopup('<b>Delivery Address</b><br>Your Location');
+      
+      // Add route line
+      route = L.polyline([start, end], { 
+        color: '#C62828', 
+        weight: 4,
+        opacity: 0.7,
+        dashArray: '10, 10'
+      }).addTo(map);
+      
+      // Add moto marker
+      motoMarker = L.marker(start, {
+        icon: L.divIcon({
+          html: '<i class="fas fa-motorcycle" style="color: #2196F3; font-size: 28px;"></i>',
+          iconSize: [30, 30],
+          className: 'moto-marker'
+        })
+      }).addTo(map);
+      
+      mapInitialized = true;
+    }
+    
+    // Animate moto if order is out for delivery
+    if (currentStatus === "outfordelivery" && !motoAnimating) {
+      motoAnimating = true;
+      motoProgress = 0;
+      
+      function animateMoto() {
+        if (motoProgress >= 1) { 
+          motoAnimating = false; 
+          return; 
+        }
+        motoProgress += 0.005;
+        if (motoProgress > 1) motoProgress = 1;
+        
+        const lat = start[0] + (end[0] - start[0]) * motoProgress;
+        const lng = start[1] + (end[1] - start[1]) * motoProgress;
+        
+        motoMarker.setLatLng([lat, lng]);
+        
+        // Smoothly follow the moto
+        if (motoProgress < 0.9) {
+          map.setView([lat, lng], 14, { animate: true, duration: 0.5 });
+        }
+        
+        if (motoProgress < 1) {
+          requestAnimationFrame(animateMoto);
+        }
+      }
+      animateMoto();
+    }
+    
+    // If delivered, move moto to destination
+    if (currentStatus === "delivered") {
+      motoProgress = 1;
+      motoMarker.setLatLng(end);
+      map.setView(end, 14);
+      motoAnimating = false;
+    }
+    
+    // Update delivery info
+    if (data.delivery_address) {
+      document.getElementById('deliveryAddress').textContent = data.delivery_address;
+    }
+    
+    if (data.contact_number) {
+      document.getElementById('contactNumber').textContent = data.contact_number;
+    }
+    
+    if (orderId) {
+      document.getElementById('orderIdDisplay').textContent = orderId;
+    }
 
-  } catch (err) { console.error("Error fetching order status:", err); }
+  } catch(err) {
+    console.error("Fetch Order Error:", err);
+  }
 }
 
+// Fetch order status on load and set interval
 if (orderId) {
   fetchOrderStatus();
-  setInterval(fetchOrderStatus, 10000);
+  setInterval(fetchOrderStatus, 10000); // Update every 10 seconds
 }
 
-async function updateCartBadge() {
-  try {
-    const res = await fetch('/api/cart/');
-    if (!res.ok) return;
-    const items = await res.json();
-    const count = items.reduce((acc, i) => acc + i.quantity, 0);
-    const badge = document.getElementById('cartBadge');
-    badge.style.display = count > 0 ? 'inline-block' : 'none';
-    badge.innerText = count > 0 ? count : '';
-  } catch (err) { console.error(err); }
+// ============================================
+// NOTIFICATION FUNCTION
+// ============================================
+function showNotification(message) {
+  let notification = document.getElementById('notification');
+  
+  if (!notification) {
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--primary-color);
+      color: white;
+      padding: 15px 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-heavy);
+      z-index: 9999;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    `;
+    document.body.appendChild(notification);
+  }
+  
+  notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+  
+  // Show notification
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 10);
+  
+  // Clear any existing timeout
+  if (notification.timeoutId) {
+    clearTimeout(notification.timeoutId);
+  }
+  
+  // Hide notification after 3 seconds
+  notification.timeoutId = setTimeout(() => {
+    notification.style.transform = 'translateX(150%)';
+    notification.timeoutId = null;
+  }, 3000);
 }
-
-updateCartBadge();
-setInterval(updateCartBadge, 10000);
 </script>
 
 </body>
