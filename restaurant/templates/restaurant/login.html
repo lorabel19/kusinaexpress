@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KusinaExpress | Login / Sign Up</title>
+<title>KusinaExpress | Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -22,6 +22,7 @@
   --divider-color: #E0E0E0;
   --success-color: #4CAF50;
   --warning-color: #F44336;
+  --info-color: #2196F3;
   --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
   --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
@@ -52,6 +53,42 @@ body {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* Login Error Message (Inside Form) */
+.login-error-message {
+  background: linear-gradient(135deg, #F44336, #D32F2F);
+  color: white;
+  padding: 15px 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-light);
+  animation: slideInDown 0.4s ease;
+}
+
+.login-error-message i {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.login-error-message.hidden {
+  display: none;
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* --- Modern Header --- */
@@ -194,7 +231,6 @@ header {
   line-height: 1;
 }
 
-/* Hide cart badge when empty (0) */
 .cart-count.empty {
   display: none;
 }
@@ -288,7 +324,7 @@ header {
 }
 
 /* --- Login Modal --- */
-.login-modal {
+.login-modal, .create-account-modal {
   display: none;
   position: fixed;
   top: 0;
@@ -299,16 +335,47 @@ header {
   z-index: 9999;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .modal-content {
   background: var(--surface-color);
   border-radius: var(--border-radius);
   padding: 40px;
-  max-width: 400px;
-  width: 90%;
+  max-width: 450px;
+  width: 100%;
   box-shadow: var(--shadow-heavy);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content.small {
+  max-width: 400px;
   text-align: center;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.modal-close:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
 }
 
 .modal-content i {
@@ -334,10 +401,259 @@ header {
   display: flex;
   gap: 15px;
   justify-content: center;
+  margin-top: 30px;
 }
 
 .modal-buttons .btn {
   min-width: 120px;
+}
+
+/* --- COMPACT CREATE ACCOUNT FORM --- */
+.create-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.create-account-form .form-group {
+  text-align: left;
+  position: relative;
+}
+
+.create-account-form .form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.create-account-form .input-wrapper {
+  position: relative;
+}
+
+.create-account-form .input-wrapper i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 16px;
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.create-account-form input {
+  width: 100%;
+  padding: 12px 12px 12px 45px;
+  border: 2px solid var(--divider-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  transition: var(--transition);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.create-account-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+.create-account-form input:focus + i {
+  color: var(--primary-color);
+}
+
+.create-account-form .password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  transition: var(--transition);
+  z-index: 2;
+  padding: 0;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-account-form .password-toggle:hover {
+  color: var(--primary-color);
+}
+
+.create-account-form .validation-message {
+  font-size: 11.5px;
+  margin-top: 3px;
+  display: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.create-account-form .validation-message.error {
+  color: var(--warning-color);
+  background: rgba(244, 67, 54, 0.1);
+  display: block;
+}
+
+.create-account-form .validation-message.success {
+  color: var(--success-color);
+  background: rgba(76, 175, 80, 0.1);
+  display: block;
+}
+
+.name-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.password-strength {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 4px;
+  background-color: var(--divider-color);
+  overflow: hidden;
+  position: relative;
+}
+
+.password-strength-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.password-strength.weak .password-strength-fill {
+  background-color: var(--warning-color);
+  width: 30%;
+}
+
+.password-strength.medium .password-strength-fill {
+  background-color: var(--secondary-color);
+  width: 60%;
+}
+
+.password-strength.strong .password-strength-fill {
+  background-color: var(--success-color);
+  width: 100%;
+}
+
+.password-strength-text {
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.terms-agreement {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.terms-agreement input[type="checkbox"] {
+  margin-top: 2px;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--primary-color);
+}
+
+.terms-agreement label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.terms-agreement label a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-agreement label a:hover {
+  text-decoration: underline;
+}
+
+/* Compact create account button with white icon */
+.create-account-btn {
+  background: var(--primary-color);
+  color: var(--text-light);
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.create-account-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.create-account-btn:disabled {
+  background: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.create-account-btn i {
+  color: white !important;
+  font-size: 16px;
+}
+
+.create-account-switch {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.create-account-switch a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  position: relative;
+  cursor: pointer;
+}
+
+.create-account-switch a::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.create-account-switch a:hover::after {
+  width: 100%;
 }
 
 /* --- MODERN LOGIN CONTENT ONLY --- */
@@ -345,23 +661,23 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 20px;
+  padding : 20px 20px;
   background: linear-gradient(135deg, rgba(198, 40, 40, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
-  min-height: calc(100vh - 200px); /* Adjusted for better fit */
+  min-height: calc(100vh - 200px);
   flex: 1;
 }
 
+/* LONG CONTAINER WITH REDUCED HEIGHT */
 .login-container {
   display: flex;
   width: 100%;
-  max-width: 1200px; /* Increased from 1100px */
+  max-width: 1200px;
   border-radius: var(--border-radius);
   overflow: hidden;
   box-shadow: var(--shadow-heavy);
   background-color: var(--surface-color);
   position: relative;
-  min-height: 680px; /* Increased height */
-  height: auto;
+  height: 900px; /* Reduced height */
 }
 
 .login-container::before {
@@ -377,14 +693,14 @@ main {
 .left-side {
   flex: 1.2;
   min-width: 300px;
-  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
+  background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
               url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: var(--text-light);
-  padding: 50px 40px; /* Increased padding */
+  padding: 40px 35px;
   text-align: center;
   position: relative;
 }
@@ -392,20 +708,20 @@ main {
 .left-side-content {
   position: relative;
   z-index: 2;
-  max-width: 450px; /* Increased width */
+  max-width: 450px;
 }
 
 .left-side h2 {
-  font-size: 38px; /* Increased size */
+  font-size: 36px;
   font-weight: 800;
-  margin-bottom: 20px; /* Increased margin */
+  margin-bottom: 20px;
   line-height: 1.1;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .left-side p {
-  font-size: 17px; /* Slightly larger */
-  margin-bottom: 40px; /* Increased margin */
+  font-size: 16px;
+  margin-bottom: 35px;
   line-height: 1.6;
   opacity: 0.9;
 }
@@ -413,64 +729,65 @@ main {
 .features {
   display: flex;
   flex-direction: column;
-  gap: 18px; /* Increased gap */
-  margin-top: 40px; /* Increased margin */
+  gap: 18px;
+  margin-top: 35px;
 }
 
 .feature {
   display: flex;
   align-items: center;
-  gap: 15px; /* Increased gap */
+  gap: 15px;
   text-align: left;
 }
 
 .feature i {
-  width: 40px; /* Larger icon */
-  height: 40px; /* Larger icon */
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px; /* Larger icon */
+  font-size: 18px;
   color: var(--secondary-color);
   flex-shrink: 0;
 }
 
 .feature span {
-  font-size: 16px; /* Larger text */
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.5;
 }
 
 .right-side {
   flex: 1;
-  min-width: 400px; /* Increased minimum width */
+  min-width: 400px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 50px 40px; /* Increased padding */
+  padding: 40px 35px;
   background: var(--surface-color);
+  position: relative;
 }
 
 .auth-container {
   background: var(--surface-color);
-  padding: 50px 40px; /* Increased padding */
+  padding: 40px 35px;
   border-radius: var(--border-radius);
   width: 100%;
-  max-width: 480px; /* Increased max width */
+  max-width: 420px;
   text-align: center;
   border: 1px solid rgba(198, 40, 40, 0.1);
 }
 
 .auth-header {
-  margin-bottom: 40px; /* Increased margin */
+  margin-bottom: 20px;
 }
 
 .auth-header h2 {
   color: var(--text-primary);
-  font-size: 32px; /* Larger */
-  margin-bottom: 12px; /* Increased */
+  font-size: 28px;
+  margin-bottom: 10px;
   font-weight: 800;
   background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   -webkit-background-clip: text;
@@ -480,47 +797,57 @@ main {
 
 .auth-header p {
   color: var(--text-secondary);
-  font-size: 16px; /* Larger */
+  font-size: 15px;
   line-height: 1.6;
 }
 
 .role-selection {
   display: flex;
   width: 100%;
-  margin-bottom: 40px; /* Increased */
+  margin-bottom: 20px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--divider-color);
   background: var(--background-color);
-  padding: 6px; /* Slightly larger */
+  padding: 6px;
 }
 
 .role-selection button {
   flex: 1;
-  padding: 18px 0; /* Increased padding */
+  padding: 16px 0;
   border: none;
   background: transparent;
   color: var(--text-secondary);
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  font-size: 16px; /* Larger */
+  font-size: 15px;
   border-radius: 8px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .role-selection button i {
-  font-size: 18px; /* Larger icon */
+  font-size: 16px;
 }
 
 .role-selection button.active {
   background: var(--surface-color);
   color: var(--primary-color);
   box-shadow: var(--shadow-light);
+}
+
+.role-selection button.active.admin {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+}
+
+.role-selection button.active.user {
+  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+  color: white;
 }
 
 .role-selection button:hover:not(.active) {
@@ -530,7 +857,7 @@ main {
 form {
   display: flex;
   flex-direction: column;
-  gap: 28px; /* Increased gap */
+  gap: 20px;
   width: 100%;
 }
 
@@ -541,10 +868,10 @@ form {
 
 .form-group label {
   display: block;
-  margin-bottom: 10px; /* Increased */
+  margin-bottom: 8px;
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 15px; /* Slightly larger */
+  font-size: 14px;
 }
 
 .input-wrapper {
@@ -553,26 +880,26 @@ form {
 
 .input-wrapper i {
   position: absolute;
-  left: 20px; /* Increased from 18px */
+  left: 18px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
-  font-size: 20px; /* Increased from 18px */
+  font-size: 18px;
   transition: var(--transition);
   z-index: 2;
 }
 
 input {
   width: 100%;
-  padding: 20px 20px 20px 60px; /* Increased padding, especially left padding for icon */
+  padding: 16px 16px 16px 55px;
   border: 2px solid var(--divider-color);
   border-radius: var(--border-radius);
-  font-size: 16px;
+  font-size: 15px;
   font-family: 'Poppins', sans-serif;
   transition: var(--transition);
   background: var(--surface-color);
   color: var(--text-primary);
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box;
 }
 
 input:focus {
@@ -585,22 +912,21 @@ input:focus + i {
   color: var(--primary-color);
 }
 
-/* FIXED: Password toggle positioned inside input */
 .password-toggle {
   position: absolute;
-  right: 20px; /* Increased from 18px */
+  right: 18px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 20px; /* Increased */
+  font-size: 18px;
   transition: var(--transition);
   z-index: 2;
   padding: 0;
-  width: 30px; /* Fixed width */
-  height: 30px; /* Fixed height */
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -608,37 +934,36 @@ input:focus + i {
 
 .password-toggle:hover {
   color: var(--primary-color);
-  background: none;
 }
 
 .remember-forgot {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 15px 0; /* Increased margin */
+  margin: 12px 0;
 }
 
 .remember-me {
   display: flex;
   align-items: center;
-  gap: 10px; /* Increased gap */
+  gap: 8px;
 }
 
 .remember-me input[type="checkbox"] {
-  width: 18px; /* Slightly larger */
-  height: 18px; /* Slightly larger */
+  width: 16px;
+  height: 16px;
   accent-color: var(--primary-color);
 }
 
 .remember-me label {
   margin: 0;
-  font-size: 15px; /* Larger */
+  font-size: 14px;
   color: var(--text-secondary);
   cursor: pointer;
 }
 
 .forgot-password {
-  font-size: 15px; /* Larger */
+  font-size: 14px;
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
@@ -653,18 +978,18 @@ input:focus + i {
 .submit-btn {
   background: var(--primary-color);
   color: var(--text-light);
-  padding: 20px; /* Increased */
+  padding: 18px;
   border: none;
   border-radius: var(--border-radius);
   font-weight: 600;
-  font-size: 17px; /* Larger */
+  font-size: 16px;
   cursor: pointer;
   transition: var(--transition);
-  margin-top: 15px; /* Increased */
+  margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .submit-btn:hover {
@@ -673,10 +998,30 @@ input:focus + i {
   box-shadow: var(--shadow-medium);
 }
 
+.submit-btn:disabled {
+  background: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submit-btn i {
+  color: white !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
 .divider {
   display: flex;
   align-items: center;
-  margin: 35px 0; /* Increased */
+  margin: 30px 0;
   color: var(--text-secondary);
 }
 
@@ -689,18 +1034,18 @@ input:focus + i {
 }
 
 .divider span {
-  padding: 0 18px; /* Increased */
-  font-size: 15px; /* Larger */
+  padding: 0 15px;
+  font-size: 14px;
 }
 
 .social-login {
   display: flex;
-  gap: 18px; /* Increased */
+  gap: 15px;
 }
 
 .social-btn {
   flex: 1;
-  padding: 18px; /* Increased */
+  padding: 16px;
   border: 2px solid var(--divider-color);
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -710,9 +1055,9 @@ input:focus + i {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   transition: var(--transition);
-  font-size: 16px; /* Larger */
+  font-size: 15px;
 }
 
 .social-btn:hover {
@@ -734,12 +1079,12 @@ input:focus + i {
 }
 
 .social-btn i {
-  font-size: 22px; /* Larger icons */
+  font-size: 20px;
 }
 
 .switch-auth {
-  margin-top: 35px; /* Increased */
-  font-size: 16px; /* Larger */
+  margin-top: 30px;
+  font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.6;
 }
@@ -750,6 +1095,7 @@ input:focus + i {
   text-decoration: none;
   transition: var(--transition);
   position: relative;
+  cursor: pointer;
 }
 
 .switch-auth a::after {
@@ -767,7 +1113,42 @@ input:focus + i {
   width: 100%;
 }
 
-/* --- Footer (SAME AS MENU PAGE) --- */
+/* Form validation styles */
+.input-wrapper.error input {
+  border-color: var(--warning-color);
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.input-wrapper.success input {
+  border-color: var(--success-color);
+}
+
+.input-wrapper.error i {
+  color: var(--warning-color);
+}
+
+.validation-message {
+  font-size: 12.5px;
+  margin-top: 5px;
+  display: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.validation-message.error {
+  color: var(--warning-color);
+  background: rgba(244, 67, 54, 0.1);
+  display: block;
+}
+
+.validation-message.success {
+  color: var(--success-color);
+  background: rgba(76, 175, 80, 0.1);
+  display: block;
+}
+
+/* --- Footer --- */
 footer {
   background-color: var(--text-primary);
   color: var(--text-light);
@@ -886,42 +1267,6 @@ footer {
 }
 
 /* --- Responsive Design --- */
-@media (max-width: 1200px) {
-  .login-container {
-    max-width: 1100px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .login-container {
-    max-width: 950px;
-    min-height: 650px;
-  }
-  
-  .left-side h2 {
-    font-size: 34px;
-  }
-  
-  .auth-container {
-    padding: 45px 35px;
-  }
-}
-
-@media (max-width: 900px) {
-  .login-container {
-    max-width: 800px;
-  }
-  
-  .right-side {
-    min-width: 350px;
-  }
-  
-  .auth-container {
-    max-width: 420px;
-    padding: 40px 30px;
-  }
-}
-
 @media (max-width: 768px) {
   .header-content {
     padding: 0 15px;
@@ -939,12 +1284,13 @@ footer {
     flex-direction: column;
     max-width: 600px;
     margin: 0 auto;
-    min-height: auto;
+    height: auto;
+    min-height: 900px;
   }
   
   .left-side {
     flex: none;
-    min-height: 300px; /* Taller mobile view */
+    min-height: 350px;
     padding: 40px 30px;
   }
   
@@ -955,7 +1301,7 @@ footer {
   }
   
   .auth-container {
-    padding: 40px 30px;
+    padding: 35px 30px;
     max-width: 500px;
     margin: 0 auto;
   }
@@ -975,6 +1321,15 @@ footer {
   .modal-buttons .btn {
     width: 100%;
   }
+  
+  .name-fields {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-content {
+    padding: 30px 25px;
+    max-width: 400px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -985,10 +1340,11 @@ footer {
   
   .login-container {
     max-width: 100%;
+    min-height: 850px;
   }
   
   .left-side {
-    min-height: 250px;
+    min-height: 300px;
     padding: 30px 20px;
   }
   
@@ -1024,62 +1380,30 @@ footer {
   }
   
   .role-selection button {
-    padding: 16px 0;
-    font-size: 15px;
-  }
-  
-  input {
-    padding: 18px 18px 18px 55px; /* Adjusted for mobile */
-    font-size: 15px;
-  }
-  
-  .input-wrapper i {
-    left: 18px;
-    font-size: 18px;
-  }
-  
-  .password-toggle {
-    right: 15px;
-    font-size: 18px;
-  }
-  
-  .submit-btn, .social-btn {
-    padding: 18px;
-    font-size: 16px;
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
+    padding: 14px 0;
+    font-size: 14px;
   }
   
   .modal-content {
     padding: 25px 20px;
-  }
-}
-
-/* Extra small devices */
-@media (max-width: 360px) {
-  .auth-container {
-    padding: 25px 20px;
+    max-width: 350px;
   }
   
-  input {
-    padding: 16px 16px 16px 50px;
+  .create-account-form input {
+    padding: 10px 10px 10px 40px;
+    font-size: 13px;
   }
   
-  .input-wrapper i {
-    left: 16px;
-  }
-  
-  .password-toggle {
-    right: 12px;
+  .create-account-form .input-wrapper i {
+    left: 12px;
+    font-size: 14px;
   }
 }
 </style>
 </head>
 <body>
 
-<!-- Header (SAME AS MENU PAGE) -->
+<!-- Header -->
 <header>
   <div class="container">
     <div class="header-content">
@@ -1120,7 +1444,7 @@ footer {
   </div>
 </header>
 
-<!-- Mobile Navigation (SAME AS MENU PAGE) -->
+<!-- Mobile Navigation -->
 <div class="overlay" id="overlay"></div>
 <nav class="mobile-nav" id="mobileNav">
   <a href="{% url 'restaurant:home' %}">
@@ -1142,7 +1466,6 @@ footer {
     <a href="{% url 'restaurant:login' %}" class="btn" style="justify-content: center; background-color: #C62828; color: white; border-color: #C62828;">
       <i class="fas fa-user" style="color: white;"></i> Sign In
     </a>
-    <!-- UPDATED MOBILE CART BUTTON -->
     <a href="#" onclick="handleProtectedLink('Cart')" 
        class="btn" 
        style="justify-content: center; 
@@ -1150,15 +1473,17 @@ footer {
               border-color: #C62828; 
               color: white;">
       <i class="fas fa-shopping-cart" style="color: white;"></i> Cart
-      <!-- Cart badge hidden by default -->
       <span class="cart-count empty">0</span>
     </a>
   </div>
 </nav>
 
-<!-- Login Modal (EXACTLY SAME AS HOMEPAGE AND MENU) -->
+<!-- Login Required Modal -->
 <div class="login-modal" id="loginModal">
-  <div class="modal-content">
+  <div class="modal-content small">
+    <button class="modal-close" onclick="closeLoginModal()">
+      <i class="fas fa-times"></i>
+    </button>
     <i class="fas fa-user-lock"></i>
     <h3 id="modalTitle">Login Required</h3>
     <p id="modalMessage">You need to log in to access this feature. Sign in to continue.</p>
@@ -1169,6 +1494,95 @@ footer {
       <button class="btn btn-secondary" onclick="closeLoginModal()">
         <i class="fas fa-times"></i> Cancel
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Compact Create Account Modal -->
+<div class="create-account-modal" id="createAccountModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeCreateAccountModal()">
+      <i class="fas fa-times"></i>
+    </button>
+    <i class="fas fa-user-plus" style="color: var(--primary-color); font-size: 40px; margin-bottom: 15px;"></i>
+    <h3 style="font-size: 22px; margin-bottom: 8px;">Create Account</h3>
+    <p style="font-size: 14px; margin-bottom: 20px;">Join KusinaExpress to start ordering delicious Filipino food!</p>
+    
+    <form method="post" action="{% url 'restaurant:create_account' %}" class="create-account-form" id="createAccountForm">
+      {% csrf_token %}
+      <input type="hidden" name="role" value="user">
+      
+      <div class="name-fields">
+        <div class="form-group">
+          <label for="create-first-name">First Name</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" name="first_name" id="create-first-name" placeholder="First name" required>
+          </div>
+          <div class="validation-message" id="first-name-error"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="create-last-name">Last Name</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" name="last_name" id="create-last-name" placeholder="Last name" required>
+          </div>
+          <div class="validation-message" id="last-name-error"></div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="create-email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fas fa-envelope"></i>
+          <input type="email" name="email" id="create-email" placeholder="your@email.com" required>
+        </div>
+        <div class="validation-message" id="create-email-error"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="create-password">Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="password" id="create-password" placeholder="••••••••" required>
+          <button type="button" class="password-toggle" id="createPasswordToggle">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <div class="password-strength" id="passwordStrength">
+          <div class="password-strength-fill"></div>
+        </div>
+        <div class="password-strength-text" id="passwordStrengthText">Strength: None</div>
+        <div class="validation-message" id="create-password-error"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" name="confirm_password" id="confirm-password" placeholder="••••••••" required>
+          <button type="button" class="password-toggle" id="confirmPasswordToggle">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <div class="validation-message" id="confirm-password-error"></div>
+      </div>
+      
+      <div class="terms-agreement">
+        <input type="checkbox" id="terms" name="terms" required>
+        <label for="terms">
+          I agree to the <a href="#" onclick="showTerms()">Terms</a> and <a href="#" onclick="showPrivacy()">Privacy Policy</a>
+        </label>
+      </div>
+      
+      <button type="submit" class="create-account-btn" id="createAccountBtn">
+        <i class="fas fa-user-plus"></i> Create Account
+      </button>
+    </form>
+    
+    <div class="create-account-switch">
+      Already have an account? <a href="#" onclick="showLoginInstead()">Sign In</a>
     </div>
   </div>
 </div>
@@ -1195,18 +1609,22 @@ footer {
               <i class="fas fa-star"></i>
               <span>Exclusive Member Offers</span>
             </div>
+            <div class="feature">
+              <i class="fas fa-shield-alt"></i>
+              <span>Role-Based Access Control</span>
+            </div>
           </div>
         </div>
       </div>
       <div class="right-side">
         <div class="auth-container">
           <div class="auth-header">
-            <h2>Sign In</h2>
-            <p>Enter your credentials to access your account</p>
+            <h2 id="authTitle">Sign In as User</h2>
+            <p id="authDescription">Enter your credentials to access user features</p>
           </div>
           
           <div class="role-selection">
-            <button type="button" id="user-role" class="active">
+            <button type="button" id="user-role" class="active user">
               <i class="fas fa-user"></i> User
             </button>
             <button type="button" id="admin-role">
@@ -1214,7 +1632,33 @@ footer {
             </button>
           </div>
           
-          <form method="post">
+          <!-- Login Error Message (Inside Form) -->
+          {% if error_type == 'role' %}
+          <div class="login-error-message" id="loginErrorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="message-content">
+              {% if selected_role == 'admin' %}
+                This email is not registered as an admin. Please login as User or use an admin account.
+              {% else %}
+                This email is not registered as a regular user. Please login as Admin or use a user account.
+              {% endif %}
+            </div>
+          </div>
+          {% elif error_type == 'invalid' %}
+          <div class="login-error-message" id="loginErrorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="message-content">
+              Invalid email or password. Please try again.
+            </div>
+          </div>
+          {% else %}
+          <div class="login-error-message hidden" id="loginErrorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="message-content" id="errorMessageContent"></div>
+          </div>
+          {% endif %}
+          
+          <form method="post" id="loginForm" action="{% url 'restaurant:login' %}">
             {% csrf_token %}
             <input type="hidden" name="role" id="role-input" value="user">
             
@@ -1222,8 +1666,10 @@ footer {
               <label for="email">Email Address</label>
               <div class="input-wrapper">
                 <i class="fas fa-envelope"></i>
-                <input type="email" name="email" id="email" placeholder="Enter your email" required>
+                <input type="email" name="email" id="email" placeholder="Enter your email" required 
+                       value="{% if form_email %}{{ form_email }}{% endif %}">
               </div>
+              <div class="validation-message" id="email-error"></div>
             </div>
             
             <div class="form-group">
@@ -1235,17 +1681,18 @@ footer {
                   <i class="fas fa-eye"></i>
                 </button>
               </div>
+              <div class="validation-message" id="password-error"></div>
             </div>
             
             <div class="remember-forgot">
               <div class="remember-me">
-                <input type="checkbox" id="remember">
+                <input type="checkbox" id="remember" name="remember">
                 <label for="remember">Remember me</label>
               </div>
-              <a href="#" class="forgot-password">Forgot password?</a>
+              <a href="#" class="forgot-password" onclick="showForgotPassword()">Forgot password?</a>
             </div>
             
-            <button type="submit" class="submit-btn">
+            <button type="submit" class="submit-btn" id="submitBtn">
               <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
           </form>
@@ -1264,7 +1711,7 @@ footer {
           </div>
           
           <div class="switch-auth">
-            Don't have an account? <a href="#">Create Account</a>
+            Don't have an account? <a href="#" onclick="showCreateAccountModal()">Create Account</a>
           </div>
         </div>
       </div>
@@ -1272,7 +1719,7 @@ footer {
   </div>
 </main>
 
-<!-- Footer (SAME AS MENU PAGE) -->
+<!-- Footer -->
 <footer>
   <div class="container">
     <div class="footer-content">
@@ -1335,7 +1782,7 @@ footer {
 </footer>
 
 <script>
-// Check if user is logged in (simulated)
+// Check if user is logged in
 const isLoggedIn = false; // User is not logged in on login page
 
 // Mobile menu toggle
@@ -1357,10 +1804,9 @@ overlay.addEventListener('click', () => {
   document.body.style.overflow = 'auto';
 });
 
-// Handle protected links (Order, Contact, About Us, Cart)
+// Handle protected links
 function handleProtectedLink(featureName) {
   if (!isLoggedIn) {
-    // Customize modal message based on feature
     let message = `You need to log in to access ${featureName}. Sign in to continue.`;
     
     if (featureName === 'Cart') {
@@ -1377,18 +1823,16 @@ function handleProtectedLink(featureName) {
       message = "You need to log in to purchase or check gift cards. Sign in to continue.";
     }
     
-    // Update modal content
     document.getElementById('modalTitle').textContent = `Login Required for ${featureName}`;
     document.getElementById('modalMessage').textContent = message;
     
-    // Show modal
     showLoginModal();
-    return false; // Prevent default link behavior
+    return false;
   }
-  return true; // Allow the link if logged in
+  return true;
 }
 
-// Login Modal Functions (EXACTLY SAME AS HOMEPAGE AND MENU)
+// Login Modal Functions
 function showLoginModal() {
   document.getElementById('loginModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -1399,33 +1843,105 @@ function closeLoginModal() {
   document.body.style.overflow = 'auto';
 }
 
-// Close modal when clicking outside
+// Create Account Modal Functions
+function showCreateAccountModal() {
+  document.getElementById('createAccountModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Focus on first name field
+  document.getElementById('create-first-name').focus();
+}
+
+function closeCreateAccountModal() {
+  document.getElementById('createAccountModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Show login instead
+function showLoginInstead() {
+  closeCreateAccountModal();
+  // Focus on email field in login form
+  document.getElementById('email').focus();
+}
+
+// Close modals when clicking outside
 document.getElementById('loginModal').addEventListener('click', function(e) {
   if (e.target === this) {
     closeLoginModal();
   }
 });
 
-// Role selection
+document.getElementById('createAccountModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeCreateAccountModal();
+  }
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeLoginModal();
+    closeCreateAccountModal();
+  }
+});
+
+// Role selection for login
 const userBtn = document.getElementById('user-role');
 const adminBtn = document.getElementById('admin-role');
 const roleInput = document.getElementById('role-input');
+const authTitle = document.getElementById('authTitle');
+const authDescription = document.getElementById('authDescription');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const loginErrorMessage = document.getElementById('loginErrorMessage');
+const errorMessageContent = document.getElementById('errorMessageContent');
 
 userBtn.addEventListener('click', () => {
   roleInput.value = 'user';
-  userBtn.classList.add('active');
-  adminBtn.classList.remove('active');
+  userBtn.classList.add('active', 'user');
+  adminBtn.classList.remove('active', 'admin');
+  authTitle.textContent = 'Sign In as User';
+  authDescription.textContent = 'Enter your credentials to access user features';
+  passwordInput.placeholder = 'Enter your password';
+  
+  // Hide error message when switching roles
+  if (loginErrorMessage) {
+    loginErrorMessage.classList.add('hidden');
+  }
 });
 
 adminBtn.addEventListener('click', () => {
   roleInput.value = 'admin';
-  adminBtn.classList.add('active');
-  userBtn.classList.remove('active');
+  adminBtn.classList.add('active', 'admin');
+  userBtn.classList.remove('active', 'user');
+  authTitle.textContent = 'Sign In as Admin';
+  authDescription.textContent = 'Enter admin credentials to access admin panel';
+  passwordInput.placeholder = 'Enter admin password';
+  
+  // Hide error message when switching roles
+  if (loginErrorMessage) {
+    loginErrorMessage.classList.add('hidden');
+  }
 });
 
-// Password toggle
+// Show error message function
+function showErrorMessage(message) {
+  if (loginErrorMessage && errorMessageContent) {
+    errorMessageContent.textContent = message;
+    loginErrorMessage.classList.remove('hidden');
+  }
+}
+
+// Check if there's an error from Django backend
+window.addEventListener('load', function() {
+  // If there's an error message from Django, show it
+  const errorDiv = document.querySelector('.login-error-message:not(.hidden)');
+  if (errorDiv) {
+    // Already showing from Django template
+  }
+});
+
+// Password toggle for login form
 const passwordToggle = document.getElementById('passwordToggle');
-const passwordInput = document.getElementById('password');
 
 passwordToggle.addEventListener('click', () => {
   const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -1433,104 +1949,334 @@ passwordToggle.addEventListener('click', () => {
   passwordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
 });
 
-// Form validation
-const form = document.querySelector('form');
-const emailInput = document.getElementById('email');
+// Password toggle for create account form
+const createPasswordToggle = document.getElementById('createPasswordToggle');
+const createPasswordInput = document.getElementById('create-password');
+const confirmPasswordToggle = document.getElementById('confirmPasswordToggle');
+const confirmPasswordInput = document.getElementById('confirm-password');
 
-form.addEventListener('submit', function(e) {
-  const email = emailInput.value;
-  const password = passwordInput.value;
+createPasswordToggle.addEventListener('click', () => {
+  const type = createPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  createPasswordInput.setAttribute('type', type);
+  createPasswordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+});
+
+confirmPasswordToggle.addEventListener('click', () => {
+  const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  confirmPasswordInput.setAttribute('type', type);
+  confirmPasswordToggle.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+});
+
+// Password strength indicator
+createPasswordInput.addEventListener('input', function() {
+  checkPasswordStrength(this.value);
+});
+
+function checkPasswordStrength(password) {
+  const strengthBar = document.getElementById('passwordStrength');
+  const strengthText = document.getElementById('passwordStrengthText');
   
-  if (!email || !password) {
-    e.preventDefault();
-    showNotification('Please fill in all fields', 'error');
+  // Reset
+  strengthBar.className = 'password-strength';
+  strengthText.textContent = 'Strength: None';
+  
+  if (password.length === 0) return;
+  
+  let strength = 0;
+  
+  // Length check
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+  
+  // Complexity checks
+  if (/[a-z]/.test(password)) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^a-zA-Z0-9]/.test(password)) strength++;
+  
+  // Update UI
+  if (strength <= 2) {
+    strengthBar.className = 'password-strength weak';
+    strengthText.textContent = 'Strength: Weak';
+  } else if (strength <= 4) {
+    strengthBar.className = 'password-strength medium';
+    strengthText.textContent = 'Strength: Medium';
+  } else {
+    strengthBar.className = 'password-strength strong';
+    strengthText.textContent = 'Strength: Strong';
+  }
+}
+
+// Form validation helper functions
+function showFieldError(field, message) {
+  const wrapper = field.parentElement;
+  const errorElement = field.parentElement.parentElement.querySelector('.validation-message');
+  
+  wrapper.classList.add('error');
+  wrapper.classList.remove('success');
+  errorElement.textContent = message;
+  errorElement.className = 'validation-message error';
+}
+
+function clearFieldError(field) {
+  const wrapper = field.parentElement;
+  const errorElement = field.parentElement.parentElement.querySelector('.validation-message');
+  
+  wrapper.classList.remove('error');
+  wrapper.classList.remove('success');
+  errorElement.textContent = '';
+  errorElement.className = 'validation-message';
+}
+
+function showFieldSuccess(field, message) {
+  const wrapper = field.parentElement;
+  const successElement = field.parentElement.parentElement.querySelector('.validation-message');
+  
+  wrapper.classList.remove('error');
+  wrapper.classList.add('success');
+  successElement.textContent = message;
+  successElement.className = 'validation-message success';
+}
+
+// Login form validation
+const loginForm = document.getElementById('loginForm');
+const submitBtn = document.getElementById('submitBtn');
+
+// Real-time email validation for login
+emailInput.addEventListener('blur', function() {
+  validateLoginEmail(this.value);
+});
+
+function validateLoginEmail(email) {
+  const emailError = document.getElementById('email-error');
+  
+  if (!email) {
+    showFieldError(emailInput, 'Email is required');
     return false;
   }
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    e.preventDefault();
-    showNotification('Please enter a valid email address', 'error');
+    showFieldError(emailInput, 'Please enter a valid email address');
+    return false;
+  }
+  
+  clearFieldError(emailInput);
+  return true;
+}
+
+// Real-time password validation for login
+passwordInput.addEventListener('blur', function() {
+  validateLoginPassword(this.value);
+});
+
+function validateLoginPassword(password) {
+  if (!password) {
+    showFieldError(passwordInput, 'Password is required');
     return false;
   }
   
   if (password.length < 6) {
-    e.preventDefault();
-    showNotification('Password must be at least 6 characters long', 'error');
+    showFieldError(passwordInput, 'Password must be at least 6 characters');
     return false;
   }
   
-  // If all validation passes, simulate login success
-  // In a real application, this would be handled by Django backend
+  clearFieldError(passwordInput);
+  return true;
+}
+
+// Login form submission
+loginForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  const role = roleInput.value;
+  
+  // Hide any existing error message
+  if (loginErrorMessage) {
+    loginErrorMessage.classList.add('hidden');
+  }
+  
+  // Validate form
+  const isEmailValid = validateLoginEmail(email);
+  const isPasswordValid = validateLoginPassword(password);
+  
+  if (!isEmailValid || !isPasswordValid) {
+    return false;
+  }
+  
+  // Show loading state
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+  submitBtn.disabled = true;
+  
+  // Submit the form after a brief delay to show loading state
   setTimeout(() => {
-    showNotification('Login successful! Redirecting...', 'success');
-    // In a real app, you would redirect here:
-    // window.location.href = "{% url 'restaurant:home' %}";
-  }, 1000);
+    this.submit();
+  }, 500);
   
   return true;
 });
 
-// Update cart badge function - hide when 0
-function updateCartBadge() {
-  // Update all cart count badges
-  const cartBadges = document.querySelectorAll('.cart-count');
-  cartBadges.forEach(badge => {
-    // Hide badge if cart is empty (0 items)
-    badge.classList.add('empty');
-  });
+// Create account form validation
+const createAccountForm = document.getElementById('createAccountForm');
+const createAccountBtn = document.getElementById('createAccountBtn');
+
+// Validate first name
+const firstNameInput = document.getElementById('create-first-name');
+firstNameInput.addEventListener('blur', function() {
+  validateFirstName(this.value);
+});
+
+function validateFirstName(firstName) {
+  if (!firstName) {
+    showFieldError(firstNameInput, 'First name is required');
+    return false;
+  }
+  
+  if (firstName.length < 2) {
+    showFieldError(firstNameInput, 'First name must be at least 2 characters');
+    return false;
+  }
+  
+  clearFieldError(firstNameInput);
+  return true;
 }
 
-// Notification system
-function showNotification(message, type = 'info') {
-  // Check if notification element already exists
-  let notification = document.getElementById('notification');
-  
-  if (!notification) {
-    notification = document.createElement('div');
-    notification.id = 'notification';
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--primary-color);
-      color: white;
-      padding: 15px 25px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-heavy);
-      z-index: 9999;
-      transform: translateX(150%);
-      transition: transform 0.3s ease;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    `;
-    document.body.appendChild(notification);
+// Validate last name
+const lastNameInput = document.getElementById('create-last-name');
+lastNameInput.addEventListener('blur', function() {
+  validateLastName(this.value);
+});
+
+function validateLastName(lastName) {
+  if (!lastName) {
+    showFieldError(lastNameInput, 'Last name is required');
+    return false;
   }
   
-  const icon = type === 'error' ? 'fas fa-exclamation-circle' : 
-              type === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle';
-  notification.innerHTML = `<i class="${icon}"></i> ${message}`;
-  
-  if (type === 'error') {
-    notification.style.background = 'var(--warning-color)';
-  } else if (type === 'success') {
-    notification.style.background = 'var(--success-color)';
-  } else {
-    notification.style.background = 'var(--primary-color)';
+  if (lastName.length < 2) {
+    showFieldError(lastNameInput, 'Last name must be at least 2 characters');
+    return false;
   }
   
-  // Show notification
-  setTimeout(() => {
-    notification.style.transform = 'translateX(0)';
-  }, 10);
-  
-  // Hide notification after 3 seconds
-  setTimeout(() => {
-    notification.style.transform = 'translateX(150%)';
-  }, 3000);
+  clearFieldError(lastNameInput);
+  return true;
 }
+
+// Validate create account email
+const createEmailInput = document.getElementById('create-email');
+createEmailInput.addEventListener('blur', function() {
+  validateCreateEmail(this.value);
+});
+
+function validateCreateEmail(email) {
+  if (!email) {
+    showFieldError(createEmailInput, 'Email is required');
+    return false;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showFieldError(createEmailInput, 'Please enter a valid email address');
+    return false;
+  }
+  
+  clearFieldError(createEmailInput);
+  return true;
+}
+
+// Validate create account password
+createPasswordInput.addEventListener('blur', function() {
+  validateCreatePassword(this.value);
+});
+
+function validateCreatePassword(password) {
+  if (!password) {
+    showFieldError(createPasswordInput, 'Password is required');
+    return false;
+  }
+  
+  if (password.length < 8) {
+    showFieldError(createPasswordInput, 'Password must be at least 8 characters');
+    return false;
+  }
+  
+  // Check for password complexity
+  const hasLowercase = /[a-z]/.test(password);
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  
+  if (!hasLowercase || !hasUppercase || !hasNumber) {
+    showFieldError(createPasswordInput, 'Password must include uppercase, lowercase letters and numbers');
+    return false;
+  }
+  
+  clearFieldError(createPasswordInput);
+  return true;
+}
+
+// Validate confirm password
+confirmPasswordInput.addEventListener('blur', function() {
+  validateConfirmPassword(this.value);
+});
+
+function validateConfirmPassword(confirmPassword) {
+  const password = createPasswordInput.value;
+  
+  if (!confirmPassword) {
+    showFieldError(confirmPasswordInput, 'Please confirm your password');
+    return false;
+  }
+  
+  if (confirmPassword !== password) {
+    showFieldError(confirmPasswordInput, 'Passwords do not match');
+    return false;
+  }
+  
+  clearFieldError(confirmPasswordInput);
+  return true;
+}
+
+// Create account form submission
+createAccountForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const firstName = firstNameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  const email = createEmailInput.value.trim();
+  const password = createPasswordInput.value;
+  const confirmPassword = confirmPasswordInput.value;
+  const termsChecked = document.getElementById('terms').checked;
+  
+  // Validate all fields
+  const isFirstNameValid = validateFirstName(firstName);
+  const isLastNameValid = validateLastName(lastName);
+  const isEmailValid = validateCreateEmail(email);
+  const isPasswordValid = validateCreatePassword(password);
+  const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
+  
+  if (!termsChecked) {
+    return false;
+  }
+  
+  if (!isFirstNameValid || !isLastNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+    return false;
+  }
+  
+  // Show loading state
+  const originalText = createAccountBtn.innerHTML;
+  createAccountBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+  createAccountBtn.disabled = true;
+  
+  // Submit the form after a brief delay to show loading state
+  setTimeout(() => {
+    this.submit();
+  }, 500);
+  
+  return true;
+});
 
 // Social button hover effects
 document.querySelectorAll('.social-btn').forEach(btn => {
@@ -1541,18 +2287,17 @@ document.querySelectorAll('.social-btn').forEach(btn => {
   btn.addEventListener('mouseleave', function() {
     this.style.transform = 'translateY(0)';
   });
-  
-  // Add click handler for social login
-  btn.addEventListener('click', function() {
-    if (this.classList.contains('google')) {
-      showNotification('Google login coming soon!', 'info');
-    } else if (this.classList.contains('facebook')) {
-      showNotification('Facebook login coming soon!', 'info');
-    }
-  });
 });
 
-// Initialize cart badge - hide because it's 0
+// Update cart badge function
+function updateCartBadge() {
+  const cartBadges = document.querySelectorAll('.cart-count');
+  cartBadges.forEach(badge => {
+    badge.classList.add('empty');
+  });
+}
+
+// Initialize cart badge
 window.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   
@@ -1560,15 +2305,39 @@ window.addEventListener('DOMContentLoaded', () => {
   const protectedLinks = document.querySelectorAll('a[onclick*="handleProtectedLink"]');
   protectedLinks.forEach(link => {
     link.addEventListener('click', function(e) {
-      if (handleProtectedLink(this.textContent.trim())) {
-        // If logged in, allow the default behavior
-        return true;
+      if (!handleProtectedLink(this.textContent.trim())) {
+        e.preventDefault();
       }
-      e.preventDefault();
-      return false;
     });
   });
+  
+  // Update create account link to open modal
+  const createAccountLink = document.querySelector('.switch-auth a');
+  if (createAccountLink) {
+    createAccountLink.onclick = function(e) {
+      e.preventDefault();
+      showCreateAccountModal();
+    };
+  }
 });
+
+// Focus on email field when page loads
+window.addEventListener('load', function() {
+  emailInput.focus();
+});
+
+// Terms and Privacy functions
+function showTerms() {
+  // No notification
+}
+
+function showPrivacy() {
+  // No notification
+}
+
+function showForgotPassword() {
+  // No notification
+}
 </script>
 
 </body>

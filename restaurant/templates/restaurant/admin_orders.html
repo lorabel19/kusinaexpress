@@ -545,145 +545,167 @@ body {
     </h1>
   </div>
 
-  <!-- Status Filter Buttons -->
-  <div class="filter-container">
-    <div class="filter-buttons">
-      <a href="?status=pending" class="btn-filter">
-        <i class="fas fa-clock"></i> Pending
-      </a>
-      <a href="?status=preparing" class="btn-filter">
-        <i class="fas fa-fire"></i> Preparing
-      </a>
-      <a href="?status=out_for_delivery" class="btn-filter">
-        <i class="fas fa-truck"></i> Out for Delivery
-      </a>
-      <a href="?status=delivered" class="btn-filter">
-        <i class="fas fa-check-circle"></i> Delivered
-      </a>
-    </div>
+<!-- Status Filter Buttons -->
+<div class="filter-container">
+  <div class="filter-buttons">
+    <a href="?status=pending" class="btn-filter">
+      <i class="fas fa-clock"></i> Pending
+    </a>
+    <a href="?status=preparing" class="btn-filter">
+      <i class="fas fa-fire"></i> Preparing
+    </a>
+    <a href="?status=out_for_delivery" class="btn-filter">
+      <i class="fas fa-truck"></i> Out for Delivery
+    </a>
+    <a href="?status=delivered" class="btn-filter">
+      <i class="fas fa-check-circle"></i> Delivered
+    </a>
   </div>
+</div>
 
-  <!-- Orders Grid -->
-  <div class="orders-grid">
-    {% for order in orders %}
-    <div class="order-card">
-      <div class="order-header">
-        <div class="order-id">
-          <i class="fas fa-receipt"></i>
-          Order #{{ order.order_id }}
-        </div>
-        <div class="order-status 
-          {% if order.delivered_at %}status-delivered
-          {% elif order.out_for_delivery_at %}status-out_for_delivery
-          {% elif order.preparing_at %}status-preparing
-          {% elif order.confirmed_at %}status-confirmed
-          {% else %}status-pending
-          {% endif %}">
-          {% if order.delivered_at %}
-            <i class="fas fa-check-circle"></i> Delivered
-          {% elif order.out_for_delivery_at %}
-            <i class="fas fa-truck"></i> Out for Delivery
-          {% elif order.preparing_at %}
-            <i class="fas fa-fire"></i> Preparing
-          {% elif order.confirmed_at %}
-            <i class="fas fa-check"></i> Confirmed
-          {% else %}
-            <i class="fas fa-clock"></i> Pending
-          {% endif %}
-        </div>
+<!-- Orders Grid -->
+<div class="orders-grid">
+  {% for order in orders %}
+  {% with delivery=order.deliveries_set.first %}
+  <div class="order-card">
+    <div class="order-header">
+      <div class="order-id">
+        <i class="fas fa-receipt"></i>
+        Order #{{ order.order_id }}
       </div>
-
-      <div class="order-details">
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-user"></i> Customer</div>
-          <div class="detail-value">{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-money-bill-wave"></i> Total Amount</div>
-          <div class="detail-value order-amount">₱{{ order.total_amount }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
-          <div class="detail-value">{{ order.delivery_address|default:"-" }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-phone"></i> Contact Number</div>
-          <div class="detail-value">{{ order.contact_number|default:"-" }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-credit-card"></i> Payment Method</div>
-          <div class="detail-value">{{ order.payment_method|default:"-" }}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-sticky-note"></i> Notes</div>
-          <div class="detail-value">{{ order.notes|default:"-" }}</div>
-        </div>
-      </div>
-
-      <div class="order-items">
-        <div class="order-items-title">
-          <i class="fas fa-utensils"></i>
-          Order Items
-        </div>
-        {% for item in order.items.all %}
-        <div class="item-row">
-          <div class="item-name">{{ item.item.name }}</div>
-          <div class="item-quantity">×{{ item.quantity }}</div>
-        </div>
-        {% empty %}
-        <div class="item-row">
-          <div class="item-name">No items</div>
-        </div>
-        {% endfor %}
-      </div>
-
-      <div class="order-actions">
-        {% if order.delivered_at %}
-          <button class="btn-action btn-completed" disabled>
-            <i class="fas fa-check-double"></i> Completed
-          </button>
-        {% elif order.out_for_delivery_at %}
-          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
-            {% csrf_token %}
-            <input type="hidden" name="status" value="delivered">
-            <button class="btn-action btn-delivered" type="submit">
-              <i class="fas fa-check-circle"></i> Mark as Delivered
-            </button>
-          </form>
-        {% elif order.preparing_at %}
-          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
-            {% csrf_token %}
-            <input type="hidden" name="status" value="out_for_delivery">
-            <button class="btn-action btn-delivery" type="submit">
-              <i class="fas fa-truck"></i> Send for Delivery
-            </button>
-          </form>
-        {% elif order.confirmed_at and not order.preparing_at %}
-          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
-            {% csrf_token %}
-            <input type="hidden" name="status" value="preparing">
-            <button class="btn-action btn-preparing" type="submit">
-              <i class="fas fa-fire"></i> Start Preparing
-            </button>
-          </form>
+      <div class="order-status 
+        {% if delivery.delivered_at %}status-delivered
+        {% elif delivery.out_for_delivery_at %}status-out_for_delivery
+        {% elif delivery.preparing_at %}status-preparing
+        {% elif delivery.confirmed_at %}status-confirmed
+        {% else %}status-pending
+        {% endif %}">
+        {% if delivery.delivered_at %}
+          <i class="fas fa-check-circle"></i> Delivered
+        {% elif delivery.out_for_delivery_at %}
+          <i class="fas fa-truck"></i> Out for Delivery
+        {% elif delivery.preparing_at %}
+          <i class="fas fa-fire"></i> Preparing
+        {% elif delivery.confirmed_at %}
+          <i class="fas fa-check"></i> Confirmed
         {% else %}
-          <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}" style="flex: 1;">
-            {% csrf_token %}
-            <button class="btn-action btn-confirm" type="submit">
-              <i class="fas fa-check"></i> Confirm Order
-            </button>
-          </form>
+          <i class="fas fa-clock"></i> Pending
         {% endif %}
       </div>
     </div>
-    {% empty %}
-    <div class="empty-state">
-      <i class="fas fa-inbox"></i>
-      <p>No orders found.</p>
+
+    <div class="order-details">
+      <div class="detail-item">
+        <div class="detail-label"><i class="fas fa-user"></i> Customer</div>
+        <div class="detail-value">{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</div>
+      </div>
+
+      <!-- Delivery Details -->
+      {% if delivery %}
+      <div class="detail-item">
+        <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
+        <div class="detail-value">{{ delivery.delivery_address|default:"-" }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label"><i class="fas fa-phone"></i> Contact Number</div>
+        <div class="detail-value">{{ delivery.contact_number|default:"-" }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label"><i class="fas fa-sticky-note"></i> Notes</div>
+        <div class="detail-value">{{ delivery.notes|default:"-" }}</div>
+      </div>
+      {% else %}
+      <div class="detail-item">
+        <div class="detail-label">Delivery Info</div>
+        <div class="detail-value">No delivery details</div>
+      </div>
+      {% endif %}
+
+      <!-- Payment Method -->
+      {% for payment in order.payments_set.all %}
+      <div class="detail-item">
+        <div class="detail-label"><i class="fas fa-credit-card"></i> Payment Method</div>
+        <div class="detail-value">{{ payment.payment_method|default:"-" }}</div>
+      </div>
+      {% empty %}
+      <div class="detail-item">
+        <div class="detail-label">Payment Info</div>
+        <div class="detail-value">No payment details</div>
+      </div>
+      {% endfor %}
+
+      <div class="detail-item">
+        <div class="detail-label"><i class="fas fa-money-bill-wave"></i> Total Amount</div>
+        <div class="detail-value order-amount">₱{{ order.total_amount }}</div>
+      </div>
     </div>
-    {% endfor %}
+
+    <!-- Order Items -->
+    <div class="order-items">
+      <div class="order-items-title">
+        <i class="fas fa-utensils"></i> Order Items
+      </div>
+      {% for item in order.items.all %}
+      <div class="item-row">
+        <div class="item-name">{{ item.item.name }}</div>
+        <div class="item-quantity">×{{ item.quantity }}</div>
+      </div>
+      {% empty %}
+      <div class="item-row">
+        <div class="item-name">No items</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Order Actions -->
+    <div class="order-actions">
+      {% if delivery.delivered_at %}
+        <button class="btn-action btn-completed" disabled>
+          <i class="fas fa-check-double"></i> Completed
+        </button>
+      {% elif delivery.out_for_delivery_at %}
+        <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
+          {% csrf_token %}
+          <input type="hidden" name="status" value="delivered">
+          <button class="btn-action btn-delivered" type="submit">
+            <i class="fas fa-check-circle"></i> Mark as Delivered
+          </button>
+        </form>
+      {% elif delivery.preparing_at %}
+        <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
+          {% csrf_token %}
+          <input type="hidden" name="status" value="out_for_delivery">
+          <button class="btn-action btn-delivery" type="submit">
+            <i class="fas fa-truck"></i> Send for Delivery
+          </button>
+        </form>
+      {% elif delivery.confirmed_at and not delivery.preparing_at %}
+        <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
+          {% csrf_token %}
+          <input type="hidden" name="status" value="preparing">
+          <button class="btn-action btn-preparing" type="submit">
+            <i class="fas fa-fire"></i> Start Preparing
+          </button>
+        </form>
+      {% else %}
+        <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}" style="flex: 1;">
+          {% csrf_token %}
+          <button class="btn-action btn-confirm" type="submit">
+            <i class="fas fa-check"></i> Confirm Order
+          </button>
+        </form>
+      {% endif %}
+    </div>
   </div>
+  {% endwith %}
+  {% empty %}
+  <div class="empty-state">
+    <i class="fas fa-inbox"></i>
+    <p>No orders found.</p>
+  </div>
+  {% endfor %}
 </div>
+
 
 <script>
 const menuToggle = document.getElementById('menuToggle');

@@ -954,16 +954,20 @@ footer {
           </tr>
         </thead>
         <tbody>
-          {% for order in orders %}
-            {% if order.delivered_at %}
+          {% for delivery in deliveries %}
             <tr>
-              <td>#{{ order.order_id|stringformat:"06d" }}</td>
-              <td>{{ order.delivered_at|date:"M d, Y H:i" }}</td>
-              <td>{{ order.items_count }} items</td>
-              <td>₱{{ order.total_amount }}</td>
+              <td>#{{ delivery.order.order_id|stringformat:"06d" }}</td>
+              <td>{{ delivery.delivered_at|date:"M d, Y H:i" }}</td>
+              <td>
+                {% for item in delivery.order.items.all %}
+                  {{ item.item.name }} ×{{ item.quantity }}<br>
+                {% empty %}
+                  No items
+                {% endfor %}
+              </td>
+              <td>₱{{ delivery.order.total_amount }}</td>
               <td class="status-delivered">Delivered</td>
             </tr>
-            {% endif %}
           {% empty %}
             <tr>
               <td colspan="5" style="text-align: center; padding: 40px;">
@@ -978,6 +982,7 @@ footer {
     </div>
   </div>
 </div>
+
 
 <!-- Footer (EXACT SAME as Homepage) -->
 <footer>

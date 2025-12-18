@@ -36,6 +36,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('profile/', views.profile_view, name='profile'),
     path('public-menu/', views.menu, name='public_menu'),
+    path('create-account/', views.create_account, name='create_account'),
 
     # --- Admin Pages ---
     path('admin-dashboard/', views.admin_dashboard, name='admin-dashboard'),

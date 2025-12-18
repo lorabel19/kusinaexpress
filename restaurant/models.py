@@ -5,14 +5,24 @@ from decimal import Decimal
 class Deliveries(models.Model):
     delivery_id = models.AutoField(primary_key=True)
     order = models.ForeignKey('Orders', models.DO_NOTHING)
-    rider = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
-    delivery_address = models.CharField(max_length=255)
-    delivery_status = models.CharField(max_length=10, blank=True, null=True)
-    delivery_time = models.DateTimeField(blank=True, null=True)
+
+    delivery_address = models.TextField(blank=True, null=True)
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    delivery_option = models.CharField(max_length=50, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    # Mirror Orders status/timestamps
+    status = models.CharField(max_length=32, blank=True, null=True)
+    confirmed_at = models.DateTimeField(blank=True, null=True)
+    preparing_at = models.DateTimeField(blank=True, null=True)
+    out_for_delivery_at = models.DateTimeField(blank=True, null=True)
+    delivered_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = False  # kung gusto mong hindi i-migrate ng Django
         db_table = 'deliveries'
+
+
 
 
 class Feedback(models.Model):
@@ -61,25 +71,12 @@ class Orders(models.Model):
     user = models.ForeignKey('Users', models.DO_NOTHING)
     order_date = models.DateTimeField(blank=True, null=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=32, blank=True, null=True)
-
-    delivery_address = models.TextField(blank=True, null=True)
-    contact_number = models.CharField(max_length=20, blank=True, null=True)
-    delivery_option = models.CharField(max_length=50, blank=True, null=True)
-    notes = models.TextField(blank=True, null=True)
-    payment_method = models.CharField(max_length=50, blank=True, null=True)
-
-    confirmed_at = models.DateTimeField(blank=True, null=True)
-    preparing_at = models.DateTimeField(blank=True, null=True)
-    out_for_delivery_at = models.DateTimeField(blank=True, null=True)
-    delivered_at = models.DateTimeField(blank=True, null=True)
-
-    delivery_lat = models.FloatField(blank=True, null=True)
-    delivery_lng = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'orders'
+
+
 
     
 from django.db import models
@@ -107,14 +104,15 @@ class OrderItems(models.Model):
 
 class Payments(models.Model):
     payment_id = models.AutoField(primary_key=True)
-    order = models.ForeignKey(Orders, models.DO_NOTHING)
-    payment_method = models.CharField(max_length=5, blank=True, null=True)
-    payment_status = models.CharField(max_length=7, blank=True, null=True)
+    order = models.ForeignKey('Orders', models.DO_NOTHING)
+
+    payment_method = models.CharField(max_length=50, blank=True, null=True)
     payment_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'payments'
+
 
 
 class Users(models.Model):
