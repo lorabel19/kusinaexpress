@@ -189,22 +189,13 @@ header {
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  display: none; /* FIX: Hidden by default */
+  display: none;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
   z-index: 1;
-}
-
-/* FIX: Mobile cart button text and icon - force white */
-.mobile-nav .btn-primary {
-  color: var(--text-light) !important;
-}
-
-.mobile-nav .btn-primary i {
-  color: var(--text-light) !important;
 }
 
 /* Hamburger menu for mobile */
@@ -295,6 +286,80 @@ header {
   display: block;
 }
 
+.mobile-cart-btn {
+  background-color: var(--primary-color);
+  color: var(--text-light) !important;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  border: none;
+  width: 100%;
+  margin-top: 10px;
+  position: relative;
+}
+
+.mobile-cart-btn i {
+  color: var(--text-light) !important;
+  font-size: 16px;
+}
+
+.mobile-cart-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.mobile-profile-btn {
+  background-color: transparent;
+  color: var(--primary-color) !important;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: var(--transition);
+  border: 2px solid var(--primary-color);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.mobile-profile-btn i {
+  color: var(--primary-color) !important;
+  font-size: 16px;
+}
+
+.mobile-profile-btn:hover {
+  background-color: var(--primary-color);
+  color: var(--text-light) !important;
+}
+
+.mobile-profile-btn:hover i {
+  color: var(--text-light) !important;
+}
+
+.nav-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.nav-links a,
+.mobile-nav a,
+.btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
 /* --- Main Profile Content --- */
 main { 
   padding: 80px 0;
@@ -322,7 +387,6 @@ main {
   font-size: 16px;
 }
 
-/* User Profile Summary */
 .user-summary {
   background: var(--surface-color);
   border-radius: var(--border-radius);
@@ -373,10 +437,9 @@ main {
   width: 20px;
 }
 
-/* HORIZONTAL Profile Cards - 4 in a row */
 .profile-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr); /* Back to 4 cards */
   gap: 25px;
   margin-bottom: 40px;
 }
@@ -470,7 +533,6 @@ main {
   box-shadow: var(--shadow-medium);
 }
 
-/* Logout Section */
 .logout-section {
   text-align: center;
   margin-top: 50px;
@@ -498,7 +560,6 @@ main {
   box-shadow: var(--shadow-heavy);
 }
 
-/* Modal Styles */
 .modal {
   display: none;
   position: fixed;
@@ -513,10 +574,10 @@ main {
 
 .modal-content {
   background: var(--surface-color);
-  margin: 80px auto;
+  margin: 40px auto;
   padding: 40px;
   border-radius: var(--border-radius);
-  max-width: 900px;
+  max-width: 600px;
   box-shadow: var(--shadow-heavy);
   position: relative;
 }
@@ -545,6 +606,9 @@ main {
   color: var(--text-primary);
   font-size: 24px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .order-table {
@@ -576,6 +640,287 @@ main {
 .order-table .status-delivered {
   color: var(--success-color);
   font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--divider-color);
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  transition: var(--transition);
+  background: var(--background-color);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+
+.form-actions .btn-save {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: var(--text-light);
+}
+
+.form-actions .btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.form-actions .btn-cancel {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--divider-color);
+}
+
+.form-actions .btn-cancel:hover {
+  background: var(--divider-color);
+  color: var(--text-primary);
+}
+
+.address-card {
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 2px solid var(--divider-color);
+  transition: var(--transition);
+  position: relative;
+}
+
+.address-card:hover {
+  border-color: var(--primary-color);
+}
+
+.address-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.address-card-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.address-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.address-card-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.address-card-btn:hover {
+  color: var(--primary-color);
+}
+
+.address-card-btn.delete:hover {
+  color: var(--warning-color);
+}
+
+.address-card-body {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.address-card-primary {
+  display: inline-block;
+  background: var(--primary-color);
+  color: white;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-top: 10px;
+}
+
+.payment-card {
+  background: var(--background-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 15px;
+  border: 2px solid var(--divider-color);
+  transition: var(--transition);
+}
+
+.payment-card:hover {
+  border-color: var(--primary-color);
+}
+
+.payment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.payment-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.payment-card-icon {
+  color: var(--primary-color);
+  font-size: 20px;
+}
+
+.payment-card-body {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.settings-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.settings-option:last-child {
+  border-bottom: none;
+}
+
+.settings-option-info {
+  flex: 1;
+}
+
+.settings-option-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+
+.settings-option-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.settings-option-action {
+  margin-left: 20px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--divider-color);
+  transition: var(--transition);
+  border-radius: 34px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: var(--transition);
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+
+/* Password validation styling */
+.password-strength {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.password-strength.weak {
+  color: var(--warning-color);
+}
+
+.password-strength.medium {
+  color: var(--secondary-color);
+}
+
+.password-strength.strong {
+  color: var(--success-color);
 }
 
 /* --- EXACT SAME Footer as Homepage --- */
@@ -696,6 +1041,58 @@ footer {
   font-size: 14px;
 }
 
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 400px;
+  animation: slideIn 0.3s ease;
+  display: none;
+}
+
+.notification.success {
+  background-color: #4CAF50;
+}
+
+.notification.error {
+  background-color: #F44336;
+}
+
+.notification.info {
+  background-color: #2196F3;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .profile-cards {
@@ -707,6 +1104,12 @@ footer {
 @media (max-width: 1024px) {
   .profile-cards {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  
+  .modal-content {
+    margin: 20px auto;
+    padding: 30px;
+    max-width: 90%;
   }
 }
 
@@ -745,8 +1148,8 @@ footer {
   }
   
   .modal-content {
-    margin: 40px auto;
-    padding: 30px 20px;
+    margin: 20px auto;
+    padding: 25px 20px;
   }
   
   .order-table {
@@ -754,8 +1157,19 @@ footer {
     overflow-x: auto;
   }
   
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
   .footer-content {
     gap: 30px;
+  }
+  
+  .notification {
+    left: 20px;
+    right: 20px;
+    max-width: none;
   }
 }
 
@@ -773,12 +1187,16 @@ footer {
   }
   
   .modal-content {
-    margin: 20px auto;
-    padding: 25px 15px;
+    margin: 10px auto;
+    padding: 20px 15px;
   }
   
   .footer-content {
     grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
   }
 }
 </style>
@@ -799,20 +1217,21 @@ footer {
       <!-- Desktop Navigation -->
       <nav class="desktop-nav">
         <div class="nav-links">
-          <a href="{% url 'restaurant:dashboard' %}">Home</a>
-          <a href="{% url 'restaurant:menu' %}">Menu</a>
-          <a href="{% url 'restaurant:order' %}">Order</a>
-          <a href="{% url 'restaurant:contact' %}">Contact</a>
-          <a href="{% url 'restaurant:about' %}">About Us</a>
+          <a href="{% url 'restaurant:dashboard' %}" id="home-link">Home</a>
+          <a href="{% url 'restaurant:menu' %}" id="menu-link">Menu</a>
+          <a href="{% url 'restaurant:order' %}" id="order-link">Order</a>
+          <a href="{% url 'restaurant:contact' %}" id="contact-link">Contact</a>
+          <a href="{% url 'restaurant:about' %}" id="about-link">About Us</a>
         </div>
         <div class="auth-buttons">
           <!-- USER IS LOGGED IN - Profile button active -->
-          <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary active">
+          <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary active" id="profile-link">
             <i class="fas fa-user-circle"></i> Profile
           </a>
-          <a href="{% url 'restaurant:cart' %}" class="btn btn-primary">
+          <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" id="cart-link">
             <i class="fas fa-shopping-cart"></i> Cart
-            <span class="cart-count" id="desktop-cart-badge"></span>
+            <!-- Cart badge - will be updated by JavaScript -->
+            <span class="cart-count" id="desktop-cart-badge" style="display: none;"></span>
           </a>
         </div>
       </nav>
@@ -827,32 +1246,40 @@ footer {
   </div>
 </header>
 
+<!-- Notification Container -->
+<div id="notification" class="notification" style="display: none;">
+  <i class="fas fa-info-circle"></i>
+  <span id="notification-message"></span>
+</div>
+
 <!-- Mobile Navigation (EXACT SAME as Homepage) -->
 <div class="overlay" id="overlay"></div>
 <nav class="mobile-nav" id="mobileNav">
-  <a href="{% url 'restaurant:dashboard' %}">
+  <a href="{% url 'restaurant:dashboard' %}" id="mobile-home-link">
     <i class="fas fa-home"></i> Home
   </a>
-  <a href="{% url 'restaurant:menu' %}">
+  <a href="{% url 'restaurant:menu' %}" id="mobile-menu-link">
     <i class="fas fa-utensils"></i> Menu
   </a>
-  <a href="{% url 'restaurant:order' %}">
+  <a href="{% url 'restaurant:order' %}" id="mobile-order-link">
     <i class="fas fa-shopping-bag"></i> Order
   </a>
-  <a href="{% url 'restaurant:contact' %}">
+  <a href="{% url 'restaurant:contact' %}" id="mobile-contact-link">
     <i class="fas fa-phone-alt"></i> Contact
   </a>
-  <a href="{% url 'restaurant:about' %}">
+  <a href="{% url 'restaurant:about' %}" id="mobile-about-link">
     <i class="fas fa-info-circle"></i> About Us
   </a>
   <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
     <!-- USER IS LOGGED IN - Profile button active -->
-    <a href="{% url 'restaurant:profile' %}" class="btn btn-secondary active" style="justify-content: center;">
+    <a href="{% url 'restaurant:profile' %}" class="mobile-profile-btn" id="mobile-profile-link">
       <i class="fas fa-user-circle"></i> Profile
     </a>
-    <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" style="justify-content: center;">
+    <!-- Cart button for mobile with white text and icon -->
+    <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn" id="mobile-cart-link">
       <i class="fas fa-shopping-cart"></i> Cart
-      <span class="cart-count" id="mobile-cart-badge"></span>
+      <!-- Mobile cart badge - will be updated by JavaScript -->
+      <span class="cart-count" id="mobile-cart-badge" style="display: none;"></span>
     </a>
   </div>
 </nav>
@@ -866,11 +1293,11 @@ footer {
 
   <!-- User Summary -->
   <div class="user-summary">
-    <div class="user-avatar">
+    <div class="user-avatar" id="userAvatar">
       {{ user.first_name|first }}{{ user.last_name|first }}
     </div>
     <div class="user-info">
-      <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+      <h3 id="userName">{{ user.first_name }} {{ user.last_name }}</h3>
       <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
       <p><i class="fas fa-calendar-alt"></i> Member since: {{ user.date_joined|date:"F Y" }}</p>
       <p><i class="fas fa-user-clock"></i> Last login: {{ user.last_login|date:"M d, Y H:i"|default:"Recently" }}</p>
@@ -879,6 +1306,28 @@ footer {
 
   <!-- HORIZONTAL Profile Cards - 4 in a row -->
   <div class="profile-cards">
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="fas fa-user-edit"></i>
+        <h3>Personal Info</h3>
+      </div>
+      <p>Update your name, email, and other personal information for a better experience.</p>
+      <button class="profile-card-button" id="updateInfoBtn">
+        <i class="fas fa-edit"></i> Update Info
+      </button>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="fas fa-key"></i>
+        <h3>Change Password</h3>
+      </div>
+      <p>Secure your account by regularly updating your password. Keep it strong and unique.</p>
+      <button class="profile-card-button" id="changePasswordBtn">
+        <i class="fas fa-lock"></i> Change Password
+      </button>
+    </div>
+
     <div class="profile-card">
       <div class="profile-card-header">
         <i class="fas fa-receipt"></i>
@@ -896,30 +1345,8 @@ footer {
         <h3>Saved Addresses</h3>
       </div>
       <p>Manage and update your delivery addresses for quicker checkout and better delivery experience.</p>
-      <button class="profile-card-button">
+      <button class="profile-card-button" id="manageAddressBtn">
         <i class="fas fa-edit"></i> Manage Address
-      </button>
-    </div>
-
-    <div class="profile-card">
-      <div class="profile-card-header">
-        <i class="fas fa-credit-card"></i>
-        <h3>Payment Methods</h3>
-      </div>
-      <p>View or change your linked payment methods including GCash, credit cards, and other e-wallets.</p>
-      <button class="profile-card-button">
-        <i class="fas fa-wallet"></i> Manage Payment
-      </button>
-    </div>
-
-    <div class="profile-card">
-      <div class="profile-card-header">
-        <i class="fas fa-cog"></i>
-        <h3>Account Settings</h3>
-      </div>
-      <p>Edit personal information, update notification preferences, and manage your account security.</p>
-      <button class="profile-card-button">
-        <i class="fas fa-sliders-h"></i> Open Settings
       </button>
     </div>
   </div>
@@ -935,12 +1362,94 @@ footer {
   </div>
 </main>
 
+<!-- Modal for Update Personal Information -->
+<div id="updateInfoModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="modal-header">
+      <h3><i class="fas fa-user-edit"></i> Update Personal Information</h3>
+    </div>
+    
+    <form id="updateInfoForm" method="POST" action="{% url 'restaurant:update_profile' %}">
+      {% csrf_token %}
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="first_name" value="{{ user.first_name }}" required>
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="last_name" value="{{ user.last_name }}" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+        <small style="color: var(--text-secondary);">Note: Changing email will require verification</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone Number (Optional)</label>
+        <input type="tel" id="phone" name="phone" placeholder="+63 912 345 6789">
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn-save" id="saveInfoBtn">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+        <button type="button" class="btn-cancel" onclick="closeModal('updateInfoModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for Change Password -->
+<div id="changePasswordModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="modal-header">
+      <h3><i class="fas fa-key"></i> Change Password</h3>
+    </div>
+    
+    <form id="changePasswordForm" method="POST" action="{% url 'restaurant:change_password' %}">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <input type="password" id="currentPassword" name="current_password" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <input type="password" id="newPassword" name="new_password" required>
+        <div class="password-strength" id="passwordStrength"></div>
+        <small style="color: var(--text-secondary);">Password must be at least 8 characters with uppercase, lowercase, number, and special character.</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <input type="password" id="confirmPassword" name="confirm_password" required>
+        <div id="passwordMatch" style="margin-top: 5px; font-size: 12px;"></div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn-save" id="savePasswordBtn" disabled>
+          <i class="fas fa-lock"></i> Change Password
+        </button>
+        <button type="button" class="btn-cancel" onclick="closeModal('changePasswordModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Modal for Order History -->
 <div id="orderModal" class="modal">
   <div class="modal-content">
-    <span class="close" id="closeModal">&times;</span>
+    <span class="close">&times;</span>
     <div class="modal-header">
-      <h3>Your Delivered Orders</h3>
+      <h3><i class="fas fa-receipt"></i> Your Delivered Orders</h3>
     </div>
     <div style="overflow-x: auto;">
       <table class="order-table">
@@ -983,6 +1492,137 @@ footer {
   </div>
 </div>
 
+<!-- Modal for Manage Address -->
+<div id="addressModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="modal-header">
+      <h3><i class="fas fa-map-marker-alt"></i> Manage Addresses</h3>
+    </div>
+    
+    <!-- Existing Addresses -->
+    <div class="address-list">
+      <div class="address-card">
+        <div class="address-card-header">
+          <div class="address-card-title">
+            <i class="fas fa-home"></i>
+            <span>Home Address</span>
+          </div>
+          <div class="address-card-actions">
+            <button class="address-card-btn edit-address">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="address-card-btn delete delete-address">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="address-card-body">
+          <p id="address-name">{{ user.first_name }} {{ user.last_name }}</p>
+          <p>123 Main Street, Barangay 123</p>
+          <p>Quezon City, Metro Manila 1100</p>
+          <p>Philippines</p>
+          <p><strong>Phone:</strong> +63 912 345 6789</p>
+        </div>
+        <span class="address-card-primary">Primary Address</span>
+      </div>
+      
+      <div class="address-card">
+        <div class="address-card-header">
+          <div class="address-card-title">
+            <i class="fas fa-briefcase"></i>
+            <span>Office Address</span>
+          </div>
+          <div class="address-card-actions">
+            <button class="address-card-btn edit-address">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="address-card-btn delete delete-address">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="address-card-body">
+          <p id="address-name-2">{{ user.first_name }} {{ user.last_name }}</p>
+          <p>456 Business Center, Makati CBD</p>
+          <p>Makati City, Metro Manila 1200</p>
+          <p>Philippines</p>
+          <p><strong>Phone:</strong> +63 912 345 6789</p>
+        </div>
+        <button class="address-card-btn" style="margin-top: 10px;">Set as Primary</button>
+      </div>
+    </div>
+    
+    <!-- Add New Address Form -->
+    <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid var(--divider-color);">
+      <h4 style="margin-bottom: 20px; color: var(--text-primary);">Add New Address</h4>
+      <form id="addressForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="addressType">Address Type</label>
+            <select id="addressType" name="address_type">
+              <option value="">Select type</option>
+              <option value="home">Home</option>
+              <option value="office">Office</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="+63 912 345 6789">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="full_name" value="{{ user.first_name }} {{ user.last_name }}">
+        </div>
+        
+        <div class="form-group">
+          <label for="streetAddress">Street Address</label>
+          <input type="text" id="streetAddress" name="street_address" placeholder="House/Building, Street, Barangay">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" placeholder="Quezon City">
+          </div>
+          <div class="form-group">
+            <label for="province">Province</label>
+            <input type="text" id="province" name="province" placeholder="Metro Manila">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="zipCode">ZIP Code</label>
+            <input type="text" id="zipCode" name="zip_code" placeholder="1100">
+          </div>
+          <div class="form-group">
+            <label for="country">Country</label>
+            <select id="country" name="country">
+              <option value="Philippines" selected>Philippines</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" name="set_primary">
+            Set as primary delivery address
+          </label>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Save Address</button>
+          <button type="button" class="btn-cancel" onclick="closeModal('addressModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <!-- Footer (EXACT SAME as Homepage) -->
 <footer>
@@ -1048,260 +1688,715 @@ footer {
 
 <script>
 // ============================================
-// MOBILE MENU TOGGLE - SIMPLE
+// GLOBAL STATE MANAGEMENT
 // ============================================
+let appState = {
+  isInitialized: false,
+  isAddingToCart: false,
+  cartCount: 0,
+  activeTimeouts: [],
+  eventListeners: []
+};
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+// Debounce function to prevent rapid clicks
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// CSRF helper
+function getCookie(name){
+  let cookieValue = null;
+  if(document.cookie && document.cookie!==''){
+    document.cookie.split(';').forEach(cookie=>{
+      if(cookie.trim().startsWith(name+'=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// Clean up timeouts
+function cleanupTimeouts() {
+  appState.activeTimeouts.forEach(timeoutId => {
+    clearTimeout(timeoutId);
+  });
+  appState.activeTimeouts = [];
+}
+
+// Remove all event listeners
+function cleanupEventListeners() {
+  appState.eventListeners.forEach(({ element, type, handler }) => {
+    if (element) {
+      element.removeEventListener(type, handler);
+    }
+  });
+  appState.eventListeners = [];
+}
+
+// Store event listener for cleanup
+function addEventWithCleanup(element, type, handler) {
+  element.addEventListener(type, handler);
+  appState.eventListeners.push({ element, type, handler });
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+  const notification = document.getElementById('notification');
+  const notificationMessage = document.getElementById('notification-message');
+  const notificationIcon = notification.querySelector('i');
+  
+  // Set message and type
+  notificationMessage.textContent = message;
+  notification.className = 'notification ' + type;
+  
+  // Set icon based on type
+  if (type === 'success') {
+    notificationIcon.className = 'fas fa-check-circle';
+  } else if (type === 'error') {
+    notificationIcon.className = 'fas fa-exclamation-circle';
+  } else {
+    notificationIcon.className = 'fas fa-info-circle';
+  }
+  
+  // Show notification
+  notification.style.display = 'flex';
+  
+  // Auto hide after 5 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      notification.style.display = 'none';
+      notification.style.animation = 'slideIn 0.3s ease';
+    }, 300);
+  }, 5000);
+  
+  // Click to dismiss
+  notification.onclick = function() {
+    notification.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => {
+      notification.style.display = 'none';
+      notification.style.animation = 'slideIn 0.3s ease';
+    }, 300);
+  };
+}
+
+// Password strength checker
+function checkPasswordStrength(password) {
+  if (!password) return { strength: 0, text: '' };
+  
+  let strength = 0;
+  let text = '';
+  
+  // Check length
+  if (password.length >= 8) strength += 1;
+  
+  // Check for uppercase letters
+  if (/[A-Z]/.test(password)) strength += 1;
+  
+  // Check for lowercase letters
+  if (/[a-z]/.test(password)) strength += 1;
+  
+  // Check for numbers
+  if (/[0-9]/.test(password)) strength += 1;
+  
+  // Check for special characters
+  if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+  
+  // Determine strength level
+  if (strength < 3) {
+    text = 'Weak';
+  } else if (strength === 3) {
+    text = 'Medium';
+  } else if (strength > 3) {
+    text = 'Strong';
+  }
+  
+  return { strength, text };
+}
+
+// ============================================
+// MODAL MANAGEMENT
+// ============================================
+
+let currentModal = null;
+
+function openModal(modalId) {
+  if (currentModal) {
+    closeModal(currentModal);
+  }
+  
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    currentModal = modalId;
+  }
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    if (currentModal === modalId) {
+      currentModal = null;
+    }
+  }
+}
+
+function setupModals() {
+  // Add close buttons functionality
+  document.querySelectorAll('.modal .close').forEach(closeBtn => {
+    addEventWithCleanup(closeBtn, 'click', function() {
+      const modal = this.closest('.modal');
+      closeModal(modal.id);
+    });
+  });
+  
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal').forEach(modal => {
+    addEventWithCleanup(modal, 'click', function(e) {
+      if (e.target === this) {
+        closeModal(this.id);
+      }
+    });
+  });
+  
+  // Open modals from buttons
+  const modalButtons = [
+    { id: 'updateInfoBtn', modal: 'updateInfoModal' },
+    { id: 'changePasswordBtn', modal: 'changePasswordModal' },
+    { id: 'viewOrdersBtn', modal: 'orderModal' },
+    { id: 'manageAddressBtn', modal: 'addressModal' }
+  ];
+  
+  modalButtons.forEach(btn => {
+    const button = document.getElementById(btn.id);
+    if (button) {
+      addEventWithCleanup(button, 'click', () => openModal(btn.modal));
+    }
+  });
+}
+
+// ============================================
+// FORM HANDLING
+// ============================================
+
+function setupForms() {
+  // Update Info Form - AJAX submission
+  const updateInfoForm = document.getElementById('updateInfoForm');
+  if (updateInfoForm) {
+    addEventWithCleanup(updateInfoForm, 'submit', async function(e) {
+      e.preventDefault();
+      
+      const saveBtn = document.getElementById('saveInfoBtn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      saveBtn.disabled = true;
+      
+      try {
+        const formData = new FormData(this);
+        
+        const response = await fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update UI with new data
+          document.getElementById('userName').textContent = `${data.first_name} ${data.last_name}`;
+          document.getElementById('userAvatar').textContent = 
+            data.first_name[0] + data.last_name[0];
+          
+          // Update all occurrences in address cards
+          document.querySelectorAll('#address-name, #address-name-2, #payment-name, #payment-name-2, #fullName, #gcashName, #cardName').forEach(el => {
+            el.textContent = `${data.first_name} ${data.last_name}`;
+          });
+          
+          showNotification(data.message || 'Profile updated successfully!', 'success');
+          closeModal('updateInfoModal');
+        } else {
+          showNotification(data.error || 'Failed to update profile. Please try again.', 'error');
+        }
+      } catch (error) {
+        showNotification('An error occurred. Please try again.', 'error');
+        console.error('Error updating profile:', error);
+      } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+      }
+    });
+  }
+  
+  // Change Password Form - AJAX submission
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  if (changePasswordForm) {
+    // Password strength indicator
+    const newPasswordInput = document.getElementById('newPassword');
+    const passwordStrengthDiv = document.getElementById('passwordStrength');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordMatchDiv = document.getElementById('passwordMatch');
+    const savePasswordBtn = document.getElementById('savePasswordBtn');
+    
+    // Check password strength
+    addEventWithCleanup(newPasswordInput, 'input', function() {
+      const password = this.value;
+      const { strength, text } = checkPasswordStrength(password);
+      
+      passwordStrengthDiv.textContent = text;
+      passwordStrengthDiv.className = 'password-strength';
+      
+      if (text === 'Weak') {
+        passwordStrengthDiv.classList.add('weak');
+      } else if (text === 'Medium') {
+        passwordStrengthDiv.classList.add('medium');
+      } else if (text === 'Strong') {
+        passwordStrengthDiv.classList.add('strong');
+      }
+      
+      validatePasswordForm();
+    });
+    
+    // Check password match
+    addEventWithCleanup(confirmPasswordInput, 'input', function() {
+      validatePasswordForm();
+    });
+    
+    // Validate password form
+    function validatePasswordForm() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = newPasswordInput.value;
+      const confirmPassword = confirmPasswordInput.value;
+      const { strength, text } = checkPasswordStrength(newPassword);
+      
+      let isValid = true;
+      let message = '';
+      
+      // Check if all fields are filled
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        isValid = false;
+      }
+      
+      // Check if new password is strong enough
+      if (newPassword && strength < 3) {
+        isValid = false;
+        message = 'Password is too weak';
+      }
+      
+      // Check if passwords match
+      if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+        isValid = false;
+        message = 'Passwords do not match';
+        passwordMatchDiv.textContent = message;
+        passwordMatchDiv.style.color = 'var(--warning-color)';
+      } else if (newPassword && confirmPassword && newPassword === confirmPassword) {
+        message = 'Passwords match';
+        passwordMatchDiv.textContent = message;
+        passwordMatchDiv.style.color = 'var(--success-color)';
+      } else {
+        passwordMatchDiv.textContent = '';
+      }
+      
+      savePasswordBtn.disabled = !isValid;
+      return isValid;
+    }
+    
+    // Form submission
+    addEventWithCleanup(changePasswordForm, 'submit', async function(e) {
+      e.preventDefault();
+      
+      if (!validatePasswordForm()) {
+        showNotification('Please fix the form errors before submitting.', 'error');
+        return;
+      }
+      
+      const originalText = savePasswordBtn.innerHTML;
+      savePasswordBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
+      savePasswordBtn.disabled = true;
+      
+      try {
+        const formData = new FormData(this);
+        
+        const response = await fetch(this.action, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showNotification(data.message || 'Password changed successfully!', 'success');
+          closeModal('changePasswordModal');
+          
+          // Clear form
+          changePasswordForm.reset();
+          passwordStrengthDiv.textContent = '';
+          passwordMatchDiv.textContent = '';
+        } else {
+          showNotification(data.error || 'Failed to change password. Please try again.', 'error');
+        }
+      } catch (error) {
+        showNotification('An error occurred. Please try again.', 'error');
+        console.error('Error changing password:', error);
+      } finally {
+        savePasswordBtn.innerHTML = originalText;
+        savePasswordBtn.disabled = false;
+      }
+    });
+  }
+  
+  // Address form submission (demo only)
+  const addressForm = document.getElementById('addressForm');
+  if (addressForm) {
+    addEventWithCleanup(addressForm, 'submit', function(e) {
+      e.preventDefault();
+      showNotification('Address saved successfully! (Demo feature)', 'success');
+      closeModal('addressModal');
+    });
+  }
+}
+
+// ============================================
+// ADDRESS CARD INTERACTIONS
+// ============================================
+
+function setupAddressCards() {
+  // Delete address buttons
+  document.querySelectorAll('.delete-address').forEach(btn => {
+    addEventWithCleanup(btn, 'click', function() {
+      if (confirm('Are you sure you want to delete this address?')) {
+        const card = this.closest('.address-card');
+        card.style.opacity = '0.5';
+        setTimeout(() => {
+          card.remove();
+        }, 300);
+      }
+    });
+  });
+  
+  // Edit address buttons
+  document.querySelectorAll('.edit-address').forEach(btn => {
+    addEventWithCleanup(btn, 'click', function() {
+      showNotification('Edit address feature would open here.', 'info');
+    });
+  });
+  
+  // Set as primary buttons
+  document.querySelectorAll('.address-card-btn:not(.delete):not(.edit-address)').forEach(btn => {
+    if (btn.textContent.includes('Set as Primary')) {
+      addEventWithCleanup(btn, 'click', function() {
+        // Remove primary from all
+        document.querySelectorAll('.address-card-primary').forEach(primary => {
+          primary.style.display = 'none';
+        });
+        
+        // Add primary to this card
+        const card = this.closest('.address-card');
+        const primaryBadge = document.createElement('span');
+        primaryBadge.className = 'address-card-primary';
+        primaryBadge.textContent = 'Primary Address';
+        card.appendChild(primaryBadge);
+        
+        // Remove this button
+        this.remove();
+        
+        showNotification('Primary address updated!', 'success');
+      });
+    }
+  });
+}
+
+// ============================================
+// CART BADGE MANAGEMENT
+// ============================================
+
+// Update badge UI with count
+function updateBadgeUI(count) {
+  const desktopBadge = document.getElementById('desktop-cart-badge');
+  const mobileBadge = document.getElementById('mobile-cart-badge');
+  
+  if (count > 0) {
+    desktopBadge.textContent = count;
+    desktopBadge.style.display = 'flex';
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = 'flex';
+  } else {
+    desktopBadge.style.display = 'none';
+    desktopBadge.textContent = '';
+    mobileBadge.style.display = 'none';
+    mobileBadge.textContent = '';
+  }
+  
+  // Update global state
+  appState.cartCount = count;
+  // Store in session storage
+  sessionStorage.setItem('cartCount', count);
+}
+
+// Fetch cart count from server
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    updateBadgeUI(count);
+  }catch(err){ 
+    console.error('Error updating cart badge:', err); 
+    // Try to use cached value
+    const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+    updateBadgeUI(cachedCount);
+  }
+}
+
+// ============================================
+// MOBILE MENU MANAGEMENT
+// ============================================
+
 const menuToggle = document.getElementById('menuToggle');
 const mobileNav = document.getElementById('mobileNav');
 const overlay = document.getElementById('overlay');
 
-let isMenuAnimating = false;
+let isMenuOpen = false;
+let isAnimating = false;
 
-menuToggle.addEventListener('click', () => {
-  if (isMenuAnimating) return;
+function toggleMobileMenu() {
+  if (isAnimating) return;
   
-  isMenuAnimating = true;
-  menuToggle.classList.toggle('active');
-  mobileNav.classList.toggle('active');
-  overlay.classList.toggle('active');
-  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
+  isAnimating = true;
+  isMenuOpen = !isMenuOpen;
   
-  setTimeout(() => {
-    isMenuAnimating = false;
-  }, 400);
-});
-
-overlay.addEventListener('click', () => {
-  if (isMenuAnimating) return;
-  
-  isMenuAnimating = true;
-  menuToggle.classList.remove('active');
-  mobileNav.classList.remove('active');
-  overlay.classList.remove('active');
-  document.body.style.overflow = 'auto';
-  
-  setTimeout(() => {
-    isMenuAnimating = false;
-  }, 400);
-});
-
-// ============================================
-// CART BADGE LOGIC - FIXED (Same as homepage)
-// ============================================
-// Function to update cart badges - SIMPLIFIED VERSION
-function updateCartBadges(count) {
-  const desktopBadge = document.getElementById('desktop-cart-badge');
-  const mobileBadge = document.getElementById('mobile-cart-badge');
-  
-  // FIX: Only show when count > 0
-  if (count > 0) {
-    if (desktopBadge) {
-      desktopBadge.textContent = count;
-      desktopBadge.style.display = 'flex';
-    }
-    if (mobileBadge) {
-      mobileBadge.textContent = count;
-      mobileBadge.style.display = 'flex';
-    }
+  if (isMenuOpen) {
+    menuToggle.classList.add('active');
+    mobileNav.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
   } else {
-    // Hide badges when count is 0
-    if (desktopBadge) {
-      desktopBadge.style.display = 'none';
-      desktopBadge.textContent = '';
-    }
-    if (mobileBadge) {
-      mobileBadge.style.display = 'none';
-      mobileBadge.textContent = '';
-    }
+    menuToggle.classList.remove('active');
+    mobileNav.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Reset animation flag after transition
+  const animationTimeout = setTimeout(() => {
+    isAnimating = false;
+  }, 400);
+  
+  appState.activeTimeouts.push(animationTimeout);
+}
+
+function closeMobileMenu() {
+  if (isMenuOpen) {
+    toggleMobileMenu();
   }
 }
 
-// Main cart update function - FIXED with proper error handling
-async function updateCartData() {
-  try {
-    const response = await fetch('/api/cart/', {
-      method: 'GET',
-      headers: { 
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache'
-      },
-      cache: 'no-cache'
-    });
-    
-    if (!response.ok) {
-      console.warn('Cart API response not OK:', response.status);
-      updateCartBadges(0);
-      return;
-    }
-    
-    const items = await response.json();
-    
-    // Calculate total quantity safely
-    let count = 0;
-    if (Array.isArray(items)) {
-      count = items.reduce((total, item) => {
-        const qty = parseInt(item.quantity) || 0;
-        return total + qty;
-      }, 0);
-    }
-    
-    updateCartBadges(count);
-    
-  } catch (error) {
-    console.warn('Cart update error:', error);
-    // Hide badges on error
-    updateCartBadges(0);
-  }
-}
+// ============================================
+// NAVIGATION MANAGEMENT
+// ============================================
 
-// Initialize cart on page load
-document.addEventListener('DOMContentLoaded', function() {
-  // Initial update
-  setTimeout(updateCartData, 100);
+// Update active navigation state
+function updateActiveNavState() {
+  const currentPath = window.location.pathname;
   
-  // Update when page becomes visible
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      setTimeout(updateCartData, 200);
-    }
-  });
-  
-  // Update when window gains focus
-  window.addEventListener('focus', function() {
-    setTimeout(updateCartData, 300);
-  });
-  
-  // Update when clicking on cart links (but wait a bit for the page to load)
-  document.querySelectorAll('a[href*="cart"]').forEach(link => {
-    link.addEventListener('click', function() {
-      setTimeout(updateCartData, 500);
-    });
-  });
-  
-  // Optional: Periodic update (every 60 seconds instead of 30 to reduce load)
-  setInterval(updateCartData, 60000);
-  
-  // Add hover effects to navigation links
+  // Remove active class from all links
   document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
-    link.addEventListener('mouseenter', function() {
-      this.style.color = 'var(--primary-color)';
-    });
-    link.addEventListener('mouseleave', function() {
-      // Only reset if not active
-      if (!this.classList.contains('active')) {
-        this.style.color = '';
-      }
-    });
+    link.classList.remove('active');
   });
-});
-
-// ============================================
-// MODAL FUNCTIONALITY
-// ============================================
-const modal = document.getElementById('orderModal');
-const btn = document.getElementById('viewOrdersBtn');
-const span = document.getElementById('closeModal');
-
-if (btn && modal && span) {
-  btn.onclick = () => {
-    modal.style.display = "block";
-    document.body.style.overflow = "hidden";
-  }
-
-  span.onclick = () => {
-    modal.style.display = "none";
-    document.body.style.overflow = "auto";
-  }
-
-  window.onclick = (event) => {
-    if(event.target == modal) {
-      modal.style.display = "none";
-      document.body.style.overflow = "auto";
-    }
+  
+  // Add active class to current page
+  if (currentPath.includes('dashboard') || currentPath === '/') {
+    document.getElementById('home-link')?.classList.add('active');
+    document.getElementById('mobile-home-link')?.classList.add('active');
+  } else if (currentPath.includes('menu')) {
+    document.getElementById('menu-link')?.classList.add('active');
+    document.getElementById('mobile-menu-link')?.classList.add('active');
+  } else if (currentPath.includes('order')) {
+    document.getElementById('order-link')?.classList.add('active');
+    document.getElementById('mobile-order-link')?.classList.add('active');
+  } else if (currentPath.includes('contact')) {
+    document.getElementById('contact-link')?.classList.add('active');
+    document.getElementById('mobile-contact-link')?.classList.add('active');
+  } else if (currentPath.includes('about')) {
+    document.getElementById('about-link')?.classList.add('active');
+    document.getElementById('mobile-about-link')?.classList.add('active');
+  } else if (currentPath.includes('profile')) {
+    document.getElementById('profile-link')?.classList.add('active');
+    document.getElementById('mobile-profile-link')?.classList.add('active');
+  } else if (currentPath.includes('cart')) {
+    document.getElementById('cart-link')?.classList.add('active');
+    document.getElementById('mobile-cart-link')?.classList.add('active');
   }
 }
 
-// ============================================
-// PROFILE CARD BUTTON FUNCTIONALITY
-// ============================================
-document.querySelectorAll('.profile-card-button').forEach(button => {
-  if(!button.id) { // Skip the View Orders button which has id
-    button.addEventListener('click', function() {
-      const cardTitle = this.closest('.profile-card').querySelector('h3').textContent;
-      
-      // Simple click prevention
-      this.disabled = true;
-      const originalText = this.innerHTML;
-      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-      
-      setTimeout(() => {
-        this.innerHTML = originalText;
-        this.disabled = false;
-        alert(`${cardTitle} feature would open here in a real implementation.`);
-      }, 500);
-    });
+// Handle navigation click
+function handleNavClick(e) {
+  // If already on the same page, prevent default and just update active state
+  if (this.href === window.location.href) {
+    e.preventDefault();
+    updateActiveNavState();
+    closeMobileMenu();
+    return;
   }
-});
-
-// ============================================
-// HOVER EFFECTS FOR PROFILE CARDS
-// ============================================
-document.querySelectorAll('.profile-card').forEach(card => {
-  card.addEventListener('mouseenter', function() {
-    const icon = this.querySelector('.profile-card-header i');
-    if (icon) {
-      icon.style.transform = 'scale(1.1) rotate(5deg)';
-      icon.style.transition = 'transform 0.3s ease';
-    }
-  });
   
-  card.addEventListener('mouseleave', function() {
-    const icon = this.querySelector('.profile-card-header i');
-    if (icon) {
-      icon.style.transform = 'scale(1) rotate(0deg)';
-    }
-  });
-});
-
-// ============================================
-// CLICK PREVENTION FOR ALL BUTTONS
-// ============================================
-// Prevent rapid clicking on all interactive elements
-document.addEventListener('DOMContentLoaded', function() {
-  const interactiveElements = document.querySelectorAll('a, button, .profile-card-button, .logout-button');
-  
-  interactiveElements.forEach(element => {
-    element.addEventListener('click', function(e) {
-      // Add click delay protection
-      if (this.dataset.lastClick && (Date.now() - this.dataset.lastClick < 500)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      this.dataset.lastClick = Date.now();
-    });
-  });
-  
-  // Update active navigation state
-  function updateActiveNav() {
-    const path = window.location.pathname;
-    const navLinks = document.querySelectorAll('.nav-links a, .mobile-nav a');
+  // Add loading state to prevent rapid clicking
+  if (!this.classList.contains('nav-loading')) {
+    this.classList.add('nav-loading');
     
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      
-      // Simple path matching
-      if (path.includes('profile') && link.href.includes('profile')) {
-        link.classList.add('active');
-      } else if (path.includes('dashboard') && link.href.includes('dashboard')) {
-        link.classList.add('active');
-      } else if (path.includes('menu') && link.href.includes('menu')) {
-        link.classList.add('active');
-      }
-      // Add other pages as needed
-    });
+    // Clean up before navigation
+    cleanupTimeouts();
+    
+    // Remove loading state after 1 second
+    const loadingTimeout = setTimeout(() => {
+      this.classList.remove('nav-loading');
+    }, 1000);
+    
+    appState.activeTimeouts.push(loadingTimeout);
+  }
+}
+
+// Setup navigation links
+function setupNavigationLinks() {
+  const navigationLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-cart-link'),
+    // Footer links
+    ...document.querySelectorAll('.footer-links a'),
+    // Social links
+    ...document.querySelectorAll('.social-link')
+  ];
+  
+  navigationLinks.forEach(link => {
+    if (!link) return;
+    
+    // Remove existing listeners
+    link.removeEventListener('click', handleNavClick);
+    // Add debounced listener with cleanup
+    addEventWithCleanup(link, 'click', debounce(handleNavClick, 300));
+  });
+}
+
+// ============================================
+// PAGE INITIALIZATION
+// ============================================
+
+function initializePage() {
+  if (appState.isInitialized) {
+    return;
   }
   
-  updateActiveNav();
+  // Clean up any existing state
+  cleanupTimeouts();
+  cleanupEventListeners();
+  
+  // Initialize with cached cart count
+  const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+  updateBadgeUI(cachedCount);
+  
+  // Set up event listeners
+  addEventWithCleanup(menuToggle, 'click', toggleMobileMenu);
+  addEventWithCleanup(overlay, 'click', toggleMobileMenu);
+  
+  // Setup navigation
+  setupNavigationLinks();
+  updateActiveNavState();
+  
+  // Setup modals
+  setupModals();
+  
+  // Setup forms
+  setupForms();
+  
+  // Setup address cards
+  setupAddressCards();
+  
+  // Fetch fresh cart count
+  updateCartBadge();
+  
+  // Set up mobile menu link close handlers
+  mobileNav.querySelectorAll('a:not(.mobile-cart-btn):not(.mobile-profile-btn)').forEach(link => {
+    addEventWithCleanup(link, 'click', closeMobileMenu);
+  });
+  
+  // Mark as initialized
+  appState.isInitialized = true;
+}
+
+// ============================================
+// PAGE VISIBILITY AND CLEANUP
+// ============================================
+
+// Handle page visibility changes
+function handleVisibilityChange() {
+  if (!document.hidden) {
+    // Page became visible again, update cart
+    updateCartBadge();
+  }
+}
+
+// Clean up before page unload
+function handleBeforeUnload() {
+  cleanupTimeouts();
+  cleanupEventListeners();
+}
+
+// ============================================
+// EVENT LISTENERS SETUP
+// ============================================
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializePage);
+
+// Set up visibility and unload handlers
+addEventWithCleanup(document, 'visibilitychange', handleVisibilityChange);
+addEventWithCleanup(window, 'beforeunload', handleBeforeUnload);
+
+// Prevent rapid scrolling issues
+let lastScrollTime = 0;
+addEventWithCleanup(window, 'scroll', function() {
+  const currentTime = Date.now();
+  if (currentTime - lastScrollTime < 50) {
+    return;
+  }
+  lastScrollTime = currentTime;
 });
 
 // ============================================

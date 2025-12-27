@@ -23,6 +23,8 @@
   --divider-color: #E0E0E0;
   --success-color: #4CAF50;
   --warning-color: #F44336;
+  --star-color: #FFC107; /* Gold for stars */
+  --star-empty: #E0E0E0; /* Light gray for empty stars */
   --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
   --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
@@ -382,10 +384,72 @@ header {
 .mobile-profile-btn,
 .filter-tag,
 .btn-add-to-cart,
-.btn-favorite {
+.btn-favorite,
+.menu-item {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   touch-action: manipulation;
+}
+
+/* --- Star Rating Styles --- */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 8px 0;
+}
+
+.star-rating i {
+  font-size: 14px;
+  color: var(--star-empty);
+}
+
+.star-rating i.filled {
+  color: var(--star-color);
+}
+
+.star-rating i.half-filled {
+  background: linear-gradient(90deg, var(--star-color) 50%, var(--star-empty) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rating-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.review-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 5px;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* Rating badge for menu items */
+.rating-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 193, 7, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rating-badge i {
+  color: var(--star-color);
+  font-size: 12px;
 }
 
 /* --- Page Header --- */
@@ -555,6 +619,7 @@ header {
   box-shadow: var(--shadow-light);
   transition: var(--transition);
   position: relative;
+  cursor: pointer;
 }
 
 .menu-item:hover {
@@ -584,7 +649,7 @@ header {
 
 .item-image {
   width: 100%;
-  height: 200px;
+  height: 300px;
   object-fit: cover;
   transition: transform 0.5s ease;
 }
@@ -637,6 +702,8 @@ header {
 .item-badges {
   display: flex;
   gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .item-badge {
@@ -716,6 +783,279 @@ header {
 .btn-favorite.active {
   background: var(--primary-color);
   color: var(--text-light);
+}
+
+/* --- Item Detail Modal --- */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  padding: 20px;
+}
+
+.modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  position: relative;
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-heavy);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.modal.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: var(--transition);
+  font-size: 20px;
+}
+
+.modal-close:hover {
+  background: var(--primary-dark);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 40px;
+}
+
+.modal-header {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.modal-image {
+  flex: 0 0 300px;
+  height: 300px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-medium);
+}
+
+.modal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-info {
+  flex: 1;
+}
+
+.modal-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.modal-category {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-category i {
+  color: var(--primary-color);
+}
+
+.modal-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 25px;
+  background: rgba(198, 40, 40, 0.1);
+  padding: 10px 20px;
+  border-radius: 50px;
+  display: inline-block;
+}
+
+.modal-description {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--divider-color);
+}
+
+.modal-details {
+  margin-bottom: 30px;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.detail-label {
+  flex: 0 0 150px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-value {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.detail-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 30px;
+  border-top: 1px solid var(--divider-color);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.modal-favorite {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--background-color);
+  border: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 20px;
+}
+
+.modal-favorite:hover {
+  background: var(--primary-color);
+  color: var(--text-light);
+}
+
+.modal-favorite.active {
+  background: var(--primary-color);
+  color: var(--text-light);
+}
+
+.modal-add-to-cart {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 50px;
+  padding: 15px 30px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-add-to-cart:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+.modal-add-to-cart:disabled {
+  background-color: var(--divider-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Modal Rating Styles */
+.modal-rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.modal-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.modal-stars i {
+  color: var(--star-empty);
+  font-size: 18px;
+}
+
+.modal-stars i.filled {
+  color: var(--star-color);
+}
+
+.modal-stars i.half-filled {
+  background: linear-gradient(90deg, var(--star-color) 50%, var(--star-empty) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.modal-rating-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-review-count {
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
 /* --- Empty State --- */
@@ -876,6 +1216,17 @@ footer {
   .menu-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
+  
+  .modal-header {
+    flex-direction: column;
+  }
+  
+  .modal-image {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 768px) {
@@ -919,6 +1270,20 @@ footer {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+  
+  .modal-body {
+    padding: 30px 20px;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 20px;
+    align-items: stretch;
+  }
+  
+  .modal-actions {
+    justify-content: center;
   }
   
   .footer-content {
@@ -974,6 +1339,24 @@ footer {
     align-self: flex-start;
   }
   
+  .modal-title {
+    font-size: 24px;
+  }
+  
+  .modal-price {
+    font-size: 28px;
+  }
+  
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .detail-label {
+    flex: 0 0 auto;
+  }
+  
   .footer-content {
     grid-template-columns: 1fr;
   }
@@ -1010,7 +1393,7 @@ footer {
           <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" id="cart-link">
             <i class="fas fa-shopping-cart"></i> Cart
             <!-- Cart badge - will be updated by JavaScript -->
-            <span class="cart-count" id="desktop-cart-badge"></span>
+            <span class="cart-count" id="desktop-cart-badge" style="display: none;"></span>
           </a>
         </div>
       </nav>
@@ -1052,7 +1435,7 @@ footer {
     <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn" id="mobile-cart-link">
       <i class="fas fa-shopping-cart"></i> Cart
       <!-- Mobile cart badge - will be updated by JavaScript -->
-      <span class="cart-count" id="mobile-cart-badge"></span>
+      <span class="cart-count" id="mobile-cart-badge" style="display: none;"></span>
     </a>
   </div>
 </nav>
@@ -1147,6 +1530,19 @@ footer {
 
 </main>
 
+<!-- Item Detail Modal -->
+<div class="modal" id="itemDetailModal">
+  <div class="modal-overlay" onclick="closeModal()"></div>
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="modal-body" id="modalBody">
+      <!-- Modal content will be loaded here by JavaScript -->
+    </div>
+  </div>
+</div>
+
 <!-- Toast Notification -->
 <div id="toast">Item added to cart!</div>
 
@@ -1213,7 +1609,402 @@ footer {
 </footer>
 
 <script>
-// Mobile menu toggle with improved anti-glitching
+// ============================================
+// GLOBAL STATE MANAGEMENT
+// ============================================
+let appState = {
+  isInitialized: false,
+  isAddingToCart: false,
+  isFiltering: false,
+  isSearching: false,
+  isTogglingFavorite: false,
+  isModalOpen: false,
+  currentItemId: null,
+  cartCount: 0,
+  activeTimeouts: [],
+  eventListeners: [],
+  allMenuItems: [],
+  favorites: new Set()
+};
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+// Function to generate random rating (for display purposes)
+function generateRandomRating() {
+  // Generate rating between 3.5 and 5.0 for better appearance
+  const baseRating = Math.random() * 1.5 + 3.5;
+  return Math.round(baseRating * 10) / 10; // Round to 1 decimal place
+}
+
+// Function to generate random review count
+function generateRandomReviewCount() {
+  return Math.floor(Math.random() * 46) + 5; // 5 to 50 reviews
+}
+
+// Function to render star rating
+function renderStarRating(rating, element) {
+  if (!element) return;
+  
+  element.innerHTML = '';
+  
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  
+  // Create stars
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('i');
+    
+    if (i <= fullStars) {
+      star.className = 'fas fa-star filled';
+    } else if (i === fullStars + 1 && hasHalfStar) {
+      star.className = 'fas fa-star-half-alt half-filled';
+    } else {
+      star.className = 'far fa-star';
+    }
+    
+    element.appendChild(star);
+  }
+  
+  // Add rating text
+  const ratingText = document.createElement('span');
+  ratingText.className = 'rating-text';
+  ratingText.textContent = rating.toFixed(1);
+  element.appendChild(ratingText);
+  
+  // Add review count
+  const reviewCount = generateRandomReviewCount();
+  const reviewSpan = document.createElement('span');
+  reviewSpan.className = 'review-count';
+  reviewSpan.textContent = `(${reviewCount})`;
+  element.appendChild(reviewSpan);
+  
+  return { rating, reviewCount };
+}
+
+// Debounce function to prevent rapid clicks
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// CSRF helper
+function getCookie(name){
+  let cookieValue = null;
+  if(document.cookie && document.cookie!==''){
+    document.cookie.split(';').forEach(cookie=>{
+      if(cookie.trim().startsWith(name+'=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// Clean up timeouts
+function cleanupTimeouts() {
+  appState.activeTimeouts.forEach(timeoutId => {
+    clearTimeout(timeoutId);
+  });
+  appState.activeTimeouts = [];
+}
+
+// Remove all event listeners
+function cleanupEventListeners() {
+  appState.eventListeners.forEach(({ element, type, handler }) => {
+    if (element) {
+      element.removeEventListener(type, handler);
+    }
+  });
+  appState.eventListeners = [];
+}
+
+// Store event listener for cleanup
+function addEventWithCleanup(element, type, handler) {
+  element.addEventListener(type, handler);
+  appState.eventListeners.push({ element, type, handler });
+}
+
+// ============================================
+// MODAL MANAGEMENT
+// ============================================
+
+// Open modal with item details
+function openItemModal(itemId, event) {
+  // Prevent event bubbling
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  
+  if (appState.isModalOpen || appState.currentItemId === itemId) {
+    return;
+  }
+  
+  appState.isModalOpen = true;
+  appState.currentItemId = itemId;
+  
+  // Find the item data
+  const item = appState.allMenuItems.find(i => i.item_id === itemId);
+  if (!item) return;
+  
+  const modal = document.getElementById('itemDetailModal');
+  const modalBody = document.getElementById('modalBody');
+  
+  // Check if item is favorite
+  const isFavorite = appState.favorites.has(itemId.toString());
+  
+  // Get category icon
+  let categoryIcon = 'fas fa-utensils';
+  if (item.category?.toLowerCase() === 'drinks') {
+    categoryIcon = 'fas fa-glass-martini-alt';
+  } else if (item.category?.toLowerCase() === 'desserts') {
+    categoryIcon = 'fas fa-ice-cream';
+  }
+  
+  // Generate random rating for this item
+  const modalRating = generateRandomRating();
+  const modalReviewCount = generateRandomReviewCount();
+  
+  // Create modal star rating
+  const modalStars = document.createElement('div');
+  modalStars.className = 'modal-rating';
+  renderStarRating(modalRating, modalStars);
+  
+  // Create badges based on item data
+  let badgesHTML = '';
+  // ALL ITEMS GET POPULAR BADGE
+  badgesHTML += '<span class="item-badge badge-popular">Popular</span>';
+  
+  // Prepare additional details
+  const preparationTime = item.preparation_time || '15-20 minutes';
+  const calories = item.calories || 'Approx. 350-450 kcal';
+  const spiceLevel = item.spice_level || 'Medium';
+  const servingSize = item.serving_size || '1 person';
+  
+  modalBody.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-image">
+        <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${item.name}">
+      </div>
+      <div class="modal-info">
+        <h1 class="modal-title">${item.name}</h1>
+        <div class="modal-category">
+          <i class="${categoryIcon}"></i>
+          ${item.category || 'Uncategorized'}
+        </div>
+        <div class="modal-price">₱${item.price}</div>
+        <div class="modal-rating" id="modalRating"></div>
+        <p class="modal-description">${item.description || 'No description available. This delicious dish is prepared with fresh ingredients and authentic Filipino flavors.'}</p>
+        
+        <div class="modal-details">
+          <div class="detail-item">
+            <div class="detail-label">Preparation Time:</div>
+            <div class="detail-value">${preparationTime}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Calories:</div>
+            <div class="detail-value">${calories}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Spice Level:</div>
+            <div class="detail-value">${spiceLevel}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Serving Size:</div>
+            <div class="detail-value">${servingSize}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Tags:</div>
+            <div class="detail-value">
+              <div class="detail-badges">
+                ${badgesHTML}
+                <span class="item-badge ${item.is_available===0 ? 'badge-spicy' : 'badge-popular'}">
+                  ${item.is_available===0 ? 'Not Available' : 'Available'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <div class="modal-actions">
+            <button class="modal-favorite ${isFavorite ? 'active' : ''}" onclick="toggleModalFavorite(${itemId})">
+              <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+            </button>
+            <button class="modal-add-to-cart" onclick="addToCartFromModal(${itemId})" ${item.is_available===0?'disabled':''}>
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Render star rating in modal
+  const modalRatingElement = document.getElementById('modalRating');
+  if (modalRatingElement) {
+    renderStarRating(modalRating, modalRatingElement);
+  }
+  
+  // Show modal
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  // Prevent background scrolling
+  document.addEventListener('keydown', handleModalKeydown);
+}
+
+// Close modal
+function closeModal() {
+  if (!appState.isModalOpen) return;
+  
+  const modal = document.getElementById('itemDetailModal');
+  modal.classList.remove('active');
+  
+  // Reset state after animation
+  const closeTimeout = setTimeout(() => {
+    appState.isModalOpen = false;
+    appState.currentItemId = null;
+    document.body.style.overflow = 'auto';
+    document.removeEventListener('keydown', handleModalKeydown);
+  }, 300);
+  
+  appState.activeTimeouts.push(closeTimeout);
+}
+
+// Handle ESC key to close modal
+function handleModalKeydown(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+}
+
+// Toggle favorite from modal
+function toggleModalFavorite(itemId) {
+  const modalFavoriteBtn = document.querySelector('.modal-favorite');
+  const icon = modalFavoriteBtn.querySelector('i');
+  
+  // Also update the grid item's favorite button
+  const gridFavoriteBtn = document.querySelector(`.menu-item[data-id="${itemId}"] .btn-favorite`);
+  
+  if (icon.classList.contains('far')) {
+    icon.classList.remove('far');
+    icon.classList.add('fas');
+    modalFavoriteBtn.classList.add('active');
+    appState.favorites.add(itemId.toString());
+    
+    if (gridFavoriteBtn) {
+      gridFavoriteBtn.querySelector('i').classList.remove('far');
+      gridFavoriteBtn.querySelector('i').classList.add('fas');
+      gridFavoriteBtn.classList.add('active');
+    }
+    
+    showToast('Added to favorites!');
+  } else {
+    icon.classList.remove('fas');
+    icon.classList.add('far');
+    modalFavoriteBtn.classList.remove('active');
+    appState.favorites.delete(itemId.toString());
+    
+    if (gridFavoriteBtn) {
+      gridFavoriteBtn.querySelector('i').classList.remove('fas');
+      gridFavoriteBtn.querySelector('i').classList.add('far');
+      gridFavoriteBtn.classList.remove('active');
+    }
+    
+    showToast('Removed from favorites!');
+  }
+  
+  // Save favorites
+  saveFavorites();
+}
+
+// Add to cart from modal
+function addToCartFromModal(itemId) {
+  const modalAddBtn = document.querySelector('.modal-add-to-cart');
+  addToCart(itemId, modalAddBtn);
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.innerHTML = msg;
+  toast.style.opacity = 1;
+  
+  // Clear any existing toast timeout
+  if (toast.timeoutId) {
+    clearTimeout(toast.timeoutId);
+  }
+  
+  toast.timeoutId = setTimeout(()=>{ 
+    toast.style.opacity = 0; 
+    toast.timeoutId = null;
+  }, 2000);
+  
+  appState.activeTimeouts.push(toast.timeoutId);
+}
+
+// ============================================
+// CART BADGE MANAGEMENT
+// ============================================
+
+// Update badge UI with count
+function updateBadgeUI(count) {
+  const desktopBadge = document.getElementById('desktop-cart-badge');
+  const mobileBadge = document.getElementById('mobile-cart-badge');
+  
+  if (count > 0) {
+    desktopBadge.textContent = count;
+    desktopBadge.style.display = 'flex';
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = 'flex';
+  } else {
+    desktopBadge.style.display = 'none';
+    desktopBadge.textContent = '';
+    mobileBadge.style.display = 'none';
+    mobileBadge.textContent = '';
+  }
+  
+  // Update global state
+  appState.cartCount = count;
+  // Store in session storage
+  sessionStorage.setItem('cartCount', count);
+}
+
+// Fetch cart count from server
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    updateBadgeUI(count);
+    return count;
+  }catch(err){ 
+    console.error('Error updating cart badge:', err); 
+    // Try to use cached value
+    const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+    updateBadgeUI(cachedCount);
+    return cachedCount;
+  }
+}
+
+// ============================================
+// MOBILE MENU MANAGEMENT
+// ============================================
+
 const menuToggle = document.getElementById('menuToggle');
 const mobileNav = document.getElementById('mobileNav');
 const overlay = document.getElementById('overlay');
@@ -1239,11 +2030,6 @@ function toggleMobileMenu() {
     mobileNav.classList.add('active');
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-    
-    // Close menu when clicking a link
-    mobileNav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', closeMobileMenuOnClick, { once: true });
-    });
   } else {
     menuToggle.classList.remove('active');
     mobileNav.classList.remove('active');
@@ -1256,87 +2042,24 @@ function toggleMobileMenu() {
     isAnimating = false;
     menuToggleTimeout = null;
   }, 450);
-}
-
-function closeMobileMenuOnClick() {
-  if (isMenuOpen) {
-    toggleMobileMenu();
-  }
+  
+  appState.activeTimeouts.push(menuToggleTimeout);
 }
 
 // Debounced click handler for menu toggle
 let lastClickTime = 0;
-menuToggle.addEventListener('click', (e) => {
+function handleMenuToggleClick(e) {
   const currentTime = Date.now();
   if (currentTime - lastClickTime < 500) { // 500ms debounce
     return;
   }
   lastClickTime = currentTime;
   toggleMobileMenu();
-});
-
-overlay.addEventListener('click', toggleMobileMenu);
-
-// Prevent rapid clicking on navigation links
-function setupNavigationLinks() {
-  const navigationLinks = [
-    // Desktop links
-    document.getElementById('home-link'),
-    document.getElementById('menu-link'),
-    document.getElementById('order-link'),
-    document.getElementById('contact-link'),
-    document.getElementById('about-link'),
-    document.getElementById('profile-link'),
-    document.getElementById('cart-link'),
-    // Mobile links
-    document.getElementById('mobile-home-link'),
-    document.getElementById('mobile-menu-link'),
-    document.getElementById('mobile-order-link'),
-    document.getElementById('mobile-contact-link'),
-    document.getElementById('mobile-about-link'),
-    document.getElementById('mobile-profile-link'),
-    document.getElementById('mobile-cart-link'),
-    // Footer links
-    ...document.querySelectorAll('.footer-links a'),
-    // Search and filter buttons
-    document.getElementById('search-btn'),
-    document.getElementById('filter-all'),
-    document.getElementById('filter-meals'),
-    document.getElementById('filter-drinks'),
-    document.getElementById('filter-desserts'),
-    document.getElementById('filter-popular'),
-    // Newsletter button
-    document.querySelector('.newsletter-btn')
-  ];
-  
-  navigationLinks.forEach(link => {
-    if (!link) return;
-    
-    link.addEventListener('click', function(e) {
-      // Prevent rapid clicks
-      if (this.classList.contains('nav-loading')) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      
-      // If already on the same page, prevent default and just update active state
-      if (this.href && this.href === window.location.href) {
-        e.preventDefault();
-        updateActiveNavState();
-        return;
-      }
-      
-      // Add loading state to prevent rapid clicking
-      this.classList.add('nav-loading');
-      
-      // Remove loading state after 1 second
-      setTimeout(() => {
-        this.classList.remove('nav-loading');
-      }, 1000);
-    });
-  });
 }
+
+// ============================================
+// NAVIGATION MANAGEMENT
+// ============================================
 
 // Update active navigation state
 function updateActiveNavState() {
@@ -1372,92 +2095,77 @@ function updateActiveNavState() {
   }
 }
 
-// CSRF helper
-function getCookie(name){
-  let cookieValue = null;
-  if(document.cookie && document.cookie!==''){
-    document.cookie.split(';').forEach(cookie=>{
-      if(cookie.trim().startsWith(name+'=')){
-        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
-      }
-    });
-  }
-  return cookieValue;
-}
-
-// Toast notification
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.innerHTML = msg;
-  toast.style.opacity = 1;
-  
-  // Clear any existing timeout
-  if (toast.timeoutId) {
-    clearTimeout(toast.timeoutId);
+// Handle navigation click
+function handleNavClick(e) {
+  // If already on the same page, prevent default and just update active state
+  if (this.href && this.href === window.location.href) {
+    e.preventDefault();
+    updateActiveNavState();
+    if (isMenuOpen) toggleMobileMenu();
+    return;
   }
   
-  toast.timeoutId = setTimeout(()=>{ 
-    toast.style.opacity = 0; 
-    toast.timeoutId = null;
-  }, 2000);
-}
-
-// Update cart badge - FIXED LOGIC: Hide badge when count is 0
-async function updateCartBadge(){
-  try{
-    const res = await fetch('/api/cart/');
-    if(!res.ok) return;
-    const items = await res.json();
-    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+  // Add loading state to prevent rapid clicking
+  if (!this.classList.contains('nav-loading')) {
+    this.classList.add('nav-loading');
     
-    // Get both cart badges
-    const desktopBadge = document.getElementById('desktop-cart-badge');
-    const mobileBadge = document.getElementById('mobile-cart-badge');
+    // Clean up before navigation
+    cleanupTimeouts();
     
-    // Update desktop badge
-    if(count > 0){
-      desktopBadge.textContent = count;
-      desktopBadge.style.display = 'flex';
-    } else {
-      desktopBadge.style.display = 'none';
-      desktopBadge.textContent = '';
-    }
+    // Remove loading state after 1 second
+    const loadingTimeout = setTimeout(() => {
+      this.classList.remove('nav-loading');
+    }, 1000);
     
-    // Update mobile badge
-    if(count > 0){
-      mobileBadge.textContent = count;
-      mobileBadge.style.display = 'flex';
-    } else {
-      mobileBadge.style.display = 'none';
-      mobileBadge.textContent = '';
-    }
-    
-    return count;
-  }catch(err){ 
-    console.error('Error updating cart badge:', err); 
-    // Hide badges on error
-    document.getElementById('desktop-cart-badge').style.display = 'none';
-    document.getElementById('mobile-cart-badge').style.display = 'none';
-    return 0;
+    appState.activeTimeouts.push(loadingTimeout);
   }
 }
 
-let allMenuItems = [];
-let isFiltering = false;
-
-// Fetch menu
-async function fetchMenu(){
-  try{
-    const res = await fetch('/api/menu/');
-    allMenuItems = await res.json();
-    displayMenu(allMenuItems);
-    updateCartBadge();
-  }catch(err){ 
-    console.error(err); 
-    // Show empty state on error
-    showEmptyState();
-  }
+// Setup navigation links
+function setupNavigationLinks() {
+  const navigationLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-cart-link'),
+    // Footer links
+    ...document.querySelectorAll('.footer-links a'),
+    // Search and filter buttons
+    document.getElementById('search-btn'),
+    document.getElementById('filter-all'),
+    document.getElementById('filter-meals'),
+    document.getElementById('filter-drinks'),
+    document.getElementById('filter-desserts'),
+    document.getElementById('filter-popular'),
+    // Newsletter button
+    document.querySelector('.newsletter-btn')
+  ];
+  
+  navigationLinks.forEach(link => {
+    if (!link) return;
+    
+    // Remove existing listeners
+    link.removeEventListener('click', handleNavClick);
+    // Add debounced listener with cleanup
+    addEventWithCleanup(link, 'click', debounce(handleNavClick, 300));
+  });
 }
+
+// ============================================
+// MENU DATA MANAGEMENT
+// ============================================
 
 // Show empty state
 function showEmptyState() {
@@ -1480,7 +2188,21 @@ function showEmptyState() {
   });
 }
 
-// Display menu
+// Fetch menu
+async function fetchMenu(){
+  try{
+    const res = await fetch('/api/menu/');
+    appState.allMenuItems = await res.json();
+    displayMenu(appState.allMenuItems);
+    updateCartBadge();
+  }catch(err){ 
+    console.error('Error fetching menu:', err); 
+    // Show empty state on error
+    showEmptyState();
+  }
+}
+
+// Display menu - MODIFIED TO SHOW STAR RATINGS
 function displayMenu(items){
   const mealsContainer = document.getElementById('mealsContainer');
   const drinksContainer = document.getElementById('drinksContainer');
@@ -1498,30 +2220,43 @@ function displayMenu(items){
   let drinksCount = 0;
   let dessertsCount = 0;
 
-  items.forEach(item=>{
+  items.forEach(item => {
     // Create menu item element
     const menuItem = document.createElement('div');
     menuItem.className = 'menu-item';
     if(item.is_available===0) menuItem.classList.add('sold-out');
     menuItem.setAttribute('data-category', item.category?.toLowerCase());
     menuItem.setAttribute('data-name', item.name.toLowerCase());
+    menuItem.setAttribute('data-id', item.item_id);
     
-    // Add popular tag for first few items
-    const tags = item.category?.toLowerCase();
-    const isPopular = mealsCount < 2 && item.category?.toLowerCase() === 'meals';
+    // Add click event to open modal
+    menuItem.addEventListener('click', (e) => {
+      // Don't trigger if clicking on action buttons
+      if (e.target.closest('.item-actions')) return;
+      openItemModal(item.item_id, e);
+    });
     
-    // Create badges based on position and category
-    let badgesHTML = '';
-    if (isPopular) {
-      badgesHTML += '<span class="item-badge badge-popular">Popular</span>';
-      if (mealsCount === 0) {
-        badgesHTML += '<span class="item-badge badge-spicy">Spicy</span>';
-      }
+    // Generate random rating for this item
+    const itemRating = generateRandomRating();
+    const itemReviewCount = generateRandomReviewCount();
+    
+    // Create star rating element
+    const ratingElement = document.createElement('div');
+    ratingElement.className = 'star-rating';
+    renderStarRating(itemRating, ratingElement);
+    
+    // Create badges - ALL ITEMS GET POPULAR BADGE
+    let badgesHTML = '<span class="item-badge badge-popular">Popular</span>';
+    
+    // Additional badges based on position and category
+    if (mealsCount === 0 && item.category?.toLowerCase() === 'meals') {
+      badgesHTML += '<span class="item-badge badge-spicy">Spicy</span>';
     } else if (drinksCount === 0 && item.category?.toLowerCase() === 'drinks') {
       badgesHTML += '<span class="item-badge badge-new">New</span>';
-    } else if (dessertsCount < 2 && item.category?.toLowerCase() === 'desserts') {
-      badgesHTML += '<span class="item-badge badge-popular">Popular</span>';
     }
+    
+    // Check if item is in favorites
+    const isFavorite = appState.favorites.has(item.item_id.toString());
     
     menuItem.innerHTML = `
       <img src="${item.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${item.name}" class="item-image">
@@ -1530,6 +2265,7 @@ function displayMenu(items){
           <h3 class="item-name">${item.name}</h3>
           <div class="item-price">₱${item.price}</div>
         </div>
+        <div class="star-rating-container"></div>
         <p class="item-description">${item.description || 'No description available'}</p>
         
         <div class="item-footer">
@@ -1538,16 +2274,22 @@ function displayMenu(items){
           </div>
           
           <div class="item-actions">
-            <button class="btn-favorite" onclick="toggleFavorite(this)">
-              <i class="far fa-heart"></i>
+            <button class="btn-favorite ${isFavorite ? 'active' : ''}" onclick="toggleFavorite(this, ${item.item_id})">
+              <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
             </button>
-            <button class="btn-add-to-cart" onclick="addToCart(${item.item_id})" ${item.is_available===0?'disabled':''}>
+            <button class="btn-add-to-cart" onclick="addToCart(${item.item_id}, this)" ${item.is_available===0?'disabled':''}>
               <i class="fas fa-cart-plus"></i> Add
             </button>
           </div>
         </div>
       </div>
     `;
+    
+    // Add star rating to the item
+    const ratingContainer = menuItem.querySelector('.star-rating-container');
+    if (ratingContainer) {
+      ratingContainer.appendChild(ratingElement);
+    }
     
     // Add to appropriate container
     if(item.category?.toLowerCase()==='meals') {
@@ -1568,14 +2310,18 @@ function displayMenu(items){
   document.getElementById('dessertsCount').textContent = dessertsCount + ' items';
 }
 
-// Filter functionality with click prevention
+// ============================================
+// FILTER AND SEARCH FUNCTIONALITY
+// ============================================
+
 const filterTags = document.querySelectorAll('.filter-tag');
 const categories = document.querySelectorAll('.menu-category');
 
+// Filter functionality with click prevention
 function filterCategory(category){
-  if (isFiltering) return;
+  if (appState.isFiltering) return;
   
-  isFiltering = true;
+  appState.isFiltering = true;
   
   // Update active filter button
   filterTags.forEach(tag => {
@@ -1627,17 +2373,18 @@ function filterCategory(category){
     }
   });
   
-  setTimeout(() => {
-    isFiltering = false;
+  const filterTimeout = setTimeout(() => {
+    appState.isFiltering = false;
   }, 300);
+  
+  appState.activeTimeouts.push(filterTimeout);
 }
 
 // Search functionality with click prevention
-let isSearching = false;
 function filterMenu(){
-  if (isSearching) return;
+  if (appState.isSearching) return;
   
-  isSearching = true;
+  appState.isSearching = true;
   
   const input = document.getElementById('searchInput').value.toLowerCase().trim();
   
@@ -1652,9 +2399,11 @@ function filterMenu(){
       cat.style.display = 'block';
     });
     
-    setTimeout(() => {
-      isSearching = false;
+    const searchTimeout = setTimeout(() => {
+      appState.isSearching = false;
     }, 300);
+    
+    appState.activeTimeouts.push(searchTimeout);
     return;
   }
   
@@ -1691,160 +2440,243 @@ function filterMenu(){
     }
   });
   
-  setTimeout(() => {
-    isSearching = false;
+  const searchTimeout = setTimeout(() => {
+    appState.isSearching = false;
   }, 300);
+  
+  appState.activeTimeouts.push(searchTimeout);
 }
 
-// Search on Enter key
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    filterMenu();
-  }
-});
+// ============================================
+// ADD TO CART FUNCTIONALITY
+// ============================================
 
-// Add to cart with click prevention
-let isAddingToCart = false;
-async function addToCart(itemId, quantity=1){
+async function addToCart(itemId, buttonElement){
   // Prevent multiple rapid clicks
-  if (isAddingToCart) return;
+  if (appState.isAddingToCart) return;
   
-  isAddingToCart = true;
+  appState.isAddingToCart = true;
+  if (buttonElement) buttonElement.disabled = true;
   
   try{
     const res = await fetch('/api/cart/add/', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'X-CSRFToken':getCookie('csrftoken') },
-      body: JSON.stringify({ item_id:itemId, quantity })
+      body: JSON.stringify({ item_id:itemId, quantity: 1 })
     });
+    
     if(res.ok){ 
       showToast('Item added to cart!'); 
       updateCartBadge(); 
+      
+      // Visual feedback
+      if (buttonElement) {
+        const originalText = buttonElement.innerHTML;
+        const originalBg = buttonElement.style.backgroundColor;
+        
+        buttonElement.innerHTML = '<i class="fas fa-check"></i> Added!';
+        buttonElement.style.backgroundColor = '#4CAF50';
+        
+        // Reset button after 2 seconds
+        const resetTimeout = setTimeout(() => {
+          buttonElement.innerHTML = originalText;
+          buttonElement.style.backgroundColor = originalBg;
+          buttonElement.disabled = false;
+        }, 2000);
+        
+        appState.activeTimeouts.push(resetTimeout);
+      }
     }
     else { 
       const data = await res.json(); 
       showToast(data.detail || 'Error adding item'); 
+      if (buttonElement) buttonElement.disabled = false;
     }
   }catch(err){ 
-    console.error(err); 
+    console.error('Error adding to cart:', err); 
     showToast('Something went wrong'); 
+    if (buttonElement) buttonElement.disabled = false;
   } finally {
-    setTimeout(() => {
-      isAddingToCart = false;
+    const finalTimeout = setTimeout(() => {
+      appState.isAddingToCart = false;
     }, 500);
+    
+    appState.activeTimeouts.push(finalTimeout);
   }
 }
 
+// ============================================
+// FAVORITES FUNCTIONALITY
+// ============================================
+
 // Toggle favorite functionality with click prevention
-let isTogglingFavorite = false;
-function toggleFavorite(button) {
-  if (isTogglingFavorite) return;
+function toggleFavorite(button, itemId) {
+  if (appState.isTogglingFavorite) return;
   
-  isTogglingFavorite = true;
+  appState.isTogglingFavorite = true;
   
   const icon = button.querySelector('i');
+  const itemIdStr = itemId.toString();
   
   if (icon.classList.contains('far')) {
     icon.classList.remove('far');
     icon.classList.add('fas');
     button.classList.add('active');
-    showNotification('Added to favorites!');
+    appState.favorites.add(itemIdStr);
+    showToast('Added to favorites!');
   } else {
     icon.classList.remove('fas');
     icon.classList.add('far');
     button.classList.remove('active');
-    showNotification('Removed from favorites!');
+    appState.favorites.delete(itemIdStr);
+    showToast('Removed from favorites!');
   }
   
   // Animation effect
   button.style.transform = 'scale(1.2)';
-  setTimeout(() => {
+  const favoriteTimeout = setTimeout(() => {
     button.style.transform = 'scale(1)';
-    isTogglingFavorite = false;
+    appState.isTogglingFavorite = false;
   }, 300);
+  
+  appState.activeTimeouts.push(favoriteTimeout);
+  
+  // Save favorites
+  saveFavorites();
 }
 
-// Show notification function (for favorites)
-function showNotification(message) {
-  // Check if notification element already exists
-  let notification = document.getElementById('notification');
-  
-  if (!notification) {
-    notification = document.createElement('div');
-    notification.id = 'notification';
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--primary-color);
-      color: white;
-      padding: 15px 25px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-heavy);
-      z-index: 9999;
-      transform: translateX(150%);
-      transition: transform 0.3s ease;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    `;
-    document.body.appendChild(notification);
+// Load favorites from localStorage
+function loadFavorites() {
+  try {
+    const saved = localStorage.getItem('kusinaFavorites');
+    if (saved) {
+      appState.favorites = new Set(JSON.parse(saved));
+    }
+  } catch (e) {
+    console.error('Error loading favorites:', e);
   }
-  
-  notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-  
-  // Show notification
-  setTimeout(() => {
-    notification.style.transform = 'translateX(0)';
-  }, 10);
-  
-  // Clear any existing timeout
-  if (notification.timeoutId) {
-    clearTimeout(notification.timeoutId);
-  }
-  
-  // Hide notification after 3 seconds
-  notification.timeoutId = setTimeout(() => {
-    notification.style.transform = 'translateX(150%)';
-    notification.timeoutId = null;
-  }, 3000);
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Set up navigation
+// Save favorites to localStorage
+function saveFavorites() {
+  try {
+    localStorage.setItem('kusinaFavorites', JSON.stringify(Array.from(appState.favorites)));
+  } catch (e) {
+    console.error('Error saving favorites:', e);
+  }
+}
+
+// ============================================
+// PAGE INITIALIZATION
+// ============================================
+
+function initializePage() {
+  if (appState.isInitialized) {
+    return;
+  }
+  
+  // Clean up any existing state
+  cleanupTimeouts();
+  cleanupEventListeners();
+  
+  // Initialize with cached cart count
+  const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+  updateBadgeUI(cachedCount);
+  
+  // Load favorites
+  loadFavorites();
+  
+  // Set up event listeners
+  addEventWithCleanup(menuToggle, 'click', handleMenuToggleClick);
+  addEventWithCleanup(overlay, 'click', toggleMobileMenu);
+  
+  // Setup navigation
   setupNavigationLinks();
   updateActiveNavState();
+  
+  // Set up mobile menu link close handlers
+  mobileNav.querySelectorAll('a:not(.mobile-cart-btn):not(.mobile-profile-btn)').forEach(link => {
+    addEventWithCleanup(link, 'click', () => {
+      if (isMenuOpen) toggleMobileMenu();
+    });
+  });
+  
+  // Set up search functionality
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('search-btn');
+  
+  if (searchInput) {
+    addEventWithCleanup(searchInput, 'keypress', function(e) {
+      if (e.key === 'Enter') {
+        filterMenu();
+      }
+    });
+    
+    addEventWithCleanup(searchInput, 'input', debounce(filterMenu, 500));
+  }
+  
+  if (searchBtn) {
+    addEventWithCleanup(searchBtn, 'click', filterMenu);
+  }
   
   // Fetch menu data
   fetchMenu();
   
-  // Handle page visibility changes
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      // Page became visible again, update cart
-      setTimeout(() => {
-        updateCartBadge();
-      }, 300);
-    }
-  });
-  
-  // Prevent rapid scrolling issues
-  let lastScrollTime = 0;
-  window.addEventListener('scroll', function() {
-    const currentTime = Date.now();
-    if (currentTime - lastScrollTime < 50) {
-      // Throttle rapid scrolling
-      return;
-    }
-    lastScrollTime = currentTime;
-  });
-  
   // Initialize with all items visible
-  setTimeout(() => {
+  const initTimeout = setTimeout(() => {
     filterCategory('all');
   }, 100);
+  
+  appState.activeTimeouts.push(initTimeout);
+  
+  // Mark as initialized
+  appState.isInitialized = true;
+  
+  console.log('Menu page initialized successfully');
+}
+
+// ============================================
+// PAGE VISIBILITY AND CLEANUP
+// ============================================
+
+// Handle page visibility changes
+function handleVisibilityChange() {
+  if (!document.hidden) {
+    // Page became visible again, update cart
+    const visibilityTimeout = setTimeout(() => {
+      updateCartBadge();
+    }, 300);
+    
+    appState.activeTimeouts.push(visibilityTimeout);
+  }
+}
+
+// Clean up before page unload
+function handleBeforeUnload() {
+  cleanupTimeouts();
+  cleanupEventListeners();
+  saveFavorites();
+}
+
+// ============================================
+// EVENT LISTENERS SETUP
+// ============================================
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializePage);
+
+// Set up visibility and unload handlers
+addEventWithCleanup(document, 'visibilitychange', handleVisibilityChange);
+addEventWithCleanup(window, 'beforeunload', handleBeforeUnload);
+
+// Prevent rapid scrolling issues
+let lastScrollTime = 0;
+addEventWithCleanup(window, 'scroll', function() {
+  const currentTime = Date.now();
+  if (currentTime - lastScrollTime < 50) {
+    return;
+  }
+  lastScrollTime = currentTime;
 });
 </script>
 

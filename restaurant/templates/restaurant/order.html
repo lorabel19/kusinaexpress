@@ -1101,104 +1101,212 @@ footer {
 
 <script>
 // ============================================
-// MOBILE MENU TOGGLE - SIMPLIFIED
+// GLOBAL STATE MANAGEMENT - EXACT SAME AS INDEX
 // ============================================
-const menuToggle = document.getElementById('menuToggle');
-const mobileNav = document.getElementById('mobileNav');
-const overlay = document.getElementById('overlay');
-
-let isMenuAnimating = false;
-
-menuToggle.addEventListener('click', () => {
-  if (isMenuAnimating) return;
-  
-  isMenuAnimating = true;
-  menuToggle.classList.toggle('active');
-  mobileNav.classList.toggle('active');
-  overlay.classList.toggle('active');
-  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
-  
-  setTimeout(() => {
-    isMenuAnimating = false;
-  }, 400);
-});
-
-overlay.addEventListener('click', () => {
-  if (isMenuAnimating) return;
-  
-  isMenuAnimating = true;
-  menuToggle.classList.remove('active');
-  mobileNav.classList.remove('active');
-  overlay.classList.remove('active');
-  document.body.style.overflow = 'auto';
-  
-  setTimeout(() => {
-    isMenuAnimating = false;
-  }, 400);
-});
+let appState = {
+  isInitialized: false,
+  cartCount: 0,
+  activeTimeouts: [],
+  eventListeners: []
+};
 
 // ============================================
-// CART BADGE LOGIC - SIMPLIFIED NO GLITCH
+// UTILITY FUNCTIONS - EXACT SAME AS INDEX
 // ============================================
-let cartUpdating = false;
-let lastCartCount = -1;
 
-async function updateCartBadge() {
-  // Prevent multiple simultaneous calls
-  if (cartUpdating) return;
-  
-  cartUpdating = true;
-  
-  try {
-    const response = await fetch('/api/cart/', {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' },
-      cache: 'no-store' // Always fetch fresh data
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch cart');
+// Debounce function to prevent rapid clicks
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Clean up timeouts
+function cleanupTimeouts() {
+  appState.activeTimeouts.forEach(timeoutId => {
+    clearTimeout(timeoutId);
+  });
+  appState.activeTimeouts = [];
+}
+
+// Remove all event listeners
+function cleanupEventListeners() {
+  appState.eventListeners.forEach(({ element, type, handler }) => {
+    if (element) {
+      element.removeEventListener(type, handler);
     }
-    
-    const items = await response.json();
-    const count = Array.isArray(items) ? 
-      items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0) : 0;
-    
-    // Only update if count changed
-    if (count !== lastCartCount) {
-      const desktopBadge = document.getElementById('desktop-cart-badge');
-      const mobileBadge = document.getElementById('mobile-cart-badge');
-      
-      if (count > 0) {
-        desktopBadge.textContent = count;
-        desktopBadge.style.display = 'flex';
-        mobileBadge.textContent = count;
-        mobileBadge.style.display = 'flex';
-      } else {
-        desktopBadge.style.display = 'none';
-        desktopBadge.textContent = '';
-        mobileBadge.style.display = 'none';
-        mobileBadge.textContent = '';
-      }
-      
-      lastCartCount = count;
-    }
-  } catch (error) {
-    console.warn('Cart update error:', error);
-    // Hide badges on error
-    document.getElementById('desktop-cart-badge').style.display = 'none';
-    document.getElementById('mobile-cart-badge').style.display = 'none';
-  } finally {
-    cartUpdating = false;
+  });
+  appState.eventListeners = [];
+}
+
+// Store event listener for cleanup
+function addEventWithCleanup(element, type, handler) {
+  element.addEventListener(type, handler);
+  appState.eventListeners.push({ element, type, handler });
+}
+
+// ============================================
+// CART BADGE MANAGEMENT - EXACT SAME AS INDEX
+// ============================================
+
+// Update badge UI with count - EXACT SAME LOGIC
+function updateBadgeUI(count) {
+  const desktopBadge = document.getElementById('desktop-cart-badge');
+  const mobileBadge = document.getElementById('mobile-cart-badge');
+  
+  if (count > 0) {
+    desktopBadge.textContent = count;
+    desktopBadge.style.display = 'flex';
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = 'flex';
+  } else {
+    desktopBadge.style.display = 'none';
+    desktopBadge.textContent = '';
+    mobileBadge.style.display = 'none';
+    mobileBadge.textContent = '';
+  }
+  
+  // Update global state
+  appState.cartCount = count;
+  // Store in session storage
+  sessionStorage.setItem('cartCount', count);
+}
+
+// Fetch cart count from server - EXACT SAME LOGIC
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    updateBadgeUI(count);
+  }catch(err){ 
+    console.error('Error updating cart badge:', err); 
+    // Try to use cached value
+    const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+    updateBadgeUI(cachedCount);
   }
 }
 
 // ============================================
-// NAVIGATION CLICK HANDLER - FIX GLITCHING
+// MOBILE MENU MANAGEMENT - EXACT SAME AS INDEX
 // ============================================
-function setupNavigation() {
-  // Get all navigation links
-  const navLinks = [
+
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
+
+let isMenuOpen = false;
+let isAnimating = false;
+
+function toggleMobileMenu() {
+  if (isAnimating) return;
+  
+  isAnimating = true;
+  isMenuOpen = !isMenuOpen;
+  
+  if (isMenuOpen) {
+    menuToggle.classList.add('active');
+    mobileNav.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  } else {
+    menuToggle.classList.remove('active');
+    mobileNav.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Reset animation flag after transition
+  const animationTimeout = setTimeout(() => {
+    isAnimating = false;
+  }, 400);
+  
+  appState.activeTimeouts.push(animationTimeout);
+}
+
+function closeMobileMenu() {
+  if (isMenuOpen) {
+    toggleMobileMenu();
+  }
+}
+
+// ============================================
+// NAVIGATION MANAGEMENT - EXACT SAME AS INDEX
+// ============================================
+
+// Update active navigation state - EXACT SAME LOGIC
+function updateActiveNavState() {
+  const currentPath = window.location.pathname;
+  
+  // Remove active class from all links
+  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Add active class to current page
+  if (currentPath.includes('dashboard') || currentPath === '/') {
+    document.getElementById('home-link')?.classList.add('active');
+    document.getElementById('mobile-home-link')?.classList.add('active');
+  } else if (currentPath.includes('menu')) {
+    document.getElementById('menu-link')?.classList.add('active');
+    document.getElementById('mobile-menu-link')?.classList.add('active');
+  } else if (currentPath.includes('order')) {
+    document.getElementById('order-link')?.classList.add('active');
+    document.getElementById('mobile-order-link')?.classList.add('active');
+  } else if (currentPath.includes('contact')) {
+    document.getElementById('contact-link')?.classList.add('active');
+    document.getElementById('mobile-contact-link')?.classList.add('active');
+  } else if (currentPath.includes('about')) {
+    document.getElementById('about-link')?.classList.add('active');
+    document.getElementById('mobile-about-link')?.classList.add('active');
+  } else if (currentPath.includes('profile')) {
+    document.getElementById('profile-link')?.classList.add('active');
+    document.getElementById('mobile-profile-link')?.classList.add('active');
+  } else if (currentPath.includes('cart')) {
+    document.getElementById('cart-link')?.classList.add('active');
+    document.getElementById('mobile-cart-link')?.classList.add('active');
+  } else if (currentPath.includes('login')) {
+    document.getElementById('login-link')?.classList.add('active');
+    document.getElementById('mobile-login-link')?.classList.add('active');
+  }
+}
+
+// Handle navigation click - EXACT SAME LOGIC
+function handleNavClick(e) {
+  // If already on the same page, prevent default and just update active state
+  if (this.href === window.location.href) {
+    e.preventDefault();
+    updateActiveNavState();
+    closeMobileMenu();
+    return;
+  }
+  
+  // Add loading state to prevent rapid clicking
+  if (!this.classList.contains('nav-loading')) {
+    this.classList.add('nav-loading');
+    
+    // Clean up before navigation
+    cleanupTimeouts();
+    
+    // Remove loading state after 1 second
+    const loadingTimeout = setTimeout(() => {
+      this.classList.remove('nav-loading');
+    }, 1000);
+    
+    appState.activeTimeouts.push(loadingTimeout);
+  }
+}
+
+// Setup navigation links - EXACT SAME LOGIC
+function setupNavigationLinks() {
+  const navigationLinks = [
     // Desktop links
     document.getElementById('home-link'),
     document.getElementById('menu-link'),
@@ -1218,291 +1326,283 @@ function setupNavigation() {
     document.getElementById('mobile-login-link'),
     document.getElementById('mobile-cart-link'),
     // Footer links
-    ...document.querySelectorAll('.footer-links a')
+    ...document.querySelectorAll('.footer-links a'),
+    // Social links
+    ...document.querySelectorAll('.social-link')
   ];
   
-  // Track last click time per link
-  const lastClickTimes = new Map();
-  
-  navLinks.forEach(link => {
+  navigationLinks.forEach(link => {
     if (!link) return;
     
-    link.addEventListener('click', function(e) {
-      // Get current time
-      const now = Date.now();
-      const lastClick = lastClickTimes.get(link) || 0;
-      
-      // Prevent rapid clicks (500ms debounce)
-      if (now - lastClick < 500) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      
-      // Update last click time
-      lastClickTimes.set(link, now);
-      
-      // Add loading state to prevent rapid navigation
-      if (!this.classList.contains('btn')) {
-        this.classList.add('nav-loading');
-        
-        // Remove loading state after navigation or timeout
-        setTimeout(() => {
-          this.classList.remove('nav-loading');
-        }, 1000);
-      }
-      
-      // If clicking the cart link, update cart badge
-      if (this.id.includes('cart')) {
-        setTimeout(updateCartBadge, 100);
-      }
-    });
+    // Remove existing listeners
+    link.removeEventListener('click', handleNavClick);
+    // Add debounced listener with cleanup
+    addEventWithCleanup(link, 'click', debounce(handleNavClick, 300));
   });
 }
 
 // ============================================
-// PAGE INITIALIZATION
+// PAGE INITIALIZATION - EXACT SAME AS INDEX
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-  // Setup navigation click handlers
-  setupNavigation();
-  
-  // Initial cart badge update
-  setTimeout(updateCartBadge, 200);
-  
-  // Update cart when page becomes visible
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      setTimeout(updateCartBadge, 300);
-    }
-  });
-  
-  // Update cart on window focus
-  window.addEventListener('focus', function() {
-    setTimeout(updateCartBadge, 300);
-  });
-  
-  // Periodic cart update (every 30 seconds)
-  setInterval(updateCartBadge, 30000);
-});
 
-// ============================================
-// ORDER STATUS & MAP LOGIC
-// ============================================
-const orderId = "{{ order.order_id }}";
-const statusItems = document.querySelectorAll('.status-item');
-const ackBtn = document.getElementById('ackBtn');
-const statusProgress = document.getElementById('statusProgress');
-const seenKey = `order_${orderId}_seen`;
-
-// Status time elements
-const timeElements = {
-  'Order Confirmed': document.getElementById('timeConfirmed'),
-  'Preparing Order': document.getElementById('timePreparing'),
-  'Out for Delivery': document.getElementById('timeDelivery'),
-  'Delivered': document.getElementById('timeDelivered')
-};
-
-function resetOrderTable(){
-  const orderBody = document.getElementById('orderBody');
-  orderBody.innerHTML = `
-    <tr>
-      <td colspan="3" style="text-align:center; padding:40px;">
-        <i class="fas fa-shopping-cart" style="font-size:48px; color:var(--divider-color); margin-bottom:20px; display:block;"></i>
-        <p style="color:var(--text-secondary);">No active order found.</p>
-      </td>
-    </tr>`;
-}
-
-// Check if order has been marked as seen
-if (localStorage.getItem(seenKey)) {
-  statusItems.forEach(item => {
-    item.classList.remove('active', 'completed');
-    const statusName = item.dataset.status;
-    if (timeElements[statusName]) {
-      timeElements[statusName].textContent = "--";
-    }
-  });
-  ackBtn.style.display = "none";
-  statusProgress.style.width = "0%";
-  resetOrderTable();
-}
-
-// Mark as received button handler
-ackBtn.onclick = () => {
-  statusItems.forEach(item => {
-    item.classList.remove('active');
-    const statusName = item.dataset.status;
-    if (timeElements[statusName]) {
-      timeElements[statusName].textContent = "--";
-    }
-  });
-  ackBtn.style.display = "none";
-  statusProgress.style.width = "0%";
-  localStorage.setItem(seenKey, "true");
-  resetOrderTable();
-  
-  // Show confirmation message
-  showNotification('Order marked as received! Thank you for your order.');
-};
-
-// Map & Animation
-let motoAnimating = false;
-let motoProgress = 0;
-let mapInitialized = false;
-let map, route, motoMarker;
-
-async function fetchOrderStatus() {
-  if (!orderId) return;
-  try {
-    const res = await fetch(`/api/orders/${orderId}/`);
-    if (!res.ok) throw new Error("Order not found");
-    const data = await res.json();
-
-    const timestamps = data.timestamps || {};
-    const start = [data.start_lat || 14.6760, data.start_lng || 121.0437];
-    const end = [data.end_lat || 14.6760, data.end_lng || 121.0437];
-    const currentStatus = (data.status || "").toLowerCase().replace(/\s/g,"");
-    
-    // Update status timeline
-    let activeIndex = -1;
-    
-    statusItems.forEach((item, index) => {
-      const statusName = item.dataset.status;
-      const timeEl = timeElements[statusName];
-      
-      if (timestamps[statusName] && !localStorage.getItem(seenKey)) {
-        item.classList.add('completed');
-        if (timeEl) timeEl.textContent = timestamps[statusName];
-        
-        // Find the current active status
-        if (statusName.toLowerCase().replace(/\s/g,"") === currentStatus) {
-          item.classList.add('active');
-          activeIndex = index;
-        }
-        
-        if (statusName === "Delivered") {
-          ackBtn.style.display = "inline-block";
-        }
-      } else {
-        item.classList.remove('active', 'completed');
-        if (timeEl) timeEl.textContent = "--";
-        if (statusName === "Delivered") ackBtn.style.display = "none";
-      }
-    });
-    
-    // Update progress bar
-    if (activeIndex >= 0) {
-      const progressPercentage = ((activeIndex + 1) / statusItems.length) * 100;
-      statusProgress.style.width = `${progressPercentage}%`;
-    }
-    
-    // Initialize map if not already done
-    if (!mapInitialized) {
-      map = L.map('map').setView(start, 14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-      
-      // Add restaurant marker
-      L.marker(start, {
-        icon: L.divIcon({
-          html: '<i class="fas fa-utensils" style="color: #C62828; font-size: 24px;"></i>',
-          iconSize: [30, 30],
-          className: 'restaurant-marker'
-        })
-      }).addTo(map).bindPopup('<b>KusinaExpress</b><br>Restaurant Location');
-      
-      // Add destination marker
-      L.marker(end, {
-        icon: L.divIcon({
-          html: '<i class="fas fa-home" style="color: #4CAF50; font-size: 24px;"></i>',
-          iconSize: [30, 30],
-          className: 'destination-marker'
-        })
-      }).addTo(map).bindPopup('<b>Delivery Address</b><br>Your Location');
-      
-      // Add route line
-      route = L.polyline([start, end], { 
-        color: '#C62828', 
-        weight: 4,
-        opacity: 0.7,
-        dashArray: '10, 10'
-      }).addTo(map);
-      
-      // Add moto marker
-      motoMarker = L.marker(start, {
-        icon: L.divIcon({
-          html: '<i class="fas fa-motorcycle" style="color: #2196F3; font-size: 28px;"></i>',
-          iconSize: [30, 30],
-          className: 'moto-marker'
-        })
-      }).addTo(map);
-      
-      mapInitialized = true;
-    }
-    
-    // Animate moto if order is out for delivery
-    if (currentStatus === "outfordelivery" && !motoAnimating) {
-      motoAnimating = true;
-      motoProgress = 0;
-      
-      function animateMoto() {
-        if (motoProgress >= 1) { 
-          motoAnimating = false; 
-          return; 
-        }
-        motoProgress += 0.005;
-        if (motoProgress > 1) motoProgress = 1;
-        
-        const lat = start[0] + (end[0] - start[0]) * motoProgress;
-        const lng = start[1] + (end[1] - start[1]) * motoProgress;
-        
-        motoMarker.setLatLng([lat, lng]);
-        
-        // Smoothly follow the moto
-        if (motoProgress < 0.9) {
-          map.setView([lat, lng], 14, { animate: true, duration: 0.5 });
-        }
-        
-        if (motoProgress < 1) {
-          requestAnimationFrame(animateMoto);
-        }
-      }
-      animateMoto();
-    }
-    
-    // If delivered, move moto to destination
-    if (currentStatus === "delivered") {
-      motoProgress = 1;
-      motoMarker.setLatLng(end);
-      map.setView(end, 14);
-      motoAnimating = false;
-    }
-    
-    // Update delivery info
-    if (data.delivery_address) {
-      document.getElementById('deliveryAddress').textContent = data.delivery_address;
-    }
-    
-    if (data.contact_number) {
-      document.getElementById('contactNumber').textContent = data.contact_number;
-    }
-    
-    if (orderId) {
-      document.getElementById('orderIdDisplay').textContent = orderId;
-    }
-
-  } catch(err) {
-    console.error("Fetch Order Error:", err);
+function initializePage() {
+  if (appState.isInitialized) {
+    return;
   }
+  
+  // Clean up any existing state
+  cleanupTimeouts();
+  cleanupEventListeners();
+  
+  // Initialize with cached cart count
+  const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+  updateBadgeUI(cachedCount);
+  
+  // Set up event listeners
+  addEventWithCleanup(menuToggle, 'click', toggleMobileMenu);
+  addEventWithCleanup(overlay, 'click', toggleMobileMenu);
+  
+  // Setup navigation
+  setupNavigationLinks();
+  updateActiveNavState();
+  
+  // Fetch fresh cart count
+  updateCartBadge();
+  
+  // Set up mobile menu link close handlers
+  mobileNav.querySelectorAll('a:not(.btn-primary):not(.btn-secondary)').forEach(link => {
+    addEventWithCleanup(link, 'click', closeMobileMenu);
+  });
+  
+  // Mark as initialized
+  appState.isInitialized = true;
+  
+  // Initialize order tracking if order exists
+  initializeOrderTracking();
 }
 
-// Fetch order status on load and set interval
-if (orderId) {
-  fetchOrderStatus();
-  setInterval(fetchOrderStatus, 10000); // Update every 10 seconds
+// ============================================
+// ORDER TRACKING LOGIC
+// ============================================
+function initializeOrderTracking() {
+  const orderId = "{{ order.order_id }}";
+  const statusItems = document.querySelectorAll('.status-item');
+  const ackBtn = document.getElementById('ackBtn');
+  const statusProgress = document.getElementById('statusProgress');
+  const seenKey = `order_${orderId}_seen`;
+
+  // Status time elements
+  const timeElements = {
+    'Order Confirmed': document.getElementById('timeConfirmed'),
+    'Preparing Order': document.getElementById('timePreparing'),
+    'Out for Delivery': document.getElementById('timeDelivery'),
+    'Delivered': document.getElementById('timeDelivered')
+  };
+
+  function resetOrderTable(){
+    const orderBody = document.getElementById('orderBody');
+    orderBody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center; padding:40px;">
+          <i class="fas fa-shopping-cart" style="font-size:48px; color:var(--divider-color); margin-bottom:20px; display:block;"></i>
+          <p style="color:var(--text-secondary);">No active order found.</p>
+        </td>
+      </tr>`;
+  }
+
+  // Check if order has been marked as seen
+  if (orderId && localStorage.getItem(seenKey)) {
+    statusItems.forEach(item => {
+      item.classList.remove('active', 'completed');
+      const statusName = item.dataset.status;
+      if (timeElements[statusName]) {
+        timeElements[statusName].textContent = "--";
+      }
+    });
+    if (ackBtn) ackBtn.style.display = "none";
+    if (statusProgress) statusProgress.style.width = "0%";
+    resetOrderTable();
+  }
+
+  // Mark as received button handler
+  if (ackBtn) {
+    addEventWithCleanup(ackBtn, 'click', () => {
+      statusItems.forEach(item => {
+        item.classList.remove('active');
+        const statusName = item.dataset.status;
+        if (timeElements[statusName]) {
+          timeElements[statusName].textContent = "--";
+        }
+      });
+      ackBtn.style.display = "none";
+      if (statusProgress) statusProgress.style.width = "0%";
+      if (orderId) localStorage.setItem(seenKey, "true");
+      resetOrderTable();
+      
+      // Show confirmation message
+      showNotification('Order marked as received! Thank you for your order.');
+    });
+  }
+
+  // Map & Animation variables
+  let motoAnimating = false;
+  let motoProgress = 0;
+  let mapInitialized = false;
+  let map, route, motoMarker;
+
+  async function fetchOrderStatus() {
+    if (!orderId) return;
+    try {
+      const res = await fetch(`/api/orders/${orderId}/`);
+      if (!res.ok) throw new Error("Order not found");
+      const data = await res.json();
+
+      const timestamps = data.timestamps || {};
+      const start = [data.start_lat || 14.6760, data.start_lng || 121.0437];
+      const end = [data.end_lat || 14.6760, data.end_lng || 121.0437];
+      const currentStatus = (data.status || "").toLowerCase().replace(/\s/g,"");
+      
+      // Update status timeline
+      let activeIndex = -1;
+      
+      statusItems.forEach((item, index) => {
+        const statusName = item.dataset.status;
+        const timeEl = timeElements[statusName];
+        
+        if (timestamps[statusName] && !localStorage.getItem(seenKey)) {
+          item.classList.add('completed');
+          if (timeEl) timeEl.textContent = timestamps[statusName];
+          
+          // Find the current active status
+          if (statusName.toLowerCase().replace(/\s/g,"") === currentStatus) {
+            item.classList.add('active');
+            activeIndex = index;
+          }
+          
+          if (statusName === "Delivered" && ackBtn) {
+            ackBtn.style.display = "inline-block";
+          }
+        } else {
+          item.classList.remove('active', 'completed');
+          if (timeEl) timeEl.textContent = "--";
+          if (statusName === "Delivered" && ackBtn) ackBtn.style.display = "none";
+        }
+      });
+      
+      // Update progress bar
+      if (activeIndex >= 0 && statusProgress) {
+        const progressPercentage = ((activeIndex + 1) / statusItems.length) * 100;
+        statusProgress.style.width = `${progressPercentage}%`;
+      }
+      
+      // Initialize map if not already done
+      if (!mapInitialized && window.L) {
+        map = L.map('map').setView(start, 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+          maxZoom: 19,
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        // Add restaurant marker
+        L.marker(start, {
+          icon: L.divIcon({
+            html: '<i class="fas fa-utensils" style="color: #C62828; font-size: 24px;"></i>',
+            iconSize: [30, 30],
+            className: 'restaurant-marker'
+          })
+        }).addTo(map).bindPopup('<b>KusinaExpress</b><br>Restaurant Location');
+        
+        // Add destination marker
+        L.marker(end, {
+          icon: L.divIcon({
+            html: '<i class="fas fa-home" style="color: #4CAF50; font-size: 24px;"></i>',
+            iconSize: [30, 30],
+            className: 'destination-marker'
+          })
+        }).addTo(map).bindPopup('<b>Delivery Address</b><br>Your Location');
+        
+        // Add route line
+        route = L.polyline([start, end], { 
+          color: '#C62828', 
+          weight: 4,
+          opacity: 0.7,
+          dashArray: '10, 10'
+        }).addTo(map);
+        
+        // Add moto marker
+        motoMarker = L.marker(start, {
+          icon: L.divIcon({
+            html: '<i class="fas fa-motorcycle" style="color: #2196F3; font-size: 28px;"></i>',
+            iconSize: [30, 30],
+            className: 'moto-marker'
+          })
+        }).addTo(map);
+        
+        mapInitialized = true;
+      }
+      
+      // Animate moto if order is out for delivery
+      if (currentStatus === "outfordelivery" && !motoAnimating && motoMarker) {
+        motoAnimating = true;
+        motoProgress = 0;
+        
+        function animateMoto() {
+          if (motoProgress >= 1) { 
+            motoAnimating = false; 
+            return; 
+          }
+          motoProgress += 0.005;
+          if (motoProgress > 1) motoProgress = 1;
+          
+          const lat = start[0] + (end[0] - start[0]) * motoProgress;
+          const lng = start[1] + (end[1] - start[1]) * motoProgress;
+          
+          motoMarker.setLatLng([lat, lng]);
+          
+          // Smoothly follow the moto
+          if (motoProgress < 0.9) {
+            map.setView([lat, lng], 14, { animate: true, duration: 0.5 });
+          }
+          
+          if (motoProgress < 1) {
+            requestAnimationFrame(animateMoto);
+          }
+        }
+        animateMoto();
+      }
+      
+      // If delivered, move moto to destination
+      if (currentStatus === "delivered" && motoMarker) {
+        motoProgress = 1;
+        motoMarker.setLatLng(end);
+        if (map) map.setView(end, 14);
+        motoAnimating = false;
+      }
+      
+      // Update delivery info
+      if (data.delivery_address) {
+        document.getElementById('deliveryAddress').textContent = data.delivery_address;
+      }
+      
+      if (data.contact_number) {
+        document.getElementById('contactNumber').textContent = data.contact_number;
+      }
+      
+      if (orderId) {
+        document.getElementById('orderIdDisplay').textContent = orderId;
+      }
+
+    } catch(err) {
+      console.error("Fetch Order Error:", err);
+    }
+  }
+
+  // Fetch order status on load and set interval
+  if (orderId) {
+    fetchOrderStatus();
+    const orderInterval = setInterval(fetchOrderStatus, 10000); // Update every 10 seconds
+    appState.activeTimeouts.push(orderInterval);
+  }
 }
 
 // ============================================
@@ -1547,11 +1647,53 @@ function showNotification(message) {
   }
   
   // Hide notification after 3 seconds
-  notification.timeoutId = setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     notification.style.transform = 'translateX(150%)';
     notification.timeoutId = null;
   }, 3000);
+  
+  notification.timeoutId = timeoutId;
+  appState.activeTimeouts.push(timeoutId);
 }
+
+// ============================================
+// PAGE VISIBILITY AND CLEANUP - EXACT SAME AS INDEX
+// ============================================
+
+// Handle page visibility changes
+function handleVisibilityChange() {
+  if (!document.hidden) {
+    // Page became visible again, update cart
+    updateCartBadge();
+  }
+}
+
+// Clean up before page unload
+function handleBeforeUnload() {
+  cleanupTimeouts();
+  cleanupEventListeners();
+}
+
+// ============================================
+// EVENT LISTENERS SETUP - EXACT SAME AS INDEX
+// ============================================
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializePage);
+
+// Set up visibility and unload handlers
+addEventWithCleanup(document, 'visibilitychange', handleVisibilityChange);
+addEventWithCleanup(window, 'beforeunload', handleBeforeUnload);
+
+// Prevent rapid scrolling issues - EXACT SAME LOGIC
+let lastScrollTime = 0;
+addEventWithCleanup(window, 'scroll', function() {
+  const currentTime = Date.now();
+  if (currentTime - lastScrollTime < 50) {
+    return;
+  }
+  lastScrollTime = currentTime;
+});
 </script>
 
 </body>

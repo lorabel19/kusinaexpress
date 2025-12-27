@@ -28,6 +28,7 @@ body {
   min-height:100vh; 
   background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
   color: var(--text-primary);
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Sidebar */
@@ -142,6 +143,7 @@ body {
   margin-left: var(--sidebar-width);
   padding: 32px;
   width: calc(100% - var(--sidebar-width));
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Header */
@@ -156,6 +158,7 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
+  width: 100%;
 }
 
 .dashboard-header h1 { 
@@ -169,19 +172,26 @@ body {
   gap: 12px;
 }
 
-/* Filter Buttons */
+/* Filter Container */
 .filter-container {
   background: var(--bg-card);
   padding: 20px;
   border-radius: var(--radius);
   margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
 }
 
 .filter-buttons {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 .btn-filter {
@@ -209,10 +219,175 @@ body {
   box-shadow: 0 4px 12px rgba(214, 40, 40, 0.3);
 }
 
-/* Order Cards */
+.btn-filter.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Date Filter Button */
+.btn-date-filter {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--secondary) 0%, #e6ac2c 100%);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-date-filter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(252, 191, 73, 0.3);
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+}
+
+.modal-header {
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  font-size: 24px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-modal:hover {
+  color: var(--primary);
+}
+
+.date-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-input-group label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-input-group input {
+  padding: 12px 16px;
+  border: 2px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: white;
+  width: 100%;
+}
+
+.date-input-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(214, 40, 40, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-apply {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.btn-apply:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(214, 40, 40, 0.3);
+}
+
+.btn-cancel {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.btn-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+/* Orders Grid */
 .orders-grid {
   display: grid;
   gap: 24px;
+  width: 100%;
 }
 
 .order-card {
@@ -224,6 +399,7 @@ body {
   border: 1px solid rgba(0,0,0,0.04);
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .order-card::before {
@@ -304,6 +480,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0; /* Prevent overflow */
 }
 
 .detail-label {
@@ -318,6 +495,7 @@ body {
   font-size: 14px;
   color: var(--text-primary);
   font-weight: 500;
+  word-break: break-word; /* Prevent long text overflow */
 }
 
 .order-amount {
@@ -359,6 +537,9 @@ body {
   font-size: 14px;
   color: var(--text-primary);
   font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .item-quantity {
@@ -368,6 +549,7 @@ body {
   background: rgba(214, 40, 40, 0.1);
   padding: 4px 12px;
   border-radius: 20px;
+  white-space: nowrap;
 }
 
 .order-actions {
@@ -439,6 +621,29 @@ body {
   opacity: 0.7;
 }
 
+/* Delivery Timestamp */
+.delivery-timestamp {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.timestamp-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.timestamp-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -447,6 +652,7 @@ body {
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
 .empty-state i {
@@ -485,6 +691,17 @@ body {
   
   .filter-container {
     padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-buttons {
+    width: 100%;
+  }
+  
+  .modal-content {
+    padding: 24px;
+    width: 95%;
   }
   
   .order-details {
@@ -497,6 +714,7 @@ body {
   
   .btn-action {
     width: 100%;
+    min-width: unset;
   }
 }
 
@@ -504,6 +722,26 @@ body {
   .order-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+  
+  .modal-content {
+    padding: 20px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .btn-filter {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .btn-date-filter {
+    padding: 8px 16px;
+    font-size: 13px;
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
@@ -528,10 +766,16 @@ body {
     <a href="{% url 'restaurant:admin-orders' %}" class="active">
       <i class="fas fa-receipt"></i> Manage Orders
     </a>
+    <a href="{% url 'restaurant:admin-users' %}">
+      <i class="fas fa-users"></i> Manage Users
+    </a>
     <a href="{% url 'restaurant:admin-feedback' %}">
       <i class="fas fa-comments"></i> Feedback
     </a>
-    <a href="{% url 'restaurant:logout' %}">
+    <a href="{% url 'restaurant:admin-settings' %}">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+    <a href="{% url 'restaurant:admin-logout' %}">
       <i class="fas fa-sign-out-alt"></i> Logout
     </a>
   </nav>
@@ -545,169 +789,223 @@ body {
     </h1>
   </div>
 
-<!-- Status Filter Buttons -->
-<div class="filter-container">
-  <div class="filter-buttons">
-    <a href="?status=pending" class="btn-filter">
-      <i class="fas fa-clock"></i> Pending
-    </a>
-    <a href="?status=preparing" class="btn-filter">
-      <i class="fas fa-fire"></i> Preparing
-    </a>
-    <a href="?status=out_for_delivery" class="btn-filter">
-      <i class="fas fa-truck"></i> Out for Delivery
-    </a>
-    <a href="?status=delivered" class="btn-filter">
-      <i class="fas fa-check-circle"></i> Delivered
-    </a>
+  <!-- Filter Container with Status Buttons and Date Filter Button -->
+  <div class="filter-container">
+    <div class="filter-buttons">   
+      <a href="?status=pending" class="btn-filter {% if request.GET.status == 'pending' %}active{% endif %}">
+        <i class="fas fa-clock"></i> Pending
+      </a>
+      <a href="?status=preparing" class="btn-filter {% if request.GET.status == 'preparing' %}active{% endif %}">
+        <i class="fas fa-fire"></i> Preparing
+      </a>
+      <a href="?status=out_for_delivery" class="btn-filter {% if request.GET.status == 'out_for_delivery' %}active{% endif %}">
+        <i class="fas fa-truck"></i> Out for Delivery
+      </a>
+      <a href="?status=delivered" class="btn-filter {% if request.GET.status == 'delivered' %}active{% endif %}">
+        <i class="fas fa-check-circle"></i> Delivered
+      </a>
+    </div>
+    
+    <!-- Date Filter Button (Visible when on delivered orders or All Orders with delivered filter) -->
+    {% if request.GET.status == 'delivered' or not request.GET.status %}
+    <button class="btn-date-filter" id="openDateFilter">
+      <i class="fas fa-calendar-alt"></i> Filter by Date
+    </button>
+    {% endif %}
   </div>
-</div>
 
-<!-- Orders Grid -->
-<div class="orders-grid">
-  {% for order in orders %}
-  {% with delivery=order.deliveries_set.first %}
-  <div class="order-card">
-    <div class="order-header">
-      <div class="order-id">
-        <i class="fas fa-receipt"></i>
-        Order #{{ order.order_id }}
+  <!-- Date Filter Modal -->
+  <div class="modal" id="dateFilterModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeDateFilter">&times;</button>
+      
+      <div class="modal-header">
+        <h3><i class="fas fa-filter"></i> Filter Orders by Date</h3>
       </div>
-      <div class="order-status 
-        {% if delivery.delivered_at %}status-delivered
-        {% elif delivery.out_for_delivery_at %}status-out_for_delivery
-        {% elif delivery.preparing_at %}status-preparing
-        {% elif delivery.confirmed_at %}status-confirmed
-        {% else %}status-pending
-        {% endif %}">
-        {% if delivery.delivered_at %}
-          <i class="fas fa-check-circle"></i> Delivered
-        {% elif delivery.out_for_delivery_at %}
-          <i class="fas fa-truck"></i> Out for Delivery
-        {% elif delivery.preparing_at %}
-          <i class="fas fa-fire"></i> Preparing
-        {% elif delivery.confirmed_at %}
-          <i class="fas fa-check"></i> Confirmed
+      
+      <form method="GET" action="{% url 'restaurant:admin-orders' %}" class="date-filter-form" id="dateFilterForm">
+        <!-- Preserve current status if exists -->
+        {% if request.GET.status %}
+        <input type="hidden" name="status" value="{{ request.GET.status }}">
         {% else %}
-          <i class="fas fa-clock"></i> Pending
+        <input type="hidden" name="status" value="delivered">
+        {% endif %}
+        
+        <div class="date-input-group">
+          <label for="modal_start_date"><i class="fas fa-calendar-plus"></i> Start Date</label>
+          <input type="date" id="modal_start_date" name="start_date" value="{{ request.GET.start_date|default:'' }}">
+        </div>
+        
+        <div class="date-input-group">
+          <label for="modal_end_date"><i class="fas fa-calendar-minus"></i> End Date</label>
+          <input type="date" id="modal_end_date" name="end_date" value="{{ request.GET.end_date|default:'' }}">
+        </div>
+        
+        <div class="modal-actions">
+          <button type="submit" class="btn-apply">
+            <i class="fas fa-filter"></i> Apply Filter
+          </button>
+          <button type="button" class="btn-cancel" id="clearDateFilter">
+            <i class="fas fa-times"></i> Clear Filter
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Orders Grid -->
+  <div class="orders-grid">
+    {% for order in orders %}
+    {% with delivery=order.deliveries_set.first %}
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-id">
+          <i class="fas fa-receipt"></i>
+          Order #{{ order.order_id }}
+        </div>
+        <div class="order-status 
+          {% if delivery.delivered_at %}status-delivered
+          {% elif delivery.out_for_delivery_at %}status-out_for_delivery
+          {% elif delivery.preparing_at %}status-preparing
+          {% elif delivery.confirmed_at %}status-confirmed
+          {% else %}status-pending
+          {% endif %}">
+          {% if delivery.delivered_at %}
+            <i class="fas fa-check-circle"></i> Delivered
+          {% elif delivery.out_for_delivery_at %}
+            <i class="fas fa-truck"></i> Out for Delivery
+          {% elif delivery.preparing_at %}
+            <i class="fas fa-fire"></i> Preparing
+          {% elif delivery.confirmed_at %}
+            <i class="fas fa-check"></i> Confirmed
+          {% else %}
+            <i class="fas fa-clock"></i> Pending
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="order-details">
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-user"></i> Customer</div>
+          <div class="detail-value">{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</div>
+        </div>
+
+        <!-- Order Date -->
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-calendar"></i> Order Date</div>
+          <div class="detail-value">{{ order.order_date|date:"M d, Y h:i A" }}</div>
+        </div>
+
+        <!-- Delivery Details -->
+        {% if delivery %}
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
+          <div class="detail-value">{{ delivery.delivery_address|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-phone"></i> Contact Number</div>
+          <div class="detail-value">{{ delivery.contact_number|default:"-" }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-sticky-note"></i> Notes</div>
+          <div class="detail-value">{{ delivery.notes|default:"-" }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Payment Method -->
+        {% for payment in order.payments_set.all %}
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-credit-card"></i> Payment Method</div>
+          <div class="detail-value">{{ payment.payment_method|default:"-" }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-money-bill-wave"></i> Total Amount</div>
+          <div class="detail-value order-amount">₱{{ order.total_amount }}</div>
+        </div>
+
+        <!-- Delivery Timestamp -->
+        {% if delivery.delivered_at %}
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-calendar-check"></i> Delivered On</div>
+          <div class="detail-value timestamp-value">
+            <i class="fas fa-clock"></i>
+            {{ delivery.delivered_at|date:"M d, Y h:i A" }}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Order Items -->
+      <div class="order-items">
+        <div class="order-items-title">
+          <i class="fas fa-utensils"></i> Order Items
+        </div>
+        {% for item in order.items.all %}
+        <div class="item-row">
+          <div class="item-name">{{ item.item.name }}</div>
+          <div class="item-quantity">×{{ item.quantity }}</div>
+        </div>
+        {% empty %}
+        <div class="item-row">
+          <div class="item-name">No items</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Order Actions -->
+      <div class="order-actions">
+        {% if delivery.delivered_at %}
+          <button class="btn-action btn-completed" disabled>
+            <i class="fas fa-check-double"></i> Completed
+          </button>
+        {% elif delivery.out_for_delivery_at %}
+          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="delivered">
+            <button class="btn-action btn-delivered" type="submit">
+              <i class="fas fa-check-circle"></i> Mark as Delivered
+            </button>
+          </form>
+        {% elif delivery.preparing_at %}
+          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="out_for_delivery">
+            <button class="btn-action btn-delivery" type="submit">
+              <i class="fas fa-truck"></i> Send for Delivery
+            </button>
+          </form>
+        {% elif delivery.confirmed_at and not delivery.preparing_at %}
+          <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
+            {% csrf_token %}
+            <input type="hidden" name="status" value="preparing">
+            <button class="btn-action btn-preparing" type="submit">
+              <i class="fas fa-fire"></i> Start Preparing
+            </button>
+          </form>
+        {% else %}
+          <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}" style="flex: 1;">
+            {% csrf_token %}
+            <button class="btn-action btn-confirm" type="submit">
+              <i class="fas fa-check"></i> Confirm Order
+            </button>
+          </form>
         {% endif %}
       </div>
     </div>
-
-    <div class="order-details">
-      <div class="detail-item">
-        <div class="detail-label"><i class="fas fa-user"></i> Customer</div>
-        <div class="detail-value">{{ order.user.first_name|default:'' }} {{ order.user.last_name|default:'' }}</div>
-      </div>
-
-      <!-- Delivery Details -->
-      {% if delivery %}
-      <div class="detail-item">
-        <div class="detail-label"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
-        <div class="detail-value">{{ delivery.delivery_address|default:"-" }}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label"><i class="fas fa-phone"></i> Contact Number</div>
-        <div class="detail-value">{{ delivery.contact_number|default:"-" }}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label"><i class="fas fa-sticky-note"></i> Notes</div>
-        <div class="detail-value">{{ delivery.notes|default:"-" }}</div>
-      </div>
-      {% else %}
-      <div class="detail-item">
-        <div class="detail-label">Delivery Info</div>
-        <div class="detail-value">No delivery details</div>
-      </div>
-      {% endif %}
-
-      <!-- Payment Method -->
-      {% for payment in order.payments_set.all %}
-      <div class="detail-item">
-        <div class="detail-label"><i class="fas fa-credit-card"></i> Payment Method</div>
-        <div class="detail-value">{{ payment.payment_method|default:"-" }}</div>
-      </div>
-      {% empty %}
-      <div class="detail-item">
-        <div class="detail-label">Payment Info</div>
-        <div class="detail-value">No payment details</div>
-      </div>
-      {% endfor %}
-
-      <div class="detail-item">
-        <div class="detail-label"><i class="fas fa-money-bill-wave"></i> Total Amount</div>
-        <div class="detail-value order-amount">₱{{ order.total_amount }}</div>
-      </div>
+    {% endwith %}
+    {% empty %}
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>No orders found.</p>
     </div>
-
-    <!-- Order Items -->
-    <div class="order-items">
-      <div class="order-items-title">
-        <i class="fas fa-utensils"></i> Order Items
-      </div>
-      {% for item in order.items.all %}
-      <div class="item-row">
-        <div class="item-name">{{ item.item.name }}</div>
-        <div class="item-quantity">×{{ item.quantity }}</div>
-      </div>
-      {% empty %}
-      <div class="item-row">
-        <div class="item-name">No items</div>
-      </div>
-      {% endfor %}
-    </div>
-
-    <!-- Order Actions -->
-    <div class="order-actions">
-      {% if delivery.delivered_at %}
-        <button class="btn-action btn-completed" disabled>
-          <i class="fas fa-check-double"></i> Completed
-        </button>
-      {% elif delivery.out_for_delivery_at %}
-        <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
-          {% csrf_token %}
-          <input type="hidden" name="status" value="delivered">
-          <button class="btn-action btn-delivered" type="submit">
-            <i class="fas fa-check-circle"></i> Mark as Delivered
-          </button>
-        </form>
-      {% elif delivery.preparing_at %}
-        <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
-          {% csrf_token %}
-          <input type="hidden" name="status" value="out_for_delivery">
-          <button class="btn-action btn-delivery" type="submit">
-            <i class="fas fa-truck"></i> Send for Delivery
-          </button>
-        </form>
-      {% elif delivery.confirmed_at and not delivery.preparing_at %}
-        <form method="POST" action="{% url 'restaurant:admin-update-order-status' order.order_id %}" style="flex: 1;">
-          {% csrf_token %}
-          <input type="hidden" name="status" value="preparing">
-          <button class="btn-action btn-preparing" type="submit">
-            <i class="fas fa-fire"></i> Start Preparing
-          </button>
-        </form>
-      {% else %}
-        <form method="POST" action="{% url 'restaurant:admin-confirm-order' order.order_id %}" style="flex: 1;">
-          {% csrf_token %}
-          <button class="btn-action btn-confirm" type="submit">
-            <i class="fas fa-check"></i> Confirm Order
-          </button>
-        </form>
-      {% endif %}
-    </div>
+    {% endfor %}
   </div>
-  {% endwith %}
-  {% empty %}
-  <div class="empty-state">
-    <i class="fas fa-inbox"></i>
-    <p>No orders found.</p>
-  </div>
-  {% endfor %}
 </div>
 
-
 <script>
+// Menu Toggle
 const menuToggle = document.getElementById('menuToggle');
 const sidebar = document.getElementById('sidebar');
 
@@ -734,6 +1032,88 @@ window.addEventListener('resize', () => {
 if (window.innerWidth <= 768) {
   sidebar.classList.add('mobile-hidden');
 }
+
+// Date Filter Modal Logic
+const dateFilterModal = document.getElementById('dateFilterModal');
+const openDateFilterBtn = document.getElementById('openDateFilter');
+const closeDateFilterBtn = document.getElementById('closeDateFilter');
+const clearDateFilterBtn = document.getElementById('clearDateFilter');
+const dateFilterForm = document.getElementById('dateFilterForm');
+const modalStartDate = document.getElementById('modal_start_date');
+const modalEndDate = document.getElementById('modal_end_date');
+
+// Open modal
+if (openDateFilterBtn) {
+  openDateFilterBtn.addEventListener('click', () => {
+    dateFilterModal.style.display = 'flex';
+    // Set default dates if not set
+    if (!modalStartDate.value) {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      modalStartDate.value = weekAgo.toISOString().split('T')[0];
+    }
+    
+    if (!modalEndDate.value) {
+      const today = new Date().toISOString().split('T')[0];
+      modalEndDate.value = today;
+    }
+  });
+}
+
+// Close modal
+closeDateFilterBtn.addEventListener('click', () => {
+  dateFilterModal.style.display = 'none';
+});
+
+// Clear filter - Redirect to current status or all orders
+clearDateFilterBtn.addEventListener('click', () => {
+  modalStartDate.value = '';
+  modalEndDate.value = '';
+  
+  // Get current status from URL or use empty for all orders
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentStatus = urlParams.get('status');
+  
+  if (currentStatus) {
+    window.location.href = `?status=${currentStatus}`;
+  } else {
+    window.location.href = "?";
+  }
+});
+
+// Close modal when clicking outside
+window.addEventListener('click', (e) => {
+  if (e.target === dateFilterModal) {
+    dateFilterModal.style.display = 'none';
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && dateFilterModal.style.display === 'flex') {
+    dateFilterModal.style.display = 'none';
+  }
+});
+
+// Form submission
+dateFilterForm.addEventListener('submit', (e) => {
+  // Validate dates
+  if (modalStartDate.value && modalEndDate.value) {
+    const start = new Date(modalStartDate.value);
+    const end = new Date(modalEndDate.value);
+    
+    if (start > end) {
+      e.preventDefault();
+      alert('Start date cannot be later than end date.');
+      return;
+    }
+  }
+  
+  // Close modal after submission
+  setTimeout(() => {
+    dateFilterModal.style.display = 'none';
+  }, 100);
+});
 </script>
 
 </body>

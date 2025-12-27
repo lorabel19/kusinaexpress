@@ -1,6 +1,6 @@
 from django.db import models
 from decimal import Decimal
-
+from django.contrib.auth.hashers import make_password, check_password
 
 class Deliveries(models.Model):
     delivery_id = models.AutoField(primary_key=True)
@@ -128,6 +128,28 @@ class Users(models.Model):
     class Meta:
         managed = False
         db_table = 'users'
+
+
+class Admin(models.Model):
+    admin_id = models.BigAutoField(primary_key=True)
+    email = models.EmailField(unique=True, max_length=100)
+    password = models.CharField(max_length=255)
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'admin'   # IMPORTANT: existing table
+        managed = False      # dahil gumawa ka na ng table sa MySQL
+
+    def save(self, *args, **kwargs):
+        # auto-hash kapag plain text pa ang password
+        if not self.password.startswith('pbkdf2_'):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
 
 class ContactMessage(models.Model):
     message_id = models.AutoField(primary_key=True)

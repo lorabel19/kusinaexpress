@@ -23,6 +23,7 @@
   --success-color: #4CAF50;
   --warning-color: #F44336;
   --info-color: #2196F3;
+  --admin-color: #673AB7; /* Purple for admin */
   --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
   --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
@@ -89,6 +90,31 @@ body {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Success message */
+.login-success-message {
+  background: linear-gradient(135deg, #4CAF50, #388E3C);
+  color: white;
+  padding: 15px 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--shadow-light);
+  animation: slideInDown 0.4s ease;
+}
+
+.login-success-message i {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.login-success-message.hidden {
+  display: none;
 }
 
 /* --- Modern Header --- */
@@ -677,7 +703,7 @@ main {
   box-shadow: var(--shadow-heavy);
   background-color: var(--surface-color);
   position: relative;
-  height: 900px; /* Reduced height */
+  /* TANGGALIN ANG HEIGHT PROPERTY */
 }
 
 .login-container::before {
@@ -693,8 +719,8 @@ main {
 .left-side {
   flex: 1.2;
   min-width: 300px;
-  background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), 
-              url('https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+  background: linear-gradient(rgba(0, 0, 0, 0.70), rgba(0, 0, 0, 0.70)), 
+              url('https://www.foxyfolksy.com/wp-content/uploads/2015/05/sisig-2.jpg') center/cover no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -840,13 +866,13 @@ main {
   box-shadow: var(--shadow-light);
 }
 
-.role-selection button.active.admin {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+.role-selection button.active.user {
+  background: linear-gradient(135deg, #4CAF50, #8BC34A);
   color: white;
 }
 
-.role-selection button.active.user {
-  background: linear-gradient(135deg, #4CAF50, #8BC34A);
+.role-selection button.active.admin {
+  background: linear-gradient(135deg, var(--admin-color), #9C27B0);
   color: white;
 }
 
@@ -1018,69 +1044,7 @@ input:focus + i {
   animation: spin 1s linear infinite;
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 30px 0;
-  color: var(--text-secondary);
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--divider-color);
-}
-
-.divider span {
-  padding: 0 15px;
-  font-size: 14px;
-}
-
-.social-login {
-  display: flex;
-  gap: 15px;
-}
-
-.social-btn {
-  flex: 1;
-  padding: 16px;
-  border: 2px solid var(--divider-color);
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  background: var(--surface-color);
-  color: var(--text-primary);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: var(--transition);
-  font-size: 15px;
-}
-
-.social-btn:hover {
-  border-color: var(--primary-color);
-  background: rgba(198, 40, 40, 0.05);
-  transform: translateY(-2px);
-}
-
-.social-btn.google:hover {
-  border-color: #DB4437;
-  color: #DB4437;
-  background: rgba(219, 68, 55, 0.05);
-}
-
-.social-btn.facebook:hover {
-  border-color: #4267B2;
-  color: #4267B2;
-  background: rgba(66, 103, 178, 0.05);
-}
-
-.social-btn i {
-  font-size: 20px;
-}
+/* REMOVED DIVIDER AND SOCIAL LOGIN STYLES */
 
 .switch-auth {
   margin-top: 30px;
@@ -1145,6 +1109,29 @@ input:focus + i {
 .validation-message.success {
   color: var(--success-color);
   background: rgba(76, 175, 80, 0.1);
+  display: block;
+}
+
+/* Admin info note */
+.admin-note {
+  background: rgba(103, 58, 183, 0.1);
+  border: 1px solid rgba(103, 58, 183, 0.2);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: none;
+}
+
+.admin-note i {
+  color: var(--admin-color);
+  margin-right: 8px;
+}
+
+.admin-note.active {
   display: block;
 }
 
@@ -1304,10 +1291,6 @@ footer {
     padding: 35px 30px;
     max-width: 500px;
     margin: 0 auto;
-  }
-  
-  .social-login {
-    flex-direction: column;
   }
   
   .footer-content {
@@ -1632,6 +1615,12 @@ footer {
             </button>
           </div>
           
+          <!-- Admin note -->
+          <div class="admin-note" id="adminNote">
+            <i class="fas fa-info-circle"></i>
+            <span>Admin accounts are separate from user accounts. Please use your admin credentials.</span>
+          </div>
+          
           <!-- Login Error Message (Inside Form) -->
           {% if error_type == 'role' %}
           <div class="login-error-message" id="loginErrorMessage">
@@ -1697,21 +1686,14 @@ footer {
             </button>
           </form>
           
-          <div class="divider">
-            <span>Or continue with</span>
-          </div>
+          <!-- Removed "Or continue with" divider and social login buttons -->
           
-          <div class="social-login">
-            <button type="button" class="social-btn google">
-              <i class="fab fa-google"></i> Google
-            </button>
-            <button type="button" class="social-btn facebook">
-              <i class="fab fa-facebook-f"></i> Facebook
-            </button>
-          </div>
-          
-          <div class="switch-auth">
+          <div class="switch-auth" id="switchAuthSection">
             Don't have an account? <a href="#" onclick="showCreateAccountModal()">Create Account</a>
+            <br>
+            <small style="color: var(--text-secondary); font-size: 13px; margin-top: 5px; display: block;">
+              Note: Admin accounts are created separately. Contact super admin for admin access.
+            </small>
           </div>
         </div>
       </div>
@@ -1894,6 +1876,8 @@ const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const loginErrorMessage = document.getElementById('loginErrorMessage');
 const errorMessageContent = document.getElementById('errorMessageContent');
+const adminNote = document.getElementById('adminNote');
+const switchAuthSection = document.getElementById('switchAuthSection');
 
 userBtn.addEventListener('click', () => {
   roleInput.value = 'user';
@@ -1901,9 +1885,14 @@ userBtn.addEventListener('click', () => {
   adminBtn.classList.remove('active', 'admin');
   authTitle.textContent = 'Sign In as User';
   authDescription.textContent = 'Enter your credentials to access user features';
+  emailInput.placeholder = 'Enter your email';
   passwordInput.placeholder = 'Enter your password';
+  adminNote.classList.remove('active');
   
-  // Hide error message when switching roles
+  // Show create account option for user role
+  switchAuthSection.style.display = 'block';
+  
+  // Clear any error messages
   if (loginErrorMessage) {
     loginErrorMessage.classList.add('hidden');
   }
@@ -1915,9 +1904,14 @@ adminBtn.addEventListener('click', () => {
   userBtn.classList.remove('active', 'user');
   authTitle.textContent = 'Sign In as Admin';
   authDescription.textContent = 'Enter admin credentials to access admin panel';
+  emailInput.placeholder = 'Enter admin email';
   passwordInput.placeholder = 'Enter admin password';
+  adminNote.classList.add('active');
   
-  // Hide error message when switching roles
+  // Hide create account option for admin role
+  switchAuthSection.style.display = 'none';
+  
+  // Clear any error messages
   if (loginErrorMessage) {
     loginErrorMessage.classList.add('hidden');
   }
@@ -1933,11 +1927,19 @@ function showErrorMessage(message) {
 
 // Check if there's an error from Django backend
 window.addEventListener('load', function() {
-  // If there's an error message from Django, show it
-  const errorDiv = document.querySelector('.login-error-message:not(.hidden)');
-  if (errorDiv) {
-    // Already showing from Django template
-  }
+  // Check for Django messages
+  const successMessages = document.querySelectorAll('.login-success-message');
+  const errorMessages = document.querySelectorAll('.login-error-message:not(.hidden)');
+  
+  // Auto-hide messages after 5 seconds
+  setTimeout(() => {
+    successMessages.forEach(msg => {
+      msg.classList.add('hidden');
+    });
+    errorMessages.forEach(msg => {
+      msg.classList.add('hidden');
+    });
+  }, 5000);
 });
 
 // Password toggle for login form
@@ -2258,6 +2260,7 @@ createAccountForm.addEventListener('submit', function(e) {
   const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
   
   if (!termsChecked) {
+    alert('Please agree to the Terms and Privacy Policy');
     return false;
   }
   
@@ -2276,17 +2279,6 @@ createAccountForm.addEventListener('submit', function(e) {
   }, 500);
   
   return true;
-});
-
-// Social button hover effects
-document.querySelectorAll('.social-btn').forEach(btn => {
-  btn.addEventListener('mouseenter', function() {
-    this.style.transform = 'translateY(-3px)';
-  });
-  
-  btn.addEventListener('mouseleave', function() {
-    this.style.transform = 'translateY(0)';
-  });
 });
 
 // Update cart badge function
@@ -2328,15 +2320,15 @@ window.addEventListener('load', function() {
 
 // Terms and Privacy functions
 function showTerms() {
-  // No notification
+  alert('Terms of Service: Welcome to KusinaExpress. By creating an account, you agree to our terms and conditions.');
 }
 
 function showPrivacy() {
-  // No notification
+  alert('Privacy Policy: We respect your privacy. Your data is securely stored and never shared with third parties.');
 }
 
 function showForgotPassword() {
-  // No notification
+  alert('Forgot Password: Please contact support at support@kusinaexpress.com to reset your password.');
 }
 </script>
 

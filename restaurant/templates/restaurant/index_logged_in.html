@@ -22,6 +22,8 @@
   --divider-color: #E0E0E0;
   --success-color: #4CAF50;
   --warning-color: #F44336;
+  --star-color: #FFC107; /* Gold for stars */
+  --star-empty: #E0E0E0; /* Light gray for empty stars */
   --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
   --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
@@ -198,6 +200,48 @@ header {
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
+}
+
+/* Hide cart badge when empty (0) */
+.cart-count.empty {
+  display: none;
+}
+
+/* --- Star Rating Styles --- */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 8px 0;
+}
+
+.star-rating i {
+  font-size: 14px;
+  color: var(--star-empty);
+}
+
+.star-rating i.filled {
+  color: var(--star-color);
+}
+
+.star-rating i.half-filled {
+  background: linear-gradient(90deg, var(--star-color) 50%, var(--star-empty) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rating-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.review-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 5px;
 }
 
 /* Hamburger menu for mobile */
@@ -525,7 +569,7 @@ h2.section-title {
 .card-image-wrapper {
   position: relative;
   overflow: hidden;
-  height: 220px;
+  height: 300px;
   background: var(--divider-color);
 }
 
@@ -599,9 +643,15 @@ h2.section-title {
   gap: 8px;
 }
 
-.card-button:hover {
+.card-button:hover:not(:disabled) {
   background: var(--primary-dark);
   transform: scale(1.05);
+}
+
+.card-button:disabled {
+  background-color: var(--divider-color);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* --- Promo Section --- */
@@ -889,7 +939,7 @@ footer {
           <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" id="cart-link">
             <i class="fas fa-shopping-cart"></i> Cart
             <!-- Cart badge - will be updated by JavaScript -->
-            <span class="cart-count" id="desktop-cart-badge"></span>
+            <span class="cart-count empty" id="desktop-cart-badge">0</span>
           </a>
         </div>
       </nav>
@@ -931,7 +981,7 @@ footer {
     <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn" id="mobile-cart-link">
       <i class="fas fa-shopping-cart"></i> Cart
       <!-- Mobile cart badge - will be updated by JavaScript -->
-      <span class="cart-count" id="mobile-cart-badge"></span>
+      <span class="cart-count empty" id="mobile-cart-badge">0</span>
     </a>
   </div>
 </nav>
@@ -974,88 +1024,14 @@ footer {
   </div>
 </div>
 
-<!-- Featured Dishes Section - MODIFIED VERSION -->
+<!-- Featured Dishes Section - UPDATED TO FETCH 9 ITEMS FROM DATABASE -->
 <section class="container">
   <div class="section-header">
     <h2 class="section-title">Our <span class="title-highlight">Featured Dishes</span></h2>
     <p class="section-subtitle">Savor the authentic taste of Filipino cuisine</p>
   </div>
-  <div class="featured-grid">
-    {% for item in featured_items|slice:":3" %}
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="{{ item.image_url }}" alt="{{ item.name }}">
-        <div class="card-badge">
-          {% if forloop.counter == 1 %}🔥 Popular
-          {% elif forloop.counter == 2 %}👨‍🍳 Chef's Pick
-          {% else %}⭐ Traditional{% endif %}
-        </div>
-      </div>
-      <div class="card-content">
-        <h3>{{ item.name }}</h3>
-        <p>{{ item.description|truncatewords:20 }}</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱{{ item.price }}</span>
-        <button class="card-button add-to-cart-btn" 
-                data-item-name="{{ item.name }}" 
-                data-item-price="{{ item.price }}"
-                {% if item.is_available == 0 %}disabled{% endif %}>
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    {% empty %}
-    <!-- Fallback dishes if no featured items -->
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg" alt="Adobo">
-        <div class="card-badge">🔥 Popular</div>
-      </div>
-      <div class="card-content">
-        <h3>Adobo</h3>
-        <p>Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱180</span>
-        <button class="card-button add-to-cart-btn" data-item-name="Adobo" data-item-price="180">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg" alt="Sisig">
-        <div class="card-badge">👨‍🍳 Chef's Pick</div>
-      </div>
-      <div class="card-content">
-        <h3>Sisig</h3>
-        <p>Sizzling pork cheeks and ears with onions, chili, and calamansi - a perfect pulutan!</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱220</span>
-        <button class="card-button add-to-cart-btn" data-item-name="Sisig" data-item-price="220">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Lechon Kawali">
-        <div class="card-badge">⭐ Traditional</div>
-      </div>
-      <div class="card-content">
-        <h3>Lechon Kawali</h3>
-        <p>Crispy deep-fried pork belly served with lechon sauce and steamed rice.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱250</span>
-        <button class="card-button add-to-cart-btn" data-item-name="Lechon Kawali" data-item-price="250">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    {% endfor %}
+  <div class="featured-grid" id="featuredItemsContainer">
+    <!-- Items will be loaded here by JavaScript -->
   </div>
 </section>
 
@@ -1130,7 +1106,7 @@ footer {
       <div class="footer-col">
         <h3 class="footer-heading">Quick Links</h3>
         <ul class="footer-links">
-          <li><a href="{% url 'restaurant:home' %}">Home</a></li>
+          <li><a href="{% url 'restaurant:dashboard' %}">Home</a></li>
           <li><a href="{% url 'restaurant:menu' %}">Menu</a></li>
           <li><a href="{% url 'restaurant:order' %}">Order Online</a></li>
           <li><a href="{% url 'restaurant:contact' %}">Catering</a></li>
@@ -1167,332 +1143,584 @@ footer {
 </footer>
 
 <script>
-// Mobile menu toggle with improved handling
-const menuToggle = document.getElementById('menuToggle');
-const mobileNav = document.getElementById('mobileNav');
-const overlay = document.getElementById('overlay');
-
-let isMenuOpen = false;
-let isAnimating = false;
-
-function toggleMobileMenu() {
-  if (isAnimating) return;
+// ============================================
+// GLOBAL STATE MANAGEMENT
+// ============================================
+const CartManager = {
+  isUpdating: false,
+  cartCount: 0,
+  updateQueue: [],
+  timeoutIds: [],
   
-  isAnimating = true;
-  isMenuOpen = !isMenuOpen;
+  // Initialize with stored count
+  init() {
+    const storedCount = localStorage.getItem('cartCount');
+    this.cartCount = storedCount ? parseInt(storedCount) : 0;
+    this.updateBadgeUI();
+  },
   
-  if (isMenuOpen) {
-    menuToggle.classList.add('active');
-    mobileNav.classList.add('active');
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
+  // Update badge UI
+  updateBadgeUI() {
+    const desktopBadge = document.getElementById('desktop-cart-badge');
+    const mobileBadge = document.getElementById('mobile-cart-badge');
     
-    // Close menu when clicking a link
-    mobileNav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', closeMobileMenuOnClick, { once: true });
-    });
-  } else {
-    menuToggle.classList.remove('active');
-    mobileNav.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = 'auto';
-  }
-  
-  // Reset animation flag after transition
-  setTimeout(() => {
-    isAnimating = false;
-  }, 400);
-}
-
-function closeMobileMenuOnClick() {
-  if (isMenuOpen) {
-    toggleMobileMenu();
-  }
-}
-
-menuToggle.addEventListener('click', toggleMobileMenu);
-overlay.addEventListener('click', toggleMobileMenu);
-
-// Prevent rapid clicking on navigation links
-function setupNavigationLinks() {
-  const navigationLinks = [
-    // Desktop links
-    document.getElementById('home-link'),
-    document.getElementById('menu-link'),
-    document.getElementById('order-link'),
-    document.getElementById('contact-link'),
-    document.getElementById('about-link'),
-    document.getElementById('profile-link'),
-    document.getElementById('cart-link'),
-    // Mobile links
-    document.getElementById('mobile-home-link'),
-    document.getElementById('mobile-menu-link'),
-    document.getElementById('mobile-order-link'),
-    document.getElementById('mobile-contact-link'),
-    document.getElementById('mobile-about-link'),
-    document.getElementById('mobile-profile-link'),
-    document.getElementById('mobile-cart-link'),
-    // CTA buttons
-    document.getElementById('browse-menu-btn'),
-    document.getElementById('track-order-btn')
-  ];
-  
-  navigationLinks.forEach(link => {
-    if (!link) return;
+    if (this.cartCount > 0) {
+      if (desktopBadge) {
+        desktopBadge.textContent = this.cartCount;
+        desktopBadge.classList.remove('empty');
+      }
+      if (mobileBadge) {
+        mobileBadge.textContent = this.cartCount;
+        mobileBadge.classList.remove('empty');
+      }
+    } else {
+      if (desktopBadge) {
+        desktopBadge.textContent = '0';
+        desktopBadge.classList.add('empty');
+      }
+      if (mobileBadge) {
+        mobileBadge.textContent = '0';
+        mobileBadge.classList.add('empty');
+      }
+    }
     
-    link.addEventListener('click', function(e) {
-      // If already on the same page, prevent default and just update active state
-      if (this.href === window.location.href) {
-        e.preventDefault();
-        updateActiveNavState();
-        return;
-      }
-      
-      // Add loading state to prevent rapid clicking
-      if (!this.classList.contains('nav-loading')) {
-        this.classList.add('nav-loading');
-        
-        // Remove loading state after 1 second
-        setTimeout(() => {
-          this.classList.remove('nav-loading');
-        }, 1000);
-      }
-    });
-  });
-}
-
-// Update active navigation state
-function updateActiveNavState() {
-  const currentPath = window.location.pathname;
+    // Store in localStorage
+    localStorage.setItem('cartCount', this.cartCount.toString());
+  },
   
-  // Remove active class from all links
-  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
-    link.classList.remove('active');
-  });
+  // Increment cart count
+  increment() {
+    this.cartCount++;
+    this.updateBadgeUI();
+  },
   
-  // Add active class to current page
-  if (currentPath.includes('dashboard') || currentPath === '/') {
-    document.getElementById('home-link')?.classList.add('active');
-    document.getElementById('mobile-home-link')?.classList.add('active');
-  } else if (currentPath.includes('menu')) {
-    document.getElementById('menu-link')?.classList.add('active');
-    document.getElementById('mobile-menu-link')?.classList.add('active');
-  } else if (currentPath.includes('order')) {
-    document.getElementById('order-link')?.classList.add('active');
-    document.getElementById('mobile-order-link')?.classList.add('active');
-  } else if (currentPath.includes('contact')) {
-    document.getElementById('contact-link')?.classList.add('active');
-    document.getElementById('mobile-contact-link')?.classList.add('active');
-  } else if (currentPath.includes('about')) {
-    document.getElementById('about-link')?.classList.add('active');
-    document.getElementById('mobile-about-link')?.classList.add('active');
-  } else if (currentPath.includes('profile')) {
-    document.getElementById('profile-link')?.classList.add('active');
-    document.getElementById('mobile-profile-link')?.classList.add('active');
-  } else if (currentPath.includes('cart')) {
-    document.getElementById('cart-link')?.classList.add('active');
-    document.getElementById('mobile-cart-link')?.classList.add('active');
+  // Set cart count directly
+  setCount(count) {
+    this.cartCount = count;
+    this.updateBadgeUI();
+  },
+  
+  // Clear all timeouts
+  clearTimeouts() {
+    this.timeoutIds.forEach(id => clearTimeout(id));
+    this.timeoutIds = [];
   }
-}
+};
 
-// CSRF helper
-function getCookie(name){
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+// Get CSRF token for Django
+function getCSRFToken() {
   let cookieValue = null;
-  if(document.cookie && document.cookie!==''){
-    document.cookie.split(';').forEach(cookie=>{
-      if(cookie.trim().startsWith(name+'=')){
-        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith('csrftoken=')) {
+        cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+        break;
       }
-    });
+    }
   }
   return cookieValue;
 }
 
-// Toast
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.innerText = msg;
-  toast.style.opacity = 1;
-  setTimeout(()=>{ toast.style.opacity = 0; }, 2000);
+// ============================================
+// STAR RATING FUNCTIONS
+// ============================================
+
+// Function to generate random rating (for display purposes)
+function generateRandomRating() {
+  // Generate rating between 3.5 and 5.0 for better appearance
+  const baseRating = Math.random() * 1.5 + 3.5;
+  return Math.round(baseRating * 10) / 10; // Round to 1 decimal place
 }
 
-// Update cart badge - FIXED LOGIC: Hide badge when count is 0
-async function updateCartBadge(){
-  try{
-    const res = await fetch('/api/cart/');
-    if(!res.ok) return;
-    const items = await res.json();
-    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+// Function to generate random review count
+function generateRandomReviewCount() {
+  return Math.floor(Math.random() * 46) + 5; // 5 to 50 reviews
+}
+
+// Function to render star rating
+function renderStarRating(rating, element) {
+  if (!element) return;
+  
+  element.innerHTML = '';
+  
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  
+  // Create stars
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('i');
     
-    // Get both cart badges
-    const desktopBadge = document.getElementById('desktop-cart-badge');
-    const mobileBadge = document.getElementById('mobile-cart-badge');
-    
-    // Update desktop badge
-    if(count > 0){
-      desktopBadge.textContent = count;
-      desktopBadge.style.display = 'flex';
+    if (i <= fullStars) {
+      star.className = 'fas fa-star filled';
+    } else if (i === fullStars + 1 && hasHalfStar) {
+      star.className = 'fas fa-star-half-alt half-filled';
     } else {
-      desktopBadge.style.display = 'none';
-      desktopBadge.textContent = '';
+      star.className = 'far fa-star';
     }
     
-    // Update mobile badge
-    if(count > 0){
-      mobileBadge.textContent = count;
-      mobileBadge.style.display = 'flex';
-    } else {
-      mobileBadge.style.display = 'none';
-      mobileBadge.textContent = '';
+    element.appendChild(star);
+  }
+  
+  // Add rating text
+  const ratingText = document.createElement('span');
+  ratingText.className = 'rating-text';
+  ratingText.textContent = rating.toFixed(1);
+  element.appendChild(ratingText);
+  
+  // Add review count
+  const reviewCount = generateRandomReviewCount();
+  const reviewSpan = document.createElement('span');
+  reviewSpan.className = 'review-count';
+  reviewSpan.textContent = `(${reviewCount})`;
+  element.appendChild(reviewSpan);
+  
+  return { rating, reviewCount };
+}
+
+// ============================================
+// FETCH FEATURED ITEMS FROM DATABASE
+// ============================================
+
+async function fetchFeaturedItems() {
+  try {
+    const response = await fetch('/api/menu/');
+    if (!response.ok) {
+      throw new Error('Failed to fetch menu items');
     }
-  }catch(err){ 
-    console.error('Error updating cart badge:', err); 
-    // Hide badges on error
-    document.getElementById('desktop-cart-badge').style.display = 'none';
-    document.getElementById('mobile-cart-badge').style.display = 'none';
+    
+    const allItems = await response.json();
+    
+    // Filter to get only available items
+    const availableItems = allItems.filter(item => item.is_available === 1);
+    
+    // Shuffle and take 9 random items
+    const shuffledItems = availableItems.sort(() => 0.5 - Math.random());
+    const featuredItems = shuffledItems.slice(0, 9);
+    
+    // Display the featured items
+    displayFeaturedItems(featuredItems);
+    
+  } catch (error) {
+    console.error('Error fetching featured items:', error);
+    // Show fallback items if fetch fails
+    displayFallbackItems();
   }
 }
 
-// Add to cart functionality with click prevention
-let isAddingToCart = false;
-
-async function addToCart(itemName, itemPrice, buttonElement) {
-  // Prevent multiple rapid clicks
-  if (isAddingToCart) return;
+// DISPLAY FEATURED ITEMS
+function displayFeaturedItems(items) {
+  const container = document.getElementById('featuredItemsContainer');
+  if (!container) return;
   
-  isAddingToCart = true;
-  buttonElement.disabled = true;
+  container.innerHTML = '';
   
-  try{
-    // In a real app, you would have item IDs for these featured items
-    const res = await fetch('/api/cart/add/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'X-CSRFToken':getCookie('csrftoken') },
-      body: JSON.stringify({ item_id: 1, quantity: 1 }) // Using dummy item_id
-    });
-    
-    if(res.ok){ 
-      showToast(`${itemName} added to cart!`); 
-      updateCartBadge(); 
-      
-      // Visual feedback
-      const originalText = buttonElement.innerHTML;
-      const originalBg = buttonElement.style.backgroundColor;
-      
-      buttonElement.innerHTML = '<i class="fas fa-check"></i> Added!';
-      buttonElement.style.backgroundColor = '#4CAF50';
-      
-      setTimeout(() => {
-        buttonElement.innerHTML = originalText;
-        buttonElement.style.backgroundColor = originalBg;
-        buttonElement.disabled = false;
-        isAddingToCart = false;
-      }, 2000);
-    }
-    else { 
-      const data = await res.json(); 
-      alert(data.detail || 'Error adding item'); 
-      buttonElement.disabled = false;
-      isAddingToCart = false;
-    }
-  }catch(err){ 
-    console.error(err); 
-    alert('Something went wrong'); 
-    buttonElement.disabled = false;
-    isAddingToCart = false;
+  if (items.length === 0) {
+    displayFallbackItems();
+    return;
   }
-}
-
-// Attach event listeners to all card buttons with click prevention
-document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-  button.addEventListener('click', function() {
-    const itemName = this.getAttribute('data-item-name');
-    const itemPrice = this.getAttribute('data-item-price');
-    addToCart(itemName, itemPrice, this);
-  });
-});
-
-// Show notification function
-function showNotification(message) {
-  let notification = document.getElementById('notification');
   
-  if (!notification) {
-    notification = document.createElement('div');
-    notification.id = 'notification';
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--primary-color);
-      color: white;
-      padding: 15px 25px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-heavy);
-      z-index: 9999;
-      transform: translateX(150%);
-      transition: transform 0.3s ease;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+  items.forEach((item, index) => {
+    // Generate random rating for each item
+    const itemRating = generateRandomRating();
+    
+    // Create card element
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-item-id', item.item_id);
+    
+    // Badge types based on position
+    let badgeText = '';
+    if (index < 3) {
+      badgeText = '🔥 Popular';
+    } else if (index < 6) {
+      badgeText = '👨‍🍳 Chef\'s Pick';
+    } else {
+      badgeText = '⭐ Traditional';
+    }
+    
+    // Create star rating element
+    const ratingElement = document.createElement('div');
+    ratingElement.className = 'star-rating';
+    renderStarRating(itemRating, ratingElement);
+    
+    card.innerHTML = `
+      <div class="card-image-wrapper">
+        <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${item.name}">
+        <div class="card-badge">${badgeText}</div>
+      </div>
+      <div class="card-content">
+        <h3>${item.name}</h3>
+        <div class="star-rating-container"></div>
+        <p>${item.description || 'Delicious Filipino dish prepared with authentic flavors and fresh ingredients.'}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱${item.price}</span>
+        <button class="card-button" 
+                data-item-id="${item.item_id}"
+                data-item-name="${item.name}"
+                ${item.is_available === 0 ? 'disabled' : ''}>
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
     `;
-    document.body.appendChild(notification);
-  }
-  
-  notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-  
-  // Show notification
-  setTimeout(() => {
-    notification.style.transform = 'translateX(0)';
-  }, 10);
-  
-  // Hide notification after 3 seconds
-  setTimeout(() => {
-    notification.style.transform = 'translateX(150%)';
-  }, 3000);
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Set up navigation
-  setupNavigationLinks();
-  updateActiveNavState();
-  updateCartBadge();
-  
-  // Add data attributes to any remaining buttons
-  document.querySelectorAll('.card-button:not(.add-to-cart-btn)').forEach(button => {
-    const card = button.closest('.card');
-    if (card) {
-      const itemName = card.querySelector('h3')?.textContent || 'Item';
-      const itemPrice = card.querySelector('.card-price')?.textContent || '0';
-      button.setAttribute('data-item-name', itemName);
-      button.setAttribute('data-item-price', itemPrice);
-      button.classList.add('add-to-cart-btn');
-      
+    
+    // Add star rating to the card
+    const ratingContainer = card.querySelector('.star-rating-container');
+    if (ratingContainer) {
+      ratingContainer.appendChild(ratingElement);
+    }
+    
+    // Add event listener to button
+    const button = card.querySelector('.card-button');
+    if (button) {
       button.addEventListener('click', function() {
-        addToCart(itemName, itemPrice, this);
+        handleAddToCart(this);
       });
     }
+    
+    container.appendChild(card);
   });
+}
+
+// FALLBACK ITEMS IF FETCH FAILS
+function displayFallbackItems() {
+  const container = document.getElementById('featuredItemsContainer');
+  if (!container) return;
   
-  // Prevent rapid scrolling issues
-  let lastScrollTime = 0;
-  window.addEventListener('scroll', function() {
-    const currentTime = Date.now();
-    if (currentTime - lastScrollTime < 50) {
-      // Throttle rapid scrolling
-      return;
+  const fallbackItems = [
+    {
+      item_id: 1,
+      name: 'Adobo',
+      description: 'Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves.',
+      price: '180',
+      image_url: 'https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg'
+    },
+    {
+      item_id: 2,
+      name: 'Sisig',
+      description: 'Sizzling pork cheeks and ears with onions, chili, and calamansi - a perfect pulutan!',
+      price: '220',
+      image_url: 'https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg'
+    },
+    {
+      item_id: 3,
+      name: 'Lechon Kawali',
+      description: 'Crispy deep-fried pork belly served with lechon sauce and steamed rice.',
+      price: '250',
+      image_url: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg'
+    },
+    {
+      item_id: 4,
+      name: 'Sinigang na Baboy',
+      description: 'Sour tamarind-based soup with pork, vegetables, and native ingredients.',
+      price: '190',
+      image_url: 'https://www.kawalingpinoy.com/wp-content/uploads/2013/01/sinigang-baboy-7.jpg'
+    },
+    {
+      item_id: 5,
+      name: 'Kare-Kare',
+      description: 'Traditional oxtail stew in rich peanut sauce served with shrimp paste.',
+      price: '280',
+      image_url: 'https://panlasangpinoy.com/wp-content/uploads/2018/11/Kare-Kare-Recipe.jpg'
+    },
+    {
+      item_id: 6,
+      name: 'Pancit Canton',
+      description: 'Stir-fried noodles with vegetables, meat, and savory sauce.',
+      price: '160',
+      image_url: 'https://www.foxyfolksy.com/wp-content/uploads/2015/07/pancit-canton-640.jpg'
+    },
+    {
+      item_id: 7,
+      name: 'Crispy Pata',
+      description: 'Deep-fried pork knuckles served with soy-vinegar dipping sauce.',
+      price: '320',
+      image_url: 'https://www.lutongpinoyrecipe.com/wp-content/uploads/2020/12/lutong-pinoy-crispy-pata.jpg'
+    },
+    {
+      item_id: 8,
+      name: 'Bulalo',
+      description: 'Hearty beef shank soup with bone marrow, corn, and native vegetables.',
+      price: '240',
+      image_url: 'https://images.summitmedia-digital.com/yummyph/images/2022/08/08/Bulalo-640.jpg'
+    },
+    {
+      item_id: 9,
+      name: 'Beef Caldereta',
+      description: 'Spicy tomato-based stew with beef, potatoes, carrots, and bell peppers.',
+      price: '210',
+      image_url: 'https://www.lutongpinoyrecipe.com/wp-content/uploads/2020/12/lutong-pinoy-beef-caldereta-1200.jpg'
     }
-    lastScrollTime = currentTime;
+  ];
+  
+  container.innerHTML = '';
+  
+  fallbackItems.forEach((item, index) => {
+    // Generate random rating for each item
+    const itemRating = generateRandomRating();
+    
+    // Create card element
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    // Badge types based on position
+    let badgeText = '';
+    if (index < 3) {
+      badgeText = '🔥 Popular';
+    } else if (index < 6) {
+      badgeText = '👨‍🍳 Chef\'s Pick';
+    } else {
+      badgeText = '⭐ Traditional';
+    }
+    
+    // Create star rating element
+    const ratingElement = document.createElement('div');
+    ratingElement.className = 'star-rating';
+    renderStarRating(itemRating, ratingElement);
+    
+    card.innerHTML = `
+      <div class="card-image-wrapper">
+        <img src="${item.image_url}" alt="${item.name}">
+        <div class="card-badge">${badgeText}</div>
+      </div>
+      <div class="card-content">
+        <h3>${item.name}</h3>
+        <div class="star-rating-container"></div>
+        <p>${item.description}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱${item.price}</span>
+        <button class="card-button" 
+                data-item-id="${item.item_id}"
+                data-item-name="${item.name}">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    `;
+    
+    // Add star rating to the card
+    const ratingContainer = card.querySelector('.star-rating-container');
+    if (ratingContainer) {
+      ratingContainer.appendChild(ratingElement);
+    }
+    
+    // Add event listener to button
+    const button = card.querySelector('.card-button');
+    if (button) {
+      button.addEventListener('click', function() {
+        handleAddToCart(this);
+      });
+    }
+    
+    container.appendChild(card);
+  });
+}
+
+// ============================================
+// CART MANAGEMENT FUNCTIONS
+// ============================================
+
+// Add item to cart via API
+async function addToCartAPI(itemId) {
+  try {
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+      throw new Error('CSRF token not found');
+    }
+    
+    const response = await fetch('/api/cart/add/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({
+        item_id: itemId,
+        quantity: 1
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to add item to cart');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    throw error;
+  }
+}
+
+// Fetch cart count from server
+async function fetchCartCount() {
+  try {
+    const response = await fetch('/api/cart/');
+    if (!response.ok) {
+      throw new Error('Failed to fetch cart');
+    }
+    
+    const cartItems = await response.json();
+    const totalCount = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
+    CartManager.setCount(totalCount);
+    
+    return totalCount;
+  } catch (error) {
+    console.error('Error fetching cart count:', error);
+    // Don't update UI on error
+    return CartManager.cartCount;
+  }
+}
+
+// Handle add to cart button click
+async function handleAddToCart(button) {
+  // Prevent multiple clicks
+  if (button.disabled || button.classList.contains('adding')) {
+    return;
+  }
+  
+  const itemId = button.getAttribute('data-item-id');
+  const itemName = button.getAttribute('data-item-name') || 'Item';
+  
+  // Mark button as adding
+  button.disabled = true;
+  button.classList.add('adding');
+  const originalText = button.innerHTML;
+  const originalBg = button.style.backgroundColor;
+  
+  try {
+    // Update UI optimistically
+    CartManager.increment();
+    
+    // Add to cart via API
+    await addToCartAPI(itemId);
+    
+    // Button success state
+    button.innerHTML = '<i class="fas fa-check"></i> Added!';
+    button.style.backgroundColor = '#4CAF50';
+    
+    // Show success message
+    showToast(`${itemName} added to cart!`);
+    
+    // Re-enable button after delay
+    const timeoutId = setTimeout(() => {
+      button.innerHTML = originalText;
+      button.style.backgroundColor = originalBg;
+      button.disabled = false;
+      button.classList.remove('adding');
+    }, 1500);
+    
+    CartManager.timeoutIds.push(timeoutId);
+    
+  } catch (error) {
+    // Revert optimistic update on error
+    CartManager.setCount(CartManager.cartCount - 1);
+    
+    // Show error message
+    showToast('Failed to add item to cart. Please try again.');
+    
+    // Reset button immediately
+    button.innerHTML = originalText;
+    button.style.backgroundColor = originalBg;
+    button.disabled = false;
+    button.classList.remove('adding');
+  }
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  
+  // Clear existing timeout
+  const existingTimeout = toast.dataset.timeoutId;
+  if (existingTimeout) {
+    clearTimeout(existingTimeout);
+  }
+  
+  toast.innerText = message;
+  toast.style.opacity = 1;
+  
+  const timeoutId = setTimeout(() => { 
+    toast.style.opacity = 0; 
+  }, 2000);
+  
+  toast.dataset.timeoutId = timeoutId;
+  CartManager.timeoutIds.push(timeoutId);
+}
+
+// ============================================
+// MOBILE MENU MANAGEMENT
+// ============================================
+
+const menuToggle = document.getElementById('menuToggle');
+const mobileNav = document.getElementById('mobileNav');
+const overlay = document.getElementById('overlay');
+
+// Mobile menu toggle
+menuToggle.addEventListener('click', () => {
+  menuToggle.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : 'auto';
+});
+
+overlay.addEventListener('click', () => {
+  menuToggle.classList.remove('active');
+  mobileNav.classList.remove('active');
+  overlay.classList.remove('active');
+  document.body.style.overflow = 'auto';
+});
+
+// Close mobile menu when clicking on links (except cart and profile)
+document.querySelectorAll('.mobile-nav a:not(.mobile-cart-btn):not(.mobile-profile-btn)').forEach(link => {
+  link.addEventListener('click', () => {
+    menuToggle.classList.remove('active');
+    mobileNav.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
   });
 });
 
-// Handle page visibility changes
+// ============================================
+// INITIALIZE PAGE
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Cart Manager
+  CartManager.init();
+  
+  // Fetch cart count from server
+  fetchCartCount().catch(error => {
+    console.error('Initial cart fetch failed:', error);
+  });
+  
+  // Fetch and display featured items from database
+  fetchFeaturedItems();
+  
+  console.log('Home page initialized successfully');
+});
+
+// Update cart when page becomes visible again
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
-    // Page became visible again, update cart
-    updateCartBadge();
+    fetchCartCount().catch(error => {
+      console.error('Cart sync failed:', error);
+    });
   }
+});
+
+// Clean up timeouts before page unload
+window.addEventListener('beforeunload', function() {
+  CartManager.clearTimeouts();
 });
 </script>
 

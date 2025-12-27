@@ -1,18 +1,19 @@
+# restaurant/views.py
+
 # ============================================================================
 # IMPORTS
 # ============================================================================
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.db import connection
-from django.db.models import Sum, Prefetch
+from django.db.models import Sum, Prefetch, Q
 from django.utils import timezone
+import re
 from django.views.decorators.csrf import csrf_exempt
-from .models import Payments, Deliveries
+from django.contrib.auth.hashers import make_password, check_password
 
-
-from rest_framework import viewsets, status, generics, permissions
+from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -22,11 +23,10 @@ from datetime import datetime
 
 from .models import (
     MenuItems, Users, Orders, Cart, OrderItems, 
-    ContactMessage, Feedback
+    ContactMessage, Feedback, Admin, Payments, Deliveries
 )
 from .serializers import (
-    MenuItemsSerializer, CartSerializer, OrdersSerializer,
-    ContactMessageSerializer, FeedbackSerializer
+    MenuItemsSerializer, CartSerializer, OrdersSerializer, FeedbackSerializer
 )
 
 
@@ -35,16 +35,32 @@ from .serializers import (
 # ============================================================================
 
 def get_logged_in_user(request):
-    """Return currently logged-in user, or None if not logged in."""
-    user_id = request.session.get('user_id')
+    """Return currently logged-in regular user."""
+    user_id = request.session.get('user_session_id')
     if not user_id:
         return None
     try:
         return Users.objects.get(user_id=user_id)
     except Users.DoesNotExist:
-        request.session.flush()
+        # Clear only user session keys
+        user_keys = [k for k in request.session.keys() if k.startswith('user_')]
+        for key in user_keys:
+            del request.session[key]
         return None
 
+def get_logged_in_admin(request):
+    """Return currently logged-in admin."""
+    admin_id = request.session.get('admin_session_id')
+    if not admin_id:
+        return None
+    try:
+        return Admin.objects.get(admin_id=admin_id)
+    except Admin.DoesNotExist:
+        # Clear only admin session keys
+        admin_keys = [k for k in request.session.keys() if k.startswith('admin_')]
+        for key in admin_keys:
+            del request.session[key]
+        return None
 
 def format_time(dt):
     """Convert datetime to string format."""
@@ -55,61 +71,58 @@ def format_time(dt):
 # AUTHENTICATION VIEWS
 # ============================================================================
 
-from django.contrib.auth.hashers import check_password
-
 def login_view(request):
+    """Handle user and admin login."""
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
         role = request.POST.get("role")
 
-        try:
-            user = Users.objects.get(email=email)
+        if role.lower() == 'admin':
+            # Check Admin model
+            try:
+                admin = Admin.objects.get(email=email)
+                
+                if admin.check_password(password):
+                    # Set admin session keys
+                    request.session['admin_session_id'] = admin.admin_id
+                    request.session['admin_role'] = 'admin'
+                    request.session['admin_email'] = admin.email
+                    request.session['admin_name'] = admin.name
 
-            if check_password(password, user.password):   # <-- FIXED
-
-                if user.role.lower() != role.lower():
-                    if role.lower() == 'admin':
-                        messages.error(request, "This email is not registered as an admin")
-                    else:
-                        messages.error(request, "This email is not registered as a regular user")
-                    return render(request, 'restaurant/login.html')
-
-                request.session['user_id'] = user.user_id
-                request.session['role'] = user.role
-                request.session['email'] = user.email
-                request.session['first_name'] = user.first_name
-                request.session['last_name'] = user.last_name
-
-                if user.role.lower() == 'admin':
-                    messages.success(request, f"Welcome back, Admin {user.first_name}!")
+                    messages.success(request, f"Welcome back, Admin {admin.name}!")
                     return redirect('restaurant:admin-dashboard')
                 else:
+                    messages.error(request, "Invalid email or password")
+                    
+            except Admin.DoesNotExist:
+                messages.error(request, "No admin account found with this email")
+                
+        else:
+            # Check Users model
+            try:
+                user = Users.objects.get(email=email)
+                
+                if check_password(password, user.password):
+                    # Set user session keys
+                    request.session['user_session_id'] = user.user_id
+                    request.session['user_role'] = 'user'
+                    request.session['user_email'] = user.email
+                    request.session['user_first_name'] = user.first_name
+                    request.session['user_last_name'] = user.last_name
+
                     messages.success(request, f"Welcome back, {user.first_name}!")
                     return redirect('restaurant:dashboard')
+                else:
+                    messages.error(request, "Invalid email or password")
+                    
+            except Users.DoesNotExist:
+                messages.error(request, "Invalid email address")
 
-            else:
-                messages.error(request, "Invalid password")
-
-        except Users.DoesNotExist:
-            messages.error(request, "Invalid email address")
-
-    if 'user_id' in request.session:
-        del request.session['user_id']
-    if 'role' in request.session:
-        del request.session['role']
-    
     return render(request, 'restaurant/login.html')
 
-# views.py
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.hashers import make_password, check_password
-from .models import Users
-from django.utils import timezone
-import re
-
 def create_account(request):
+    """Create new user account."""
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
@@ -159,12 +172,12 @@ def create_account(request):
             # Create user with hashed password
             user = Users(
                 email=email,
-                password=make_password(password),  # Hash the password
+                password=make_password(password),
                 first_name=first_name,
                 last_name=last_name,
-                role='user',  # Default role is user
+                role='user',
                 date_joined=timezone.now(),
-                is_active=1  # Set as active
+                is_active=1
             )
             user.save()
             
@@ -177,10 +190,22 @@ def create_account(request):
     
     return redirect('restaurant:login')
 
-def logout_view(request):
-    """Log out the user."""
-    logout(request)  # log out the user
-    request.session.flush()
+def user_logout_view(request):
+    """Logout regular user."""
+    user_keys = [k for k in request.session.keys() if k.startswith('user_')]
+    for key in user_keys:
+        del request.session[key]
+
+    messages.success(request, "Logged out successfully!")
+    return redirect('restaurant:login')
+
+def admin_logout_view(request):
+    """Logout admin."""
+    admin_keys = [k for k in request.session.keys() if k.startswith('admin_')]
+    for key in admin_keys:
+        del request.session[key]
+
+    messages.success(request, "Admin logged out successfully!")
     return redirect('restaurant:login')
 
 
@@ -192,32 +217,26 @@ def home(request):
     """Render home page."""
     user = get_logged_in_user(request)
     
-    # Get featured menu items from the database
+    # Get featured menu items
     try:
-        # Option 1: Get available meals (you can adjust the filter)
         featured_items = MenuItems.objects.filter(
-            is_available=1,  # Using 1 for available since it's IntegerField
-            category='meals'  # Assuming you want to feature meals
+            is_available=1,
+            category='meals'
         )[:3]
         
-        # If you want to create a featured flag later, you can add:
-        # featured_items = MenuItems.objects.filter(is_available=1, is_featured=True)[:3]
-        
-        # Convert QuerySet to list of dictionaries for template compatibility
         featured_items_list = []
         for item in featured_items:
             featured_items_list.append({
                 'name': item.name,
                 'description': item.description or '',
-                'price': float(item.price),  # Convert Decimal to float for template
+                'price': float(item.price),
                 'image_url': item.image_url or '',
                 'is_available': item.is_available == 1,
                 'item_id': item.item_id
             })
         
     except Exception as e:
-        print(f"Error fetching featured items: {e}")  # For debugging
-        # Fallback to static items if database query fails
+        print(f"Error fetching featured items: {e}")
         featured_items_list = [
             {
                 'name': 'Adobo',
@@ -248,11 +267,9 @@ def about(request):
     """Render about page."""
     return render(request, 'restaurant/about.html')
 
-
 def contact_page(request):
     """Render contact page."""
     return render(request, 'restaurant/contact.html')
-
 
 def menu(request):
     """Render menu page with categories."""
@@ -268,20 +285,17 @@ def menu(request):
     return render(request, 'restaurant/mainmenu.html', context)
 
 
-
-
 # ============================================================================
 # USER DASHBOARD & PROFILE
 # ============================================================================
 
 def dashboard(request):
-    """Render dashboard for logged-in users."""
+    """Render dashboard for logged-in regular users."""
     user = get_logged_in_user(request)
     if not user:
         return redirect('restaurant:login')
     
-    # Get featured items for logged-in users (you could customize this)
-    featured_items = MenuItems.objects.filter(is_available=1)[:6]  # Show more items on dashboard
+    featured_items = MenuItems.objects.filter(is_available=1)[:6]
     
     context = {
         'user': user,
@@ -290,16 +304,12 @@ def dashboard(request):
     
     return render(request, 'restaurant/index_logged_in.html', context)
 
-
 def profile_view(request):
-    user_id = request.session.get('user_id')
-    
-    if not user_id:
-        return redirect('login')
+    """Render user profile page."""
+    user = get_logged_in_user(request)
+    if not user:
+        return redirect('restaurant:login')
 
-    user = Users.objects.filter(user_id=user_id).first()
-
-    # Fetch all deliveries for this user where delivered_at is set
     deliveries = Deliveries.objects.filter(
         order__user=user,
         delivered_at__isnull=False
@@ -313,6 +323,117 @@ def profile_view(request):
 
 
 
+def update_profile(request):
+    """Update user profile information."""
+    # Use your custom function to get logged in user
+    user = get_logged_in_user(request)
+    if not user:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        # Get the user from database
+        db_user = Users.objects.get(user_id=user.user_id)
+        
+        # Get form data
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip().lower()
+        
+        # Validate required fields
+        if not first_name or not last_name or not email:
+            return JsonResponse({'error': 'All fields are required'}, status=400)
+        
+        # Check if email is already taken by another user
+        if email != db_user.email:
+            if Users.objects.filter(email=email).exclude(user_id=db_user.user_id).exists():
+                return JsonResponse({'error': 'Email is already registered'}, status=400)
+        
+        # Update user
+        db_user.first_name = first_name
+        db_user.last_name = last_name
+        db_user.email = email
+        
+        # Save phone if provided (you need to add phone field to Users model first)
+        # phone = request.POST.get('phone', '').strip()
+        # if phone:
+        #     db_user.phone = phone
+        
+        db_user.save()
+        
+        # Return success response with updated data
+        return JsonResponse({
+            'success': True,
+            'message': 'Profile updated successfully',
+            'first_name': db_user.first_name,
+            'last_name': db_user.last_name,
+            'email': db_user.email
+        })
+        
+    except Users.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def change_password(request):
+    """Change user password."""
+    # Use your custom function to get logged in user
+    user = get_logged_in_user(request)
+    if not user:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        # Get the user from database
+        db_user = Users.objects.get(user_id=user.user_id)
+        
+        # Get form data
+        current_password = request.POST.get('current_password', '')
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        
+        # Validate required fields
+        if not current_password or not new_password or not confirm_password:
+            return JsonResponse({'error': 'All fields are required'}, status=400)
+        
+        # Verify current password
+        if not check_password(current_password, db_user.password):
+            return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+        
+        # Check if new password matches confirmation
+        if new_password != confirm_password:
+            return JsonResponse({'error': 'New passwords do not match'}, status=400)
+        
+        # Check password strength
+        if len(new_password) < 8:
+            return JsonResponse({'error': 'Password must be at least 8 characters long'}, status=400)
+        
+        # Check for password complexity (optional but recommended)
+        import re
+        if not re.search(r'[A-Z]', new_password):
+            return JsonResponse({'error': 'Password must contain at least one uppercase letter'}, status=400)
+        if not re.search(r'[a-z]', new_password):
+            return JsonResponse({'error': 'Password must contain at least one lowercase letter'}, status=400)
+        if not re.search(r'[0-9]', new_password):
+            return JsonResponse({'error': 'Password must contain at least one number'}, status=400)
+        
+        # Update password
+        db_user.password = make_password(new_password)
+        db_user.save()
+        
+        # Return success response
+        return JsonResponse({
+            'success': True,
+            'message': 'Password changed successfully'
+        })
+        
+    except Users.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
 # ============================================================================
 # MENU ITEMS API
 # ============================================================================
@@ -321,7 +442,6 @@ class MenuItemsViewSet(viewsets.ModelViewSet):
     """ViewSet for managing menu items via REST API."""
     queryset = MenuItems.objects.all()
     serializer_class = MenuItemsSerializer
-
 
 def menu_page(request):
     """Render menu page."""
@@ -344,7 +464,6 @@ def cart_page(request):
     total = sum(item.subtotal for item in cart_items)
     return render(request, 'restaurant/cart.html', {'user': user, 'cart_items': cart_items, 'total': total})
 
-
 @api_view(['GET'])
 def cart_api(request):
     """Return current user's cart items."""
@@ -356,16 +475,15 @@ def cart_api(request):
     serializer = CartSerializer(items, many=True)
     return Response(serializer.data)
 
-
 @api_view(['POST'])
 def add_to_cart_api(request):
-    """Add a menu item to the cart, update quantity, or remove if quantity <= 0."""
+    """Add a menu item to the cart."""
     user = get_logged_in_user(request)
     if not user:
         return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
 
     item_id = request.data.get('item_id')
-    quantity = int(request.data.get('quantity', 1))  # default to 1 if not provided
+    quantity = int(request.data.get('quantity', 1))
 
     if not item_id:
         return Response({"detail": "Item ID is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -389,7 +507,6 @@ def add_to_cart_api(request):
         cart_item.subtotal = Decimal(menu_item.price) * Decimal(cart_item.quantity)
         cart_item.save()
 
-        # Return flattened response for frontend
         return Response({
             "detail": f"'{menu_item.name}' added/updated in cart.",
             "cart_id": cart_item.cart_id,
@@ -406,10 +523,9 @@ def add_to_cart_api(request):
     except Exception as e:
         return Response({"detail": f"Error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['DELETE'])
 def remove_from_cart_api(request, cart_id):
-    """Remove an item from cart (manual delete since managed=False)."""
+    """Remove an item from cart."""
     user = get_logged_in_user(request)
     if not user:
         return Response({"detail": "Not logged in"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -427,19 +543,6 @@ def remove_from_cart_api(request, cart_id):
 # ORDER PLACEMENT & TRACKING
 # ============================================================================
 
-import json
-from decimal import Decimal
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.utils import timezone
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from .models import Orders, OrderItems, Cart, Deliveries, Payments
-
-# -----------------------------
-# PLACE ORDER API
-# -----------------------------
 @csrf_exempt
 def place_order_api(request):
     """Place a new order from cart items."""
@@ -464,18 +567,14 @@ def place_order_api(request):
 
         now = timezone.localtime()
 
-        # ---------------------
-        # CREATE ORDER
-        # ---------------------
+        # Create order
         order = Orders.objects.create(
             user_id=user.user_id,
             total_amount=total_amount,
             order_date=now
         )
 
-        # ---------------------
-        # SAVE ORDER ITEMS
-        # ---------------------
+        # Save order items
         for ci in cart_items:
             OrderItems.objects.create(
                 order_id=order.order_id,
@@ -484,34 +583,28 @@ def place_order_api(request):
                 subtotal=ci.subtotal
             )
 
-        # ---------------------
-        # SAVE PAYMENT
-        # ---------------------
+        # Save payment
         Payments.objects.create(
             order=order,
             payment_method=data.get("payment_method", ""),
             payment_date=now
         )
 
-        # ---------------------
-        # SAVE DELIVERY
-        # ---------------------
+        # Save delivery
         Deliveries.objects.create(
             order=order,
             delivery_address=data.get("address", ""),
             contact_number=data.get("contact", ""),
             delivery_option=data.get("delivery_option", ""),
             notes=data.get("notes", ""),
-            status="pending",          # Initial status
+            status="pending",
             confirmed_at=None,
             preparing_at=None,
             out_for_delivery_at=None,
             delivered_at=None
         )
 
-        # ---------------------
-        # CLEAR CART
-        # ---------------------
+        # Clear cart
         cart_items.delete()
 
         return JsonResponse({
@@ -522,10 +615,6 @@ def place_order_api(request):
     except Exception as e:
         return JsonResponse({"detail": f"Error placing order: {str(e)}"}, status=500)
 
-
-# -----------------------------
-# ORDER VIEW (HTML PAGE)
-# -----------------------------
 def order_view(request):
     """Render order tracking page."""
     user = get_logged_in_user(request)
@@ -547,13 +636,9 @@ def order_view(request):
         },
     )
 
-
-# -----------------------------
-# TRACK ORDER API
-# -----------------------------
 @api_view(["GET"])
 def track_order_api(request, order_id):
-    """Return order status and tracking information from Deliveries table."""
+    """Return order status and tracking information."""
     order = get_object_or_404(Orders, pk=order_id)
     delivery = Deliveries.objects.filter(order=order).first()
 
@@ -597,10 +682,6 @@ def track_order_api(request, order_id):
         }
     )
 
-
-# -----------------------------
-# MARK ORDER AS SEEN
-# -----------------------------
 @csrf_exempt
 def mark_order_seen(request, order_id):
     """Mark an order as seen by user."""
@@ -611,36 +692,22 @@ def mark_order_seen(request, order_id):
         order = Orders.objects.get(pk=order_id)
         delivery = Deliveries.objects.filter(order=order).first()
         if delivery:
-            # Reset timestamps or seen status (assuming JSONField exists in Deliveries)
             delivery.timestamps = {}
             delivery.save()
         return JsonResponse({"detail": "Order marked as seen"})
     except Orders.DoesNotExist:
         return JsonResponse({"detail": "Order not found"}, status=404)
 
+
 # ============================================================================
 # CONTACT & FEEDBACK
 # ============================================================================
-
-class ContactMessageListCreateAPIView(generics.ListCreateAPIView):
-    """API for listing and creating contact messages."""
-    queryset = ContactMessage.objects.all()
-    serializer_class = ContactMessageSerializer
-    permission_classes = [permissions.AllowAny]  # or IsAuthenticated if you want
-
-    def perform_create(self, serializer):
-        # Replace this with how you identify the logged-in Users instance
-        # For example, if you store `user_id` in session:
-        user_id = self.request.session.get('user_id')  
-        user_instance = Users.objects.filter(user_id=user_id).first() if user_id else None
-        serializer.save(user=user_instance)
 
 
 @api_view(['POST'])
 def submit_feedback(request):
     """Submit user feedback."""
-    # Get user from session
-    user_id = request.session.get('user_id')
+    user_id = request.session.get('user_session_id')
     if not user_id:
         return Response({'detail': 'You must be logged in to submit feedback.'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -657,7 +724,10 @@ def submit_feedback(request):
 # ============================================================================
 
 def admin_dashboard(request):
-    """Render admin dashboard with statistics and summaries."""
+    """Render admin dashboard with statistics."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
 
     # Summary counts
     total_orders = Orders.objects.count()
@@ -665,7 +735,7 @@ def admin_dashboard(request):
     total_menu = MenuItems.objects.count()
     total_users = Users.objects.count()
 
-    # Last 10 orders with deliveries prefetched
+    # Last 10 orders
     orders = Orders.objects.prefetch_related(
         Prefetch('deliveries_set', queryset=Deliveries.objects.all()),
         Prefetch('items', queryset=OrderItems.objects.select_related('item'))
@@ -687,13 +757,6 @@ def admin_dashboard(request):
         .order_by('total_ordered')[:5]
     )
 
-    # Admin name
-    try:
-        admin_user = Users.objects.get(role='admin')
-        admin_name = f"{admin_user.first_name} {admin_user.last_name}"
-    except Users.DoesNotExist:
-        admin_name = "Admin"
-
     context = {
         'total_orders': total_orders,
         'pending_orders': pending_orders,
@@ -702,22 +765,31 @@ def admin_dashboard(request):
         'orders': orders,
         'best_sellers': best_sellers,
         'low_sellers': low_sellers,
-        'admin_name': admin_name,
+        'admin': admin,
     }
 
     return render(request, 'restaurant/admin_dashboard.html', context)
+
+
 # ============================================================================
 # ADMIN MENU MANAGEMENT
 # ============================================================================
 
 def admin_menu(request):
     """Display all menu items for admin."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
     menu_items = MenuItems.objects.all()
-    return render(request, 'restaurant/admin_menu.html', {'menu_items': menu_items})
-
+    return render(request, 'restaurant/admin_menu.html', {'menu_items': menu_items, 'admin': admin})
 
 def admin_add_menu(request):
     """Add new menu item."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
     if request.method == "POST":
         name = request.POST.get("name")
         description = request.POST.get("description")
@@ -737,11 +809,14 @@ def admin_add_menu(request):
         messages.success(request, f"{name} added successfully!")
         return redirect('restaurant:admin-menu')
 
-    return render(request, 'restaurant/admin_menu_add.html')
-
+    return render(request, 'restaurant/admin_menu_add.html', {'admin': admin})
 
 def admin_edit_menu(request, item_id):
     """Edit existing menu item."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
     item = get_object_or_404(MenuItems, item_id=item_id)
 
     if request.method == "POST":
@@ -749,20 +824,46 @@ def admin_edit_menu(request, item_id):
         item.description = request.POST.get("description")
         item.price = request.POST.get("price")
         item.category = request.POST.get("category")
-        item.image_url = request.POST.get("image_url")
+       
         item.is_available = int(request.POST.get("is_available", 1))
         item.save()
         messages.success(request, f"{item.name} updated successfully!")
         return redirect('restaurant:admin-menu')
 
-    return render(request, 'restaurant/admin_menu_edit.html', {'item': item})
+    return render(request, 'restaurant/admin_menu_edit.html', {'item': item, 'admin': admin})
 
+from django.db import transaction
+from django.db import connection
 
 def admin_delete_menu(request, item_id):
     """Delete a menu item."""
-    item = get_object_or_404(MenuItems, item_id=item_id)
-    item.delete()
-    messages.success(request, f"{item.name} deleted successfully!")
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
+    try:
+        with transaction.atomic():
+            from .models import MenuItems
+            
+            # Get the item name first
+            item = MenuItems.objects.get(item_id=item_id)
+            item_name = item.name
+            
+            # Use raw SQL to bypass Django's model constraints
+            with connection.cursor() as cursor:
+                # Delete order items first
+                cursor.execute("DELETE FROM OrderItems WHERE item_id = %s", [item_id])
+                
+                # Delete menu item
+                cursor.execute("DELETE FROM menu_items WHERE item_id = %s", [item_id])
+            
+            messages.success(request, f"{item_name} deleted successfully!")
+            
+    except MenuItems.DoesNotExist:
+        messages.error(request, "Item not found!")
+    except Exception as e:
+        messages.error(request, f"Error deleting item: {str(e)}")
+    
     return redirect('restaurant:admin-menu')
 
 
@@ -770,111 +871,143 @@ def admin_delete_menu(request, item_id):
 # ADMIN ORDER MANAGEMENT
 # ============================================================================
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.db.models import Prefetch
-from .models import Orders, OrderItems, Deliveries
+from datetime import timedelta
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.db.models import Prefetch
-from .models import Orders, OrderItems, Deliveries, Payments
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Prefetch
-from django.utils import timezone
-
-from .models import Orders, OrderItems, Deliveries, Payments
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.db.models import Prefetch
-from .models import Orders, OrderItems, Deliveries, Payments
-
-# -----------------------------
-# ADMIN ORDERS VIEW
-# -----------------------------
 def admin_orders(request):
     """Display orders filtered by status for admin."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
     status_filter = request.GET.get('status', 'pending')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
-    # Base queryset with prefetch of order items and related deliveries/payments
+    # Base queryset with prefetch
     orders = Orders.objects.all().prefetch_related(
         Prefetch('items', queryset=OrderItems.objects.select_related('item')),
         Prefetch('deliveries_set', queryset=Deliveries.objects.all()),
         Prefetch('payments_set', queryset=Payments.objects.all())
     )
 
-    # Apply status filter based on Deliveries
+    # Apply status filter
     if status_filter != 'all':
-        orders = orders.filter(deliveries__status=status_filter)
+        if status_filter == 'delivered':
+            orders = orders.filter(deliveries__delivered_at__isnull=False)
+        elif status_filter == 'out_for_delivery':
+            orders = orders.filter(deliveries__status='out_for_delivery')
+        elif status_filter == 'preparing':
+            orders = orders.filter(deliveries__status='preparing')
+        elif status_filter == 'confirmed':
+            orders = orders.filter(deliveries__status='confirmed')
+        elif status_filter == 'pending':
+            orders = orders.filter(
+                Q(deliveries__isnull=True) | 
+                Q(deliveries__status='pending')
+            )
+        else:
+            orders = orders.filter(deliveries__status=status_filter)
+
+    # Apply date filtering for delivered orders
+    if status_filter == 'delivered' and (start_date or end_date):
+        if start_date:
+            try:
+                start_date_obj = timezone.make_aware(datetime.strptime(start_date, '%Y-%m-%d'))
+                orders = orders.filter(deliveries__delivered_at__gte=start_date_obj)
+            except ValueError:
+                pass
+        
+        if end_date:
+            try:
+                end_date_obj = timezone.make_aware(datetime.strptime(end_date, '%Y-%m-%d'))
+                end_date_obj = end_date_obj + timedelta(days=1)
+                orders = orders.filter(deliveries__delivered_at__lt=end_date_obj)
+            except ValueError:
+                pass
+
+    # Order by order_date
+    orders = orders.order_by('-order_date')
 
     return render(
         request,
         "restaurant/admin_orders.html",
         {
             'orders': orders,
-            'status_filter': status_filter
+            'status_filter': status_filter,
+            'admin': admin,
+            'start_date': start_date,
+            'end_date': end_date
         }
     )
 
-
-# -----------------------------
-# UPDATE ORDER STATUS (ADMIN)
-# -----------------------------
 def admin_update_orders(request, order_id):
     """Update order status and sync Deliveries timestamps."""
-    order = get_object_or_404(Orders, order_id=order_id)
-    delivery = Deliveries.objects.filter(order=order).first()
-
-    if request.method == "POST":
-        new_status = request.POST.get("status")
-        now = timezone.now()
-
-        if delivery:
-            if new_status == "preparing":
-                delivery.status = "preparing"
-                delivery.confirmed_at = delivery.confirmed_at or now
-                delivery.preparing_at = now
-
-            elif new_status == "out_for_delivery":
-                delivery.status = "out_for_delivery"
-                delivery.preparing_at = delivery.preparing_at or now
-                delivery.out_for_delivery_at = now
-
-            elif new_status == "delivered":
-                delivery.status = "delivered"
-                delivery.confirmed_at = delivery.confirmed_at or now
-                delivery.preparing_at = delivery.preparing_at or now
-                delivery.out_for_delivery_at = delivery.out_for_delivery_at or now
-                delivery.delivered_at = now
-
-            delivery.save()
-
-        return redirect(f'/admin-orders/?status={new_status}')
-
-    return redirect('/admin-orders/')
-
-
-# -----------------------------
-# CONFIRM ORDER (ADMIN)
-# -----------------------------
-def confirm_order(request, order_id):
-    """Confirm order and move from pending to preparing status."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
     order = get_object_or_404(Orders, order_id=order_id)
     delivery = Deliveries.objects.filter(order=order).first()
 
     if request.method == "POST" and delivery:
+        new_status = request.POST.get("status")
         now = timezone.now()
-        delivery.status = "preparing"
-        delivery.confirmed_at = now
-        delivery.preparing_at = now
+        
+        if new_status == "preparing":
+            delivery.status = "preparing"
+            delivery.preparing_at = now
+            if not delivery.confirmed_at:
+                delivery.confirmed_at = now
+
+        elif new_status == "out_for_delivery":
+            delivery.status = "out_for_delivery"
+            delivery.out_for_delivery_at = now
+            if not delivery.confirmed_at:
+                delivery.confirmed_at = now
+            if not delivery.preparing_at:
+                delivery.preparing_at = now
+
+        elif new_status == "delivered":
+            delivery.status = "delivered"
+            delivery.delivered_at = now
+            if not delivery.confirmed_at:
+                delivery.confirmed_at = now
+            if not delivery.preparing_at:
+                delivery.preparing_at = now
+            if not delivery.out_for_delivery_at:
+                delivery.out_for_delivery_at = now
+
         delivery.save()
+        
+        return redirect(f'/admin-orders/?status={new_status}')
 
-    return redirect('/admin-orders/?status=preparing')
+    return redirect('/admin-orders/')
 
+def confirm_order(request, order_id):
+    """Confirm order."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
+    order = get_object_or_404(Orders, order_id=order_id)
+    
+    if request.method == "POST":
+        now = timezone.now()
+        
+        delivery, created = Deliveries.objects.get_or_create(
+            order=order,
+            defaults={
+                'status': 'confirmed',
+                'confirmed_at': now
+            }
+        )
+        
+        if not created:
+            delivery.status = 'confirmed'
+            delivery.confirmed_at = now
+            delivery.save()
 
-
+    return redirect('/admin-orders/?status=confirmed')
 
 
 # ============================================================================
@@ -883,9 +1016,337 @@ def confirm_order(request, order_id):
 
 def admin_feedback(request):
     """Display all user feedback for admin."""
-    # Fetch all feedback, newest first
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
     feedback_list = Feedback.objects.all().order_by('-date_submitted')
     context = {
-        'feedback_list': feedback_list
+        'feedback_list': feedback_list,
+        'admin': admin
     }
     return render(request, 'restaurant/admin_feedback.html', context)
+
+
+# ============================================================================
+# ADMIN USER MANAGEMENT
+# ============================================================================
+
+def manage_users(request):
+    """
+    Manage users and admins.
+    - Users tab: All Users table entries
+    - Admins tab: All Admin table entries
+    """
+    admin = get_logged_in_admin(request)
+    if not admin:
+        return redirect('restaurant:login')
+    
+    users = Users.objects.all().order_by('-date_joined')
+    admins = Admin.objects.all().order_by('-created_at')
+    
+    success_message = request.session.pop('success_message', None)
+    error_message = request.session.pop('error_message', None)
+    
+    context = {
+        'users': users,
+        'admins': admins,
+        'admin': admin,
+        'success_message': success_message,
+        'error_message': error_message,
+    }
+    
+    return render(request, 'restaurant/manage_users.html', context)
+
+def add_admin(request):
+    """Add new admin account."""
+    admin_user = get_logged_in_admin(request)
+    if not admin_user:
+        return redirect('restaurant:login')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate passwords match
+        if password != confirm_password:
+            request.session['error_message'] = 'Passwords do not match!'
+            return redirect('restaurant:admin-users')
+        
+        # Check if email already exists in Admin table
+        if Admin.objects.filter(email=email).exists():
+            request.session['error_message'] = 'Email already exists in admin accounts!'
+            return redirect('restaurant:admin-users')
+        
+        # Also check if email exists in Users table
+        if Users.objects.filter(email=email).exists():
+            request.session['error_message'] = 'Email already exists in users!'
+            return redirect('restaurant:admin-users')
+        
+        # Create new admin
+        try:
+            admin = Admin(
+                name=name,
+                email=email,
+                password=make_password(password)
+            )
+            admin.save()
+            request.session['success_message'] = 'Admin added successfully!'
+            return redirect('restaurant:admin-users')
+        except Exception as e:
+            print(f"Error creating admin: {e}")
+            request.session['error_message'] = 'Server error. Please try again.'
+            return redirect('restaurant:admin-users')
+    
+    return redirect('restaurant:admin-users')
+
+def edit_admin(request):
+    """Edit existing admin account."""
+    admin_user = get_logged_in_admin(request)
+    if not admin_user:
+        return redirect('restaurant:login')
+    
+    if request.method == 'POST':
+        admin_id = request.POST.get('admin_id')
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        try:
+            admin = Admin.objects.get(admin_id=admin_id)
+            
+            # Update basic info
+            admin.name = name
+            admin.email = email
+            
+            # Update password if provided
+            if password and confirm_password:
+                if password != confirm_password:
+                    request.session['error_message'] = 'Passwords do not match!'
+                    return redirect('restaurant:admin-users')
+                if len(password) < 6:
+                    request.session['error_message'] = 'Password must be at least 6 characters long!'
+                    return redirect('restaurant:admin-users')
+                admin.password = make_password(password)
+            
+            # Check if email already exists
+            if Admin.objects.filter(email=email).exclude(admin_id=admin_id).exists():
+                request.session['error_message'] = 'Email already exists!'
+                return redirect('restaurant:admin-users')
+            
+            admin.save()
+            request.session['success_message'] = 'Admin updated successfully!'
+            return redirect('restaurant:admin-users')
+            
+        except Admin.DoesNotExist:
+            request.session['error_message'] = 'Admin not found!'
+            return redirect('restaurant:admin-users')
+        except Exception as e:
+            print(f"Error updating admin: {e}")
+            request.session['error_message'] = 'Server error. Please try again.'
+            return redirect('restaurant:admin-users')
+    
+    return redirect('restaurant:admin-users')
+
+def delete_admin(request):
+    """Delete admin account."""
+    admin_user = get_logged_in_admin(request)
+    if not admin_user:
+        return redirect('restaurant:login')
+    
+    if request.method == 'POST':
+        admin_id = request.POST.get('admin_id')
+        
+        try:
+            admin = Admin.objects.get(admin_id=admin_id)
+            admin_name = admin.name
+            admin.delete()
+            request.session['success_message'] = f'Admin "{admin_name}" deleted successfully!'
+            return redirect('restaurant:admin-users')
+            
+        except Admin.DoesNotExist:
+            request.session['error_message'] = 'Admin not found!'
+            return redirect('restaurant:admin-users')
+        except Exception as e:
+            print(f"Error deleting admin: {e}")
+            request.session['error_message'] = 'Server error. Please try again.'
+            return redirect('restaurant:admin-users')
+    
+    return redirect('restaurant:admin-users')
+
+
+# ============================================================================
+# ADMIN SETTINGS
+# ============================================================================
+
+def admin_settings(request):
+    """Admin profile settings page."""
+    admin = get_logged_in_admin(request)
+    if not admin:
+        messages.error(request, 'Please login to access settings')
+        return redirect('restaurant:login')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate required fields
+        if not name or not email:
+            messages.error(request, 'Name and email are required!')
+            return redirect('restaurant:admin-settings')
+        
+        # Validate email format
+        if '@' not in email:
+            messages.error(request, 'Please enter a valid email address!')
+            return redirect('restaurant:admin-settings')
+        
+        # Validate email uniqueness if changed
+        if email != admin.email:
+            if Admin.objects.filter(email=email).exclude(admin_id=admin.admin_id).exists():
+                messages.error(request, 'Email already exists!')
+                return redirect('restaurant:admin-settings')
+        
+        # Update basic info
+        admin.name = name
+        admin.email = email
+        
+        # Handle password change
+        password_changed = False
+        if current_password or new_password or confirm_password:
+            # If any password field is filled, all must be filled
+            if not (current_password and new_password and confirm_password):
+                messages.error(request, 'Please fill all password fields to change password!')
+                return redirect('restaurant:admin-settings')
+            
+            if admin.check_password(current_password):
+                if new_password == confirm_password:
+                    # Validate password strength
+                    if len(new_password) < 8:
+                        messages.error(request, 'Password must be at least 8 characters long!')
+                        return redirect('restaurant:admin-settings')
+                    
+                    admin.password = make_password(new_password)
+                    password_changed = True
+                    messages.success(request, 'Password updated successfully!')
+                else:
+                    messages.error(request, 'New passwords do not match!')
+                    return redirect('restaurant:admin-settings')
+            else:
+                messages.error(request, 'Current password is incorrect!')
+                return redirect('restaurant:admin-settings')
+        
+        try:
+            admin.save()
+            messages.success(request, 'Profile updated successfully!')
+            
+            # Update session variables
+            request.session['admin_name'] = admin.name
+            request.session['admin_email'] = admin.email
+            
+            return redirect('restaurant:admin-settings')
+        except Exception as e:
+            messages.error(request, f'Error updating profile: {str(e)}')
+    
+    return render(request, 'restaurant/admin_settings.html', {'admin': admin})
+
+from django.views import View
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@method_decorator(csrf_exempt, name='dispatch')
+class FeedbackView(View):
+    def post(self, request):
+        user_id = request.session.get('user_session_id')
+        if not user_id:
+            return JsonResponse({'detail': 'You must be logged in to submit feedback.'}, status=403)
+        
+        try:
+            user = Users.objects.get(pk=user_id)
+        except Users.DoesNotExist:
+            return JsonResponse({'detail': 'User not found'}, status=404)
+        
+        # Parse request data
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = {}
+        else:
+            data = {
+                'message': request.POST.get('message'),
+                'rating': request.POST.get('rating')
+            }
+        
+        # Validate required field
+        if not data.get('message'):
+            return JsonResponse({'message': ['This field is required.']}, status=400)
+        
+        # Create feedback
+        feedback = Feedback.objects.create(
+            user=user,
+            message=data['message'],
+            rating=int(data['rating']) if data.get('rating') and data['rating'].isdigit() else None,
+            date_submitted=timezone.now()
+        )
+        
+        return JsonResponse({
+            'message': 'Feedback submitted successfully!',
+            'feedback_id': feedback.feedback_id
+        }, status=201)
+    
+    from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+
+@csrf_exempt
+def submit_feedback_form(request):
+    """Traditional form submission for feedback (not API)."""
+    if request.method != 'POST':
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
+    
+    user_id = request.session.get('user_session_id')
+    if not user_id:
+        return JsonResponse({'detail': 'You must be logged in to submit feedback.'}, status=403)
+
+    try:
+        user = Users.objects.get(pk=user_id)
+    except Users.DoesNotExist:
+        return JsonResponse({'detail': 'User not found'}, status=404)
+    
+    # Get form data
+    message = request.POST.get('message', '').strip()
+    rating = request.POST.get('rating', '').strip()
+    
+    # Validate
+    if not message:
+        return JsonResponse({'error': 'Message is required'}, status=400)
+    
+    # Validate rating
+    rating_int = None
+    if rating:
+        try:
+            rating_int = int(rating)
+            if rating_int < 1 or rating_int > 5:
+                return JsonResponse({'error': 'Rating must be between 1 and 5'}, status=400)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid rating value'}, status=400)
+    
+    # Create feedback
+    try:
+        Feedback.objects.create(
+            user=user,
+            message=message,
+            rating=rating_int,
+            date_submitted=timezone.now()
+        )
+        return JsonResponse({'message': 'Feedback submitted successfully!'}, status=201)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

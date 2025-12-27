@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import MenuItems, Cart, Orders, ContactMessage
+from .models import MenuItems, Cart, Orders
 
 # Serializer for Menu Items
 class MenuItemsSerializer(serializers.ModelSerializer):
@@ -57,13 +57,6 @@ class OrdersSerializer(serializers.ModelSerializer):
             "Out for Delivery": obj.out_for_delivery_at.strftime("%I:%M %p") if obj.out_for_delivery_at else None,
             "Delivered": obj.delivered_at.strftime("%I:%M %p") if obj.delivered_at else None,
         }
-
-class ContactMessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContactMessage
-        fields = ['message_id', 'user', 'name', 'email', 'message', 'rating', 'date_submitted']
-        read_only_fields = ['message_id', 'date_submitted']
-
 
 from rest_framework import serializers
 from django.utils import timezone

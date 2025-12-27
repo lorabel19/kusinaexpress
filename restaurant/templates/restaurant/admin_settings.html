@@ -1,0 +1,717 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KusinaExpress | Admin Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', 'Poppins', sans-serif; 
+        }
+        
+        :root {
+            --primary: #d62828;
+            --primary-dark: #a01f1f;
+            --secondary: #fcbf49;
+            --bg-main: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #2d2d2d;
+            --text-secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --sidebar-width: 280px;
+        }
+
+        body { 
+            display: flex; 
+            min-height: 100vh; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+            color: var(--text-primary);
+        }
+
+        /* Sidebar (same as dashboard) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 32px 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar h2 { 
+            font-size: 24px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar a { 
+            color: rgba(255,255,255,0.85);
+            text-decoration: none; 
+            padding: 14px 16px; 
+            margin-bottom: 8px;
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--secondary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar a:hover::before {
+            transform: scaleY(1);
+        }
+
+        .sidebar a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+
+        /* Hamburger Menu */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            font-size: 20px;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        /* Main Content */
+        .main-content { 
+            flex: 1; 
+            margin-left: var(--sidebar-width);
+            padding: 32px;
+            width: calc(100% - var(--sidebar-width));
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        /* Settings Header */
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            background: var(--bg-card);
+            padding: 24px 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .settings-header h1 {
+            font-size: 32px;
+            color: var(--text-primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+
+        .settings-header h1 i {
+            color: var(--primary);
+        }
+
+        /* Settings Container */
+        .settings-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 32px;
+        }
+
+        /* Profile Card */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: var(--shadow-md);
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-info h2 {
+            font-size: 24px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .profile-info p {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .profile-info p i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(214, 40, 40, 0.1);
+        }
+
+        .form-control:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+            color: var(--text-secondary);
+        }
+
+        .form-help {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-help i {
+            color: var(--primary);
+        }
+
+        /* Password Section */
+        .password-section {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-top: 32px;
+            border-left: 4px solid var(--warning);
+        }
+
+        .password-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+        }
+
+        .password-section h3 i {
+            color: var(--warning);
+        }
+
+        .password-section > p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        /* Action Buttons */
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+        }
+        
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Messages */
+        .messages {
+            margin-bottom: 24px;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Responsive */
+        @media screen and (max-width: 1024px) {
+            .main-content {
+                padding: 24px;
+            }
+            
+            .settings-container {
+                padding: 24px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 80px 20px 20px;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 16px;
+            }
+            
+            .settings-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 20px;
+            }
+            
+            .settings-header h1 {
+                font-size: 24px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .settings-container {
+                padding: 20px;
+            }
+            
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+            
+            .profile-info h2 {
+                font-size: 20px;
+            }
+            
+            .form-control {
+                padding: 12px 14px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</button>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'restaurant:admin-dashboard' %}">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="{% url 'restaurant:admin-menu' %}">
+            <i class="fas fa-hamburger"></i> Manage Menu
+        </a>
+        <a href="{% url 'restaurant:admin-orders' %}">
+            <i class="fas fa-receipt"></i> Manage Orders
+        </a>
+        <a href="{% url 'restaurant:admin-users' %}">
+            <i class="fas fa-users"></i> Manage Users
+        </a>
+        <a href="{% url 'restaurant:admin-feedback' %}">
+            <i class="fas fa-comments"></i> Feedback
+        </a>
+        <a href="{% url 'restaurant:admin-settings' %}" class="active">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+        <a href="{% url 'restaurant:admin-logout' %}">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="settings-header">
+        <h1><i class="fas fa-cog"></i> Admin Settings</h1>
+    </div>
+
+        
+
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="profile-info">
+                <h2>{{ admin.name }}</h2>
+                <p><i class="fas fa-envelope"></i> {{ admin.email }}</p>
+                <p><i class="fas fa-calendar-alt"></i> Joined {{ admin.created_at|date:"F d, Y" }}</p>
+                <p><i class="fas fa-id-card"></i> Admin ID: {{ admin.admin_id }}</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'restaurant:admin-settings' %}">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="name">
+                        <i class="fas fa-user"></i> Full Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        class="form-control" 
+                        value="{{ admin.name }}" 
+                        required
+                    >
+                    <div class="form-help">
+                        <i class="fas fa-info-circle"></i> Your display name
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-control" 
+                        value="{{ admin.email }}" 
+                        required
+                    >
+                    <div class="form-help">
+                        <i class="fas fa-info-circle"></i> Used for login and notifications
+                    </div>
+                </div>
+            </div>
+
+            <div class="password-section">
+                <h3><i class="fas fa-lock"></i> Change Password</h3>
+                <p>Leave blank if you don't want to change your password.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="current_password">
+                            <i class="fas fa-key"></i> Current Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="current_password" 
+                            name="current_password" 
+                            class="form-control"
+                            placeholder="Enter current password"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="new_password">
+                            <i class="fas fa-key"></i> New Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="new_password" 
+                            name="new_password" 
+                            class="form-control"
+                            placeholder="Enter new password"
+                        >
+                        <div class="form-help">
+                            <i class="fas fa-info-circle"></i> Must be at least 8 characters
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirm_password">
+                            <i class="fas fa-key"></i> Confirm Password
+                        </label>
+                        <input 
+                            type="password" 
+                            id="confirm_password" 
+                            name="confirm_password" 
+                            class="form-control"
+                            placeholder="Confirm new password"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Menu toggle functionality
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-hidden');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.add('mobile-hidden');
+            }
+        }
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('mobile-hidden');
+        } else {
+            sidebar.classList.add('mobile-hidden');
+        }
+    });
+
+    // Initialize on load
+    if (window.innerWidth <= 768) {
+        sidebar.classList.add('mobile-hidden');
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const currentPassword = document.getElementById('current_password').value;
+
+        // If any password field is filled, all must be filled
+        if (currentPassword || newPassword || confirmPassword) {
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                e.preventDefault();
+                alert('Please fill all password fields to change your password.');
+                return false;
+            }
+
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('New passwords do not match!');
+                return false;
+            }
+
+            if (newPassword.length < 8) {
+                e.preventDefault();
+                alert('Password must be at least 8 characters long.');
+                return false;
+            }
+        }
+    });
+
+    // Auto-hide messages after 5 seconds
+    setTimeout(() => {
+        const messages = document.querySelector('.messages');
+        if (messages) {
+            messages.style.opacity = '0';
+            messages.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                messages.style.display = 'none';
+            }, 500);
+        }
+    }, 5000);
+</script>
+
+</body>
+</html>

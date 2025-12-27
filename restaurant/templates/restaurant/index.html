@@ -22,6 +22,8 @@
   --divider-color: #E0E0E0;
   --success-color: #4CAF50;
   --warning-color: #F44336;
+  --star-color: #FFC107; /* Gold for stars */
+  --star-empty: #E0E0E0; /* Light gray for empty stars */
   --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.05);
   --shadow-medium: 0 10px 25px rgba(0, 0, 0, 0.1);
   --shadow-heavy: 0 15px 30px rgba(0, 0, 0, 0.15);
@@ -194,6 +196,43 @@ header {
 /* Hide cart badge when empty (0) */
 .cart-count.empty {
   display: none;
+}
+
+/* --- Star Rating Styles --- */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 8px 0;
+}
+
+.star-rating i {
+  font-size: 14px;
+  color: var(--star-empty);
+}
+
+.star-rating i.filled {
+  color: var(--star-color);
+}
+
+.star-rating i.half-filled {
+  background: linear-gradient(90deg, var(--star-color) 50%, var(--star-empty) 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rating-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.review-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 5px;
 }
 
 /* Hamburger menu for mobile */
@@ -481,7 +520,7 @@ h2.section-title {
 .card-image-wrapper {
   position: relative;
   overflow: hidden;
-  height: 220px;
+  height: 300px;
   background: var(--divider-color);
 }
 
@@ -573,8 +612,6 @@ h2.section-title {
   margin: 60px 0;
   position: relative;
 }
-
-
 
 /* --- Footer --- */
 footer {
@@ -959,86 +996,14 @@ footer {
   </div>
 </div>
 
-<!-- Featured Dishes Section - MODIFIED VERSION -->
+<!-- Featured Dishes Section - UPDATED TO SHOW 9 ITEMS -->
 <section class="container">
   <div class="section-header">
     <h2 class="section-title">Our <span class="title-highlight">Featured Dishes</span></h2>
     <p class="section-subtitle">Savor the authentic taste of Filipino cuisine</p>
   </div>
-  <div class="featured-grid">
-    {% for item in featured_items|slice:":3" %}
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="{{ item.image_url }}" alt="{{ item.name }}">
-        <div class="card-badge">
-          {% if forloop.counter == 1 %}🔥 Popular
-          {% elif forloop.counter == 2 %}👨‍🍳 Chef's Pick
-          {% else %}⭐ Traditional{% endif %}
-        </div>
-      </div>
-      <div class="card-content">
-        <h3>{{ item.name }}</h3>
-        <p>{{ item.description|truncatewords:20 }}</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱{{ item.price }}</span>
-        <button class="card-button" onclick="handleAddToCart(this)" 
-                {% if item.is_available == 0 %}disabled{% endif %}>
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    {% empty %}
-    <!-- Fallback dishes if no featured items -->
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg" alt="Adobo">
-        <div class="card-badge">🔥 Popular</div>
-      </div>
-      <div class="card-content">
-        <h3>Adobo</h3>
-        <p>Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱180</span>
-        <button class="card-button" onclick="handleAddToCart(this)">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg" alt="Sisig">
-        <div class="card-badge">👨‍🍳 Chef's Pick</div>
-      </div>
-      <div class="card-content">
-        <h3>Sisig</h3>
-        <p>Sizzling pork cheeks and ears with onions, chili, and calamansi - a perfect pulutan!</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱220</span>
-        <button class="card-button" onclick="handleAddToCart(this)">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-image-wrapper">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg" alt="Lechon Kawali">
-        <div class="card-badge">⭐ Traditional</div>
-      </div>
-      <div class="card-content">
-        <h3>Lechon Kawali</h3>
-        <p>Crispy deep-fried pork belly served with lechon sauce and steamed rice.</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-price">₱250</span>
-        <button class="card-button" onclick="handleAddToCart(this)">
-          <i class="fas fa-cart-plus"></i> Add to Cart
-        </button>
-      </div>
-    </div>
-    {% endfor %}
+  <div class="featured-grid" id="featuredItemsContainer">
+    <!-- Items will be loaded here by JavaScript -->
   </div>
 </section>
 
@@ -1342,12 +1307,274 @@ function showNotification(message) {
   }, 3000);
 }
 
-// Initialize cart badge - hide because it's 0
-updateCartBadge();
+// STAR RATING FUNCTIONS
+// Function to generate random rating (for display purposes)
+function generateRandomRating() {
+  // Generate rating between 3.5 and 5.0 for better appearance
+  const baseRating = Math.random() * 1.5 + 3.5;
+  return Math.round(baseRating * 10) / 10; // Round to 1 decimal place
+}
 
-// Prevent default behavior for protected links
+// Function to generate random review count
+function generateRandomReviewCount() {
+  return Math.floor(Math.random() * 46) + 5; // 5 to 50 reviews
+}
+
+// Function to render star rating
+function renderStarRating(rating, element) {
+  if (!element) return;
+  
+  element.innerHTML = '';
+  
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  
+  // Create stars
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('i');
+    
+    if (i <= fullStars) {
+      star.className = 'fas fa-star filled';
+    } else if (i === fullStars + 1 && hasHalfStar) {
+      star.className = 'fas fa-star-half-alt half-filled';
+    } else {
+      star.className = 'far fa-star';
+    }
+    
+    element.appendChild(star);
+  }
+  
+  // Add rating text
+  const ratingText = document.createElement('span');
+  ratingText.className = 'rating-text';
+  ratingText.textContent = rating.toFixed(1);
+  element.appendChild(ratingText);
+  
+  // Add review count
+  const reviewCount = generateRandomReviewCount();
+  const reviewSpan = document.createElement('span');
+  reviewSpan.className = 'review-count';
+  reviewSpan.textContent = `(${reviewCount})`;
+  element.appendChild(reviewSpan);
+  
+  return { rating, reviewCount };
+}
+
+// FETCH FEATURED ITEMS FROM DATABASE
+async function fetchFeaturedItems() {
+  try {
+    const response = await fetch('/api/menu/');
+    if (!response.ok) {
+      throw new Error('Failed to fetch menu items');
+    }
+    
+    const allItems = await response.json();
+    
+    // Filter to get only available items
+    const availableItems = allItems.filter(item => item.is_available === 1);
+    
+    // Shuffle and take 9 random items
+    const shuffledItems = availableItems.sort(() => 0.5 - Math.random());
+    const featuredItems = shuffledItems.slice(0, 9);
+    
+    // Display the featured items
+    displayFeaturedItems(featuredItems);
+    
+  } catch (error) {
+    console.error('Error fetching featured items:', error);
+    // Show fallback items if fetch fails
+    displayFallbackItems();
+  }
+}
+
+// DISPLAY FEATURED ITEMS
+function displayFeaturedItems(items) {
+  const container = document.getElementById('featuredItemsContainer');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (items.length === 0) {
+    displayFallbackItems();
+    return;
+  }
+  
+  items.forEach((item, index) => {
+    // Generate random rating for each item
+    const itemRating = generateRandomRating();
+    
+    // Create card element
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-item-id', item.item_id);
+    
+    // Badge types based on position
+    let badgeText = '';
+    if (index < 3) {
+      badgeText = '🔥 Popular';
+    } else if (index < 6) {
+      badgeText = '👨‍🍳 Chef\'s Pick';
+    } else {
+      badgeText = '⭐ Traditional';
+    }
+    
+    // Create star rating element
+    const ratingElement = document.createElement('div');
+    ratingElement.className = 'star-rating';
+    renderStarRating(itemRating, ratingElement);
+    
+    card.innerHTML = `
+      <div class="card-image-wrapper">
+        <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${item.name}">
+        <div class="card-badge">${badgeText}</div>
+      </div>
+      <div class="card-content">
+        <h3>${item.name}</h3>
+        <div class="star-rating-container"></div>
+        <p>${item.description || 'Delicious Filipino dish prepared with authentic flavors and fresh ingredients.'}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱${item.price}</span>
+        <button class="card-button" onclick="handleAddToCart(this)" ${item.is_available === 0 ? 'disabled' : ''}>
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    `;
+    
+    // Add star rating to the card
+    const ratingContainer = card.querySelector('.star-rating-container');
+    if (ratingContainer) {
+      ratingContainer.appendChild(ratingElement);
+    }
+    
+    container.appendChild(card);
+  });
+}
+
+// FALLBACK ITEMS IF FETCH FAILS
+function displayFallbackItems() {
+  const container = document.getElementById('featuredItemsContainer');
+  if (!container) return;
+  
+  const fallbackItems = [
+    {
+      name: 'Adobo',
+      description: 'Tender pork or chicken slowly cooked in soy sauce, vinegar, garlic, and bay leaves.',
+      price: '180',
+      image_url: 'https://images.deliveryhero.io/image/fd-ph/LH/t7o8-listing.jpg'
+    },
+    {
+      name: 'Sisig',
+      description: 'Sizzling pork cheeks and ears with onions, chili, and calamansi - a perfect pulutan!',
+      price: '220',
+      image_url: 'https://www.unileverfoodsolutions.com.ph/dam/global-ufs/mcos/SEA/calcmenu/recipes/PH-recipes/appetisers/sizzling-pork-sisig-manila/sizzling-pork-sisig-manila-main.jpg'
+    },
+    {
+      name: 'Lechon Kawali',
+      description: 'Crispy deep-fried pork belly served with lechon sauce and steamed rice.',
+      price: '250',
+      image_url: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Lechon_Kawali.jpg'
+    },
+    {
+      name: 'Sinigang na Baboy',
+      description: 'Sour tamarind-based soup with pork, vegetables, and native ingredients.',
+      price: '190',
+      image_url: 'https://www.kawalingpinoy.com/wp-content/uploads/2013/01/sinigang-baboy-7.jpg'
+    },
+    {
+      name: 'Kare-Kare',
+      description: 'Traditional oxtail stew in rich peanut sauce served with shrimp paste.',
+      price: '280',
+      image_url: 'https://panlasangpinoy.com/wp-content/uploads/2018/11/Kare-Kare-Recipe.jpg'
+    },
+    {
+      name: 'Pancit Canton',
+      description: 'Stir-fried noodles with vegetables, meat, and savory sauce.',
+      price: '160',
+      image_url: 'https://www.foxyfolksy.com/wp-content/uploads/2015/07/pancit-canton-640.jpg'
+    },
+    {
+      name: 'Crispy Pata',
+      description: 'Deep-fried pork knuckles served with soy-vinegar dipping sauce.',
+      price: '320',
+      image_url: 'https://www.lutongpinoyrecipe.com/wp-content/uploads/2020/12/lutong-pinoy-crispy-pata.jpg'
+    },
+    {
+      name: 'Bulalo',
+      description: 'Hearty beef shank soup with bone marrow, corn, and native vegetables.',
+      price: '240',
+      image_url: 'https://images.summitmedia-digital.com/yummyph/images/2022/08/08/Bulalo-640.jpg'
+    },
+    {
+      name: 'Beef Caldereta',
+      description: 'Spicy tomato-based stew with beef, potatoes, carrots, and bell peppers.',
+      price: '210',
+      image_url: 'https://www.lutongpinoyrecipe.com/wp-content/uploads/2020/12/lutong-pinoy-beef-caldereta-1200.jpg'
+    }
+  ];
+  
+  container.innerHTML = '';
+  
+  fallbackItems.forEach((item, index) => {
+    // Generate random rating for each item
+    const itemRating = generateRandomRating();
+    
+    // Create card element
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    // Badge types based on position
+    let badgeText = '';
+    if (index < 3) {
+      badgeText = '🔥 Popular';
+    } else if (index < 6) {
+      badgeText = '👨‍🍳 Chef\'s Pick';
+    } else {
+      badgeText = '⭐ Traditional';
+    }
+    
+    // Create star rating element
+    const ratingElement = document.createElement('div');
+    ratingElement.className = 'star-rating';
+    renderStarRating(itemRating, ratingElement);
+    
+    card.innerHTML = `
+      <div class="card-image-wrapper">
+        <img src="${item.image_url}" alt="${item.name}">
+        <div class="card-badge">${badgeText}</div>
+      </div>
+      <div class="card-content">
+        <h3>${item.name}</h3>
+        <div class="star-rating-container"></div>
+        <p>${item.description}</p>
+      </div>
+      <div class="card-footer">
+        <span class="card-price">₱${item.price}</span>
+        <button class="card-button" onclick="handleAddToCart(this)">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    `;
+    
+    // Add star rating to the card
+    const ratingContainer = card.querySelector('.star-rating-container');
+    if (ratingContainer) {
+      ratingContainer.appendChild(ratingElement);
+    }
+    
+    container.appendChild(card);
+  });
+}
+
+// Initialize everything when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Add click event listeners to all protected links in footer
+  // Initialize cart badge - hide because it's 0
+  updateCartBadge();
+  
+  // Fetch and display featured items
+  fetchFeaturedItems();
+  
+  // Prevent default behavior for protected links
   const protectedLinks = document.querySelectorAll('a[onclick*="handleProtectedLink"]');
   protectedLinks.forEach(link => {
     link.addEventListener('click', function(e) {

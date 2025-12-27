@@ -1,0 +1,1155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KusinaExpress | Manage Users & Admins</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', 'Poppins', sans-serif; }
+:root {
+  --primary: #d62828;
+  --primary-dark: #a01f1f;
+  --secondary: #fcbf49;
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #2d2d2d;
+  --text-secondary: #6c757d;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --sidebar-width: 280px;
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+}
+
+body { 
+  display:flex; 
+  min-height:100vh; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+  color: var(--text-primary);
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color:white;
+  display:flex;
+  flex-direction:column;
+  padding: 32px 24px;
+  position:fixed;
+  top:0;
+  left:0;
+  height:100vh;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar h2 { 
+  font-size: 24px; 
+  display:flex; 
+  align-items:center; 
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar a { 
+  color: rgba(255,255,255,0.85);
+  text-decoration:none; 
+  padding: 14px 16px; 
+  margin-bottom: 8px;
+  border-radius: 12px; 
+  display:flex; 
+  align-items:center; 
+  gap: 14px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar a::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--secondary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  transform: translateX(4px);
+}
+
+.sidebar a:hover::before {
+  transform: scaleY(1);
+}
+
+.sidebar a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.sidebar a i {
+  width: 20px;
+  text-align: center;
+}
+
+/* Hamburger Menu */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  font-size: 20px;
+}
+
+.sidebar.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+/* Main Content */
+.main-content { 
+  flex: 1; 
+  margin-left: var(--sidebar-width);
+  padding: 32px;
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Header */
+.dashboard-header { 
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: var(--radius);
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dashboard-header h1 { 
+  font-size: 32px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+/* Alert Messages */
+.alert {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.alert-error {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.alert i {
+  font-size: 18px;
+}
+
+.close-alert {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.close-alert:hover {
+  opacity: 1;
+}
+
+/* Add Admin Button */
+.add-admin-btn {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-admin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  color: var(--primary);
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-modal:hover {
+  color: var(--primary);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  font-size: 15px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(214, 40, 40, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid rgba(0,0,0,0.06);
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: var(--primary);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+}
+
+/* Tab Content */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Users Table Container */
+.users-container {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 32px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table thead {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.users-table th {
+  padding: 20px 16px;
+  text-align: left;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.users-table tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+}
+
+.users-table tbody tr:hover {
+  background: rgba(214, 40, 40, 0.03);
+}
+
+.users-table td {
+  padding: 20px 16px;
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-active {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+}
+
+.status-inactive {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+}
+
+.status-badge i {
+  font-size: 10px;
+}
+
+/* Role Badge */
+.role-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.role-user {
+  background: rgba(252, 191, 73, 0.15);
+  color: #e6a800;
+}
+
+.role-admin {
+  background: rgba(214, 40, 40, 0.15);
+  color: var(--primary);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-action {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.btn-edit {
+  background: rgba(23, 162, 184, 0.1);
+  color: var(--info);
+}
+
+.btn-delete {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--danger);
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-action:active {
+  transform: translateY(0);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+/* User Count */
+.user-count {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin: 16px 0 24px 0;
+  padding: 12px 0;
+}
+
+.user-count span {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* Responsive */
+@media screen and (max-width: 1024px) {
+  .users-container {
+    overflow-x: auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  .sidebar {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 80px 20px 20px;
+  }
+  
+  .dashboard-header {
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 16px 12px;
+    font-size: 14px;
+  }
+  
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  
+  .alert {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .btn-action {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .users-table {
+    font-size: 13px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 12px 8px;
+  }
+  
+  .modal-content {
+    padding: 20px;
+    width: 95%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" id="menuToggle">
+  <i class="fas fa-bars"></i>
+</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><i class="fas fa-utensils"></i> KusinaAdmin</h2>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="{% url 'restaurant:admin-dashboard' %}">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="{% url 'restaurant:admin-menu' %}">
+      <i class="fas fa-hamburger"></i> Manage Menu
+    </a>
+    <a href="{% url 'restaurant:admin-orders' %}">
+      <i class="fas fa-receipt"></i> Manage Orders
+    </a>
+    <a href="{% url 'restaurant:admin-users' %}" class="active">
+      <i class="fas fa-users"></i> Manage Users
+    </a>
+    <a href="{% url 'restaurant:admin-feedback' %}">
+      <i class="fas fa-comments"></i> Feedback
+    </a>
+    <a href="{% url 'restaurant:admin-settings' %}">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+    <a href="{% url 'restaurant:admin-logout' %}">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </nav>
+</div>
+
+<div class="main-content">
+  <div class="dashboard-header">
+    <h1>Manage Users</h1>
+    <button class="add-admin-btn" id="addAdminBtn">
+      <i class="fas fa-user-plus"></i> Add New Admin
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  {% if success_message %}
+  <div class="alert alert-success" id="successAlert">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <i class="fas fa-check-circle"></i>
+      <span>{{ success_message }}</span>
+    </div>
+    <button class="close-alert" onclick="document.getElementById('successAlert').style.display='none'">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  {% endif %}
+
+  {% if error_message %}
+  <div class="alert alert-error" id="errorAlert">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ error_message }}</span>
+    </div>
+    <button class="close-alert" onclick="document.getElementById('errorAlert').style.display='none'">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  {% endif %}
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="users">Regular Users</button>
+    <button class="tab-btn" data-tab="admins">Admins</button>
+  </div>
+
+  <!-- Users Tab Content -->
+  <div id="usersTab" class="tab-content active">
+    <div class="user-count">
+      Total Regular Users: <span>{{ users|length }}</span>
+    </div>
+
+    <div class="users-container">
+      <div class="table-responsive">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td><strong>#{{ user.user_id }}</strong></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                    {% if user.first_name and user.last_name %}
+                      {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    {% else %}
+                      {{ user.email|first|upper }}
+                    {% endif %}
+                  </div>
+                  <div>
+                    <strong>
+                      {% if user.first_name or user.last_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                      {% else %}
+                        Unnamed User
+                      {% endif %}
+                    </strong>
+                  </div>
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="role-badge role-user">
+                  <i class="fas fa-user"></i> {{ user.role|default:"user"|title }}
+                </span>
+              </td>
+              <td>
+                {% if user.date_joined %}
+                  {{ user.date_joined|date:"M d, Y" }}
+                {% else %}
+                  <span style="color: var(--text-secondary);">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if user.is_active == 1 %}
+                  <span class="status-badge status-active">
+                    <i class="fas fa-circle"></i> Active
+                  </span>
+                {% else %}
+                  <span class="status-badge status-inactive">
+                    <i class="fas fa-circle"></i> Inactive
+                  </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="fas fa-users-slash"></i>
+                  <p>No regular users found.</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admins Tab Content -->
+  <div id="adminsTab" class="tab-content">
+    <div class="user-count">
+      Total Admins: <span>{{ admins|length }}</span>
+    </div>
+
+    <div class="users-container">
+      <div class="table-responsive">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for admin in admins %}
+            <tr>
+              <td><strong>#{{ admin.admin_id }}</strong></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                    {{ admin.name|first|upper }}
+                  </div>
+                  <div>
+                    <strong>{{ admin.name }}</strong>
+                  </div>
+                </div>
+              </td>
+              <td>{{ admin.email }}</td>
+              <td>
+                <span class="role-badge role-admin">
+                  <i class="fas fa-user-shield"></i> Admin
+                </span>
+              </td>
+              <td>
+                {% if admin.created_at %}
+                  {{ admin.created_at|date:"M d, Y" }}
+                {% else %}
+                  <span style="color: var(--text-secondary);">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-action btn-edit" title="Edit Admin" onclick="editAdmin('{{ admin.admin_id }}')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn-action btn-delete" title="Delete Admin" onclick="deleteAdmin('{{ admin.admin_id }}', '{{ admin.name|escapejs }}')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="fas fa-user-shield"></i>
+                  <p>No admin accounts found.</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Admin Modal -->
+<div class="modal" id="addAdminModal">
+  <div class="modal-content">
+    <button class="close-modal" id="closeModal">&times;</button>
+    <div class="modal-header">
+      <h2><i class="fas fa-user-plus"></i> Add New Admin</h2>
+    </div>
+    <form id="addAdminForm" method="POST" action="{% url 'restaurant:add-admin' %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="adminName">Full Name</label>
+        <input type="text" id="adminName" name="name" required placeholder="Enter admin's full name">
+      </div>
+      <div class="form-group">
+        <label for="adminEmail">Email Address</label>
+        <input type="email" id="adminEmail" name="email" required placeholder="Enter admin's email">
+      </div>
+      <div class="form-group">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" name="password" required placeholder="Enter password">
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirm_password" required placeholder="Confirm password">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Admin</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Admin Modal -->
+<div class="modal" id="editAdminModal">
+  <div class="modal-content">
+    <button class="close-modal" id="closeEditModal">&times;</button>
+    <div class="modal-header">
+      <h2><i class="fas fa-edit"></i> Edit Admin</h2>
+    </div>
+    <form id="editAdminForm" method="POST" action="{% url 'restaurant:edit-admin' %}">
+      {% csrf_token %}
+      <input type="hidden" id="editAdminId" name="admin_id">
+      <div class="form-group">
+        <label for="editAdminName">Full Name</label>
+        <input type="text" id="editAdminName" name="name" required placeholder="Enter admin's full name">
+      </div>
+      <div class="form-group">
+        <label for="editAdminEmail">Email Address</label>
+        <input type="email" id="editAdminEmail" name="email" required placeholder="Enter admin's email">
+      </div>
+      <div class="form-group">
+        <label for="editAdminPassword">New Password (Leave blank to keep current)</label>
+        <input type="password" id="editAdminPassword" name="password" placeholder="Enter new password">
+      </div>
+      <div class="form-group">
+        <label for="editConfirmPassword">Confirm New Password</label>
+        <input type="password" id="editConfirmPassword" name="confirm_password" placeholder="Confirm new password">
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Admin</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Sidebar toggle
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('mobile-hidden');
+});
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768) {
+    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+      sidebar.classList.add('mobile-hidden');
+    }
+  }
+});
+
+// Handle resize
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    sidebar.classList.remove('mobile-hidden');
+  } else {
+    sidebar.classList.add('mobile-hidden');
+  }
+});
+
+// Initialize on load
+if (window.innerWidth <= 768) {
+  sidebar.classList.add('mobile-hidden');
+}
+
+// Tab functionality
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    // Remove active class from all tabs and tab contents
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    // Add active class to clicked tab
+    this.classList.add('active');
+    
+    // Show corresponding tab content
+    const tabId = this.getAttribute('data-tab');
+    document.getElementById(`${tabId}Tab`).classList.add('active');
+  });
+});
+
+// Add Admin Modal functionality
+const addAdminBtn = document.getElementById('addAdminBtn');
+const addAdminModal = document.getElementById('addAdminModal');
+const closeModal = document.getElementById('closeModal');
+const cancelBtn = document.getElementById('cancelBtn');
+
+addAdminBtn.addEventListener('click', () => {
+  addAdminModal.style.display = 'flex';
+});
+
+closeModal.addEventListener('click', () => {
+  addAdminModal.style.display = 'none';
+});
+
+cancelBtn.addEventListener('click', () => {
+  addAdminModal.style.display = 'none';
+});
+
+// Edit Admin Modal functionality
+const editAdminModal = document.getElementById('editAdminModal');
+const closeEditModal = document.getElementById('closeEditModal');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+closeEditModal.addEventListener('click', () => {
+  editAdminModal.style.display = 'none';
+});
+
+cancelEditBtn.addEventListener('click', () => {
+  editAdminModal.style.display = 'none';
+});
+
+// Close modals when clicking outside
+window.addEventListener('click', (e) => {
+  if (e.target === addAdminModal) {
+    addAdminModal.style.display = 'none';
+  }
+  if (e.target === editAdminModal) {
+    editAdminModal.style.display = 'none';
+  }
+});
+
+// Form validation for Add Admin
+const addAdminForm = document.getElementById('addAdminForm');
+const passwordInput = document.getElementById('adminPassword');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+
+addAdminForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Validate passwords match
+  if (passwordInput.value !== confirmPasswordInput.value) {
+    alert('Passwords do not match!');
+    return;
+  }
+  
+  // Validate password strength (optional)
+  if (passwordInput.value.length < 6) {
+    alert('Password must be at least 6 characters long!');
+    return;
+  }
+  
+  // If validation passes, submit the form
+  this.submit();
+});
+
+// Form validation for Edit Admin
+const editAdminForm = document.getElementById('editAdminForm');
+const editPasswordInput = document.getElementById('editAdminPassword');
+const editConfirmPasswordInput = document.getElementById('editConfirmPassword');
+
+editAdminForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  // Only validate if password fields are filled
+  if (editPasswordInput.value || editConfirmPasswordInput.value) {
+    if (editPasswordInput.value !== editConfirmPasswordInput.value) {
+      alert('Passwords do not match!');
+      return;
+    }
+    
+    if (editPasswordInput.value.length < 6) {
+      alert('Password must be at least 6 characters long!');
+      return;
+    }
+  }
+  
+  // If validation passes, submit the form
+  this.submit();
+});
+
+// Edit Admin function
+function editAdmin(adminId) {
+  // Get admin data from the table row
+  const row = document.querySelector(`button[onclick="editAdmin('${adminId}')"]`).closest('tr');
+  const name = row.querySelector('td:nth-child(2) strong').textContent;
+  const email = row.querySelector('td:nth-child(3)').textContent;
+  
+  // Fill the edit form
+  document.getElementById('editAdminId').value = adminId;
+  document.getElementById('editAdminName').value = name;
+  document.getElementById('editAdminEmail').value = email;
+  
+  // Clear password fields
+  document.getElementById('editAdminPassword').value = '';
+  document.getElementById('editConfirmPassword').value = '';
+  
+  // Show the edit modal
+  editAdminModal.style.display = 'flex';
+}
+
+// Delete Admin function
+function deleteAdmin(adminId, adminName) {
+  if (confirm(`Are you sure you want to delete admin "${adminName}"? This action cannot be undone.`)) {
+    // Create a form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{% url 'restaurant:delete-admin' %}";
+    
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = 'csrfmiddlewaretoken';
+    csrfToken.value = '{{ csrf_token }}';
+    form.appendChild(csrfToken);
+    
+    const adminIdInput = document.createElement('input');
+    adminIdInput.type = 'hidden';
+    adminIdInput.name = 'admin_id';
+    adminIdInput.value = adminId;
+    form.appendChild(adminIdInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+// Auto-hide alerts after 5 seconds
+setTimeout(() => {
+  const successAlert = document.getElementById('successAlert');
+  const errorAlert = document.getElementById('errorAlert');
+  
+  if (successAlert) {
+    setTimeout(() => {
+      successAlert.style.display = 'none';
+    }, 5000);
+  }
+  
+  if (errorAlert) {
+    setTimeout(() => {
+      errorAlert.style.display = 'none';
+    }, 5000);
+  }
+}, 100);
+</script>
+
+</body>
+</html>

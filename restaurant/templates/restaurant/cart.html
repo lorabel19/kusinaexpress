@@ -194,12 +194,13 @@ header {
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  display: flex;
+  display: none; /* FIX: Hidden by default */
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
+  z-index: 1;
 }
 
 /* Hamburger menu for mobile */
@@ -305,7 +306,7 @@ header {
   opacity: 1;
 }
 
-/* FIX: Mobile cart button specific styles */
+/* FIX: Mobile cart button specific styles - MATCHING HOMEPAGE */
 .mobile-cart-btn {
   background-color: var(--primary-color);
   color: var(--text-light) !important; /* Force white text */
@@ -336,7 +337,7 @@ header {
   box-shadow: var(--shadow-medium);
 }
 
-/* FIX: Mobile profile button specific styles */
+/* FIX: Mobile profile button specific styles - MATCHING HOMEPAGE */
 .mobile-profile-btn {
   background-color: transparent;
   color: var(--primary-color) !important; /* Force primary color text */
@@ -369,13 +370,13 @@ header {
   color: var(--text-light) !important;
 }
 
-/* Navigation loading state prevention */
+/* Navigation loading state prevention - MATCHING HOMEPAGE */
 .nav-loading {
   pointer-events: none;
   opacity: 0.7;
 }
 
-/* Prevent rapid clicking issues */
+/* Prevent rapid clicking issues - MATCHING HOMEPAGE */
 .nav-links a,
 .mobile-nav a,
 .btn,
@@ -930,7 +931,7 @@ footer {
           <a href="{% url 'restaurant:cart' %}" class="btn btn-primary active" id="cart-link">
             <i class="fas fa-shopping-cart"></i> Cart
             <!-- Cart badge - will be updated by JavaScript -->
-            <span class="cart-count" id="desktop-cart-badge"></span>
+            <span class="cart-count" id="desktop-cart-badge" style="display: none;"></span>
           </a>
         </div>
       </nav>
@@ -972,7 +973,7 @@ footer {
     <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn active" id="mobile-cart-link">
       <i class="fas fa-shopping-cart"></i> Cart
       <!-- Mobile cart badge - will be updated by JavaScript -->
-      <span class="cart-count" id="mobile-cart-badge"></span>
+      <span class="cart-count" id="mobile-cart-badge" style="display: none;"></span>
     </a>
   </div>
 </nav>
@@ -1123,23 +1124,144 @@ footer {
 <div id="toast"><i class="fas fa-check-circle"></i> Item added to cart!</div>
 
 <script>
-// Mobile menu toggle with improved anti-glitching
+// ============================================
+// GLOBAL STATE MANAGEMENT - EXACT SAME AS INDEX
+// ============================================
+let appState = {
+  isInitialized: false,
+  isAddingToCart: false,
+  isUpdatingQuantity: false,
+  isRemovingItem: false,
+  isSubmittingOrder: false,
+  cartCount: 0,
+  cartItems: [],
+  activeTimeouts: [],
+  eventListeners: []
+};
+
+// ============================================
+// UTILITY FUNCTIONS - EXACT SAME AS INDEX
+// ============================================
+
+// Debounce function to prevent rapid clicks
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// CSRF helper
+function getCookie(name){
+  let cookieValue = null;
+  if(document.cookie && document.cookie!==''){
+    document.cookie.split(';').forEach(cookie=>{
+      if(cookie.trim().startsWith(name+'=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// Clean up timeouts
+function cleanupTimeouts() {
+  appState.activeTimeouts.forEach(timeoutId => {
+    clearTimeout(timeoutId);
+  });
+  appState.activeTimeouts = [];
+}
+
+// Remove all event listeners
+function cleanupEventListeners() {
+  appState.eventListeners.forEach(({ element, type, handler }) => {
+    if (element) {
+      element.removeEventListener(type, handler);
+    }
+  });
+  appState.eventListeners = [];
+}
+
+// Store event listener for cleanup
+function addEventWithCleanup(element, type, handler) {
+  element.addEventListener(type, handler);
+  appState.eventListeners.push({ element, type, handler });
+}
+
+// Toast notification - EXACT SAME AS INDEX
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+  toast.style.opacity = 1;
+  
+  const toastTimeout = setTimeout(()=>{ 
+    toast.style.opacity = 0; 
+  }, 2000);
+  
+  appState.activeTimeouts.push(toastTimeout);
+}
+
+// ============================================
+// CART BADGE MANAGEMENT - EXACT SAME AS INDEX
+// ============================================
+
+// Update badge UI with count - EXACT SAME LOGIC
+function updateBadgeUI(count) {
+  const desktopBadge = document.getElementById('desktop-cart-badge');
+  const mobileBadge = document.getElementById('mobile-cart-badge');
+  
+  if (count > 0) {
+    desktopBadge.textContent = count;
+    desktopBadge.style.display = 'flex';
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = 'flex';
+  } else {
+    desktopBadge.style.display = 'none';
+    desktopBadge.textContent = '';
+    mobileBadge.style.display = 'none';
+    mobileBadge.textContent = '';
+  }
+  
+  // Update global state
+  appState.cartCount = count;
+  // Store in session storage
+  sessionStorage.setItem('cartCount', count);
+}
+
+// Fetch cart count from server - EXACT SAME LOGIC
+async function updateCartBadge(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    const items = await res.json();
+    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+    updateBadgeUI(count);
+  }catch(err){ 
+    console.error('Error updating cart badge:', err); 
+    // Try to use cached value
+    const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+    updateBadgeUI(cachedCount);
+  }
+}
+
+// ============================================
+// MOBILE MENU MANAGEMENT - EXACT SAME AS INDEX
+// ============================================
+
 const menuToggle = document.getElementById('menuToggle');
 const mobileNav = document.getElementById('mobileNav');
 const overlay = document.getElementById('overlay');
 
 let isMenuOpen = false;
 let isAnimating = false;
-let menuToggleTimeout = null;
 
 function toggleMobileMenu() {
   if (isAnimating) return;
-  
-  // Clear any pending timeout
-  if (menuToggleTimeout) {
-    clearTimeout(menuToggleTimeout);
-    menuToggleTimeout = null;
-  }
   
   isAnimating = true;
   isMenuOpen = !isMenuOpen;
@@ -1149,11 +1271,6 @@ function toggleMobileMenu() {
     mobileNav.classList.add('active');
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-    
-    // Close menu when clicking a link
-    mobileNav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', closeMobileMenuOnClick, { once: true });
-    });
   } else {
     menuToggle.classList.remove('active');
     mobileNav.classList.remove('active');
@@ -1161,86 +1278,25 @@ function toggleMobileMenu() {
     document.body.style.overflow = 'auto';
   }
   
-  // Reset animation flag after transition with a small buffer
-  menuToggleTimeout = setTimeout(() => {
+  // Reset animation flag after transition
+  const animationTimeout = setTimeout(() => {
     isAnimating = false;
-    menuToggleTimeout = null;
-  }, 450);
+  }, 400);
+  
+  appState.activeTimeouts.push(animationTimeout);
 }
 
-function closeMobileMenuOnClick() {
+function closeMobileMenu() {
   if (isMenuOpen) {
     toggleMobileMenu();
   }
 }
 
-// Debounced click handler for menu toggle
-let lastClickTime = 0;
-menuToggle.addEventListener('click', (e) => {
-  const currentTime = Date.now();
-  if (currentTime - lastClickTime < 500) { // 500ms debounce
-    return;
-  }
-  lastClickTime = currentTime;
-  toggleMobileMenu();
-});
+// ============================================
+// NAVIGATION MANAGEMENT - EXACT SAME AS INDEX
+// ============================================
 
-overlay.addEventListener('click', toggleMobileMenu);
-
-// Prevent rapid clicking on navigation links
-function setupNavigationLinks() {
-  const navigationLinks = [
-    // Desktop links
-    document.getElementById('home-link'),
-    document.getElementById('menu-link'),
-    document.getElementById('order-link'),
-    document.getElementById('contact-link'),
-    document.getElementById('about-link'),
-    document.getElementById('profile-link'),
-    document.getElementById('cart-link'),
-    // Mobile links
-    document.getElementById('mobile-home-link'),
-    document.getElementById('mobile-menu-link'),
-    document.getElementById('mobile-order-link'),
-    document.getElementById('mobile-contact-link'),
-    document.getElementById('mobile-about-link'),
-    document.getElementById('mobile-profile-link'),
-    document.getElementById('mobile-cart-link'),
-    // CTA buttons
-    document.getElementById('browse-menu-btn'),
-    document.getElementById('placeOrderBtn')
-  ];
-  
-  navigationLinks.forEach(link => {
-    if (!link) return;
-    
-    link.addEventListener('click', function(e) {
-      // Prevent rapid clicks
-      if (this.classList.contains('nav-loading')) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      
-      // If already on the same page, prevent default and just update active state
-      if (this.href && this.href === window.location.href) {
-        e.preventDefault();
-        updateActiveNavState();
-        return;
-      }
-      
-      // Add loading state to prevent rapid clicking
-      this.classList.add('nav-loading');
-      
-      // Remove loading state after 1 second
-      setTimeout(() => {
-        this.classList.remove('nav-loading');
-      }, 1000);
-    });
-  });
-}
-
-// Update active navigation state
+// Update active navigation state - EXACT SAME LOGIC
 function updateActiveNavState() {
   const currentPath = window.location.pathname;
   
@@ -1274,93 +1330,73 @@ function updateActiveNavState() {
   }
 }
 
-// CSRF helper
-function getCookie(name){
-  let cookieValue = null;
-  if(document.cookie && document.cookie!==''){
-    document.cookie.split(';').forEach(cookie=>{
-      if(cookie.trim().startsWith(name+'=')){
-        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
-      }
-    });
-  }
-  return cookieValue;
-}
-
-// Toast notification
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-  toast.style.opacity = 1;
-  
-  // Clear any existing timeout
-  if (toast.timeoutId) {
-    clearTimeout(toast.timeoutId);
+// Handle navigation click - EXACT SAME LOGIC
+function handleNavClick(e) {
+  // If already on the same page, prevent default and just update active state
+  if (this.href === window.location.href) {
+    e.preventDefault();
+    updateActiveNavState();
+    closeMobileMenu();
+    return;
   }
   
-  toast.timeoutId = setTimeout(()=>{ 
-    toast.style.opacity = 0; 
-    toast.timeoutId = null;
-  }, 2000);
-}
-
-// Update cart badge - FIXED LOGIC: Hide badge when count is 0
-async function updateCartBadge(){
-  try{
-    const res = await fetch('/api/cart/');
-    if(!res.ok) return;
-    const items = await res.json();
-    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+  // Add loading state to prevent rapid clicking
+  if (!this.classList.contains('nav-loading')) {
+    this.classList.add('nav-loading');
     
-    // Get both cart badges
-    const desktopBadge = document.getElementById('desktop-cart-badge');
-    const mobileBadge = document.getElementById('mobile-cart-badge');
+    // Clean up before navigation
+    cleanupTimeouts();
     
-    // Update desktop badge
-    if(count > 0){
-      desktopBadge.textContent = count;
-      desktopBadge.style.display = 'flex';
-    } else {
-      desktopBadge.style.display = 'none';
-      desktopBadge.textContent = '';
-    }
+    // Remove loading state after 1 second
+    const loadingTimeout = setTimeout(() => {
+      this.classList.remove('nav-loading');
+    }, 1000);
     
-    // Update mobile badge
-    if(count > 0){
-      mobileBadge.textContent = count;
-      mobileBadge.style.display = 'flex';
-    } else {
-      mobileBadge.style.display = 'none';
-      mobileBadge.textContent = '';
-    }
-    
-    return count;
-  }catch(err){ 
-    console.error('Error updating cart badge:', err); 
-    // Hide badges on error
-    document.getElementById('desktop-cart-badge').style.display = 'none';
-    document.getElementById('mobile-cart-badge').style.display = 'none';
-    return 0;
+    appState.activeTimeouts.push(loadingTimeout);
   }
 }
 
-let cartItems = [];
-let selectedPayment = 'cod';
-
-// Fetch cart items
-async function fetchCart(){
-  try{
-    const res = await fetch('/api/cart/');
-    if(!res.ok) return;
-    cartItems = await res.json();
-    displayCart();
-    updateCartBadge();
-  } catch(err){ 
-    console.error(err); 
-    // Show empty cart state on error
-    displayEmptyCart();
-  }
+// Setup navigation links - EXACT SAME LOGIC
+function setupNavigationLinks() {
+  const navigationLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-cart-link'),
+    // CTA buttons
+    document.getElementById('browse-menu-btn'),
+    document.getElementById('placeOrderBtn'),
+    // Footer links
+    ...document.querySelectorAll('.footer-links a'),
+    // Social links
+    ...document.querySelectorAll('.social-link')
+  ];
+  
+  navigationLinks.forEach(link => {
+    if (!link) return;
+    
+    // Remove existing listeners
+    link.removeEventListener('click', handleNavClick);
+    // Add debounced listener with cleanup
+    addEventWithCleanup(link, 'click', debounce(handleNavClick, 300));
+  });
 }
+
+// ============================================
+// CART FUNCTIONALITY
+// ============================================
 
 // Display empty cart state
 function displayEmptyCart() {
@@ -1383,7 +1419,7 @@ function displayCart(){
   const container = document.getElementById('cartItems');
   let subtotal = 0;
 
-  if(cartItems.length === 0){
+  if(appState.cartItems.length === 0){
     displayEmptyCart();
     return;
   }
@@ -1392,7 +1428,7 @@ function displayCart(){
   
   container.innerHTML = '';
   
-  cartItems.forEach(item=>{
+  appState.cartItems.forEach(item=>{
     const itemDiv = document.createElement('div');
     itemDiv.className='cart-item';
     itemDiv.innerHTML=`
@@ -1403,10 +1439,10 @@ function displayCart(){
         <h3>${item.item.name}</h3>
         <p>${item.item.description || 'Delicious Filipino dish'}</p>
         <div class="order-controls">
-          <button onclick="updateQuantity(${item.item.item_id}, -1)">-</button>
+          <button data-action="decrease" data-item-id="${item.item.item_id}">-</button>
           <span>${item.quantity}</span>
-          <button onclick="updateQuantity(${item.item.item_id}, 1)">+</button>
-          <button onclick="removeItem(${item.cart_id})">Remove</button>
+          <button data-action="increase" data-item-id="${item.item.item_id}">+</button>
+          <button data-action="remove" data-cart-id="${item.cart_id}">Remove</button>
         </div>
       </div>
       <div class="order-price">₱${parseFloat(item.subtotal).toFixed(2)}</div>
@@ -1419,18 +1455,16 @@ function displayCart(){
   document.getElementById('total').innerText = `₱${(subtotal+40).toFixed(2)}`;
 }
 
-// Update item quantity with click prevention
-let isUpdatingQuantity = false;
-
+// Update item quantity
 async function updateQuantity(itemId, delta){
   // Prevent multiple rapid clicks
-  if (isUpdatingQuantity) return;
+  if (appState.isUpdatingQuantity) return;
   
-  isUpdatingQuantity = true;
+  appState.isUpdatingQuantity = true;
   
-  const item = cartItems.find(i=>i.item.item_id===itemId);
+  const item = appState.cartItems.find(i=>i.item.item_id===itemId);
   if(!item) {
-    isUpdatingQuantity = false;
+    appState.isUpdatingQuantity = false;
     return;
   }
 
@@ -1452,24 +1486,23 @@ async function updateQuantity(itemId, delta){
     console.error(err); 
   } finally {
     // Re-enable after a short delay
-    setTimeout(() => {
-      isUpdatingQuantity = false;
+    const enableTimeout = setTimeout(() => {
+      appState.isUpdatingQuantity = false;
     }, 500);
+    appState.activeTimeouts.push(enableTimeout);
   }
 }
 
-// Remove item from cart with click prevention
-let isRemovingItem = false;
-
+// Remove item from cart
 async function removeItem(cartId){
   // Prevent multiple rapid clicks
-  if (isRemovingItem) return;
+  if (appState.isRemovingItem) return;
   
-  isRemovingItem = true;
+  appState.isRemovingItem = true;
   
-  const item = cartItems.find(i=>i.cart_id===cartId);
+  const item = appState.cartItems.find(i=>i.cart_id===cartId);
   if(!item) {
-    isRemovingItem = false;
+    appState.isRemovingItem = false;
     return;
   }
 
@@ -1491,140 +1524,218 @@ async function removeItem(cartId){
     console.error(err); 
   } finally {
     // Re-enable after a short delay
-    setTimeout(() => {
-      isRemovingItem = false;
+    const enableTimeout = setTimeout(() => {
+      appState.isRemovingItem = false;
     }, 500);
+    appState.activeTimeouts.push(enableTimeout);
   }
 }
 
-// Payment method selection with click prevention
-let isSelectingPayment = false;
-document.querySelectorAll('.payment-option').forEach(el=>{
-  el.addEventListener('click', ()=>{
-    if (isSelectingPayment) return;
-    
-    isSelectingPayment = true;
-    selectedPayment=el.dataset.method;
-    document.getElementById('paymentMethod').value = selectedPayment;
-    document.querySelectorAll('.payment-option').forEach(s=>s.classList.remove('active'));
-    el.classList.add('active');
-    
-    setTimeout(() => {
-      isSelectingPayment = false;
-    }, 300);
-  });
-});
-
-// Form submission with click prevention
-let isSubmittingOrder = false;
-
-document.getElementById('orderForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  
-  // Prevent multiple submissions
-  if (isSubmittingOrder) return;
-  
-  if(cartItems.length===0){ 
-    showToast('Your cart is empty.'); 
-    return; 
+// Fetch cart items
+async function fetchCart(){
+  try{
+    const res = await fetch('/api/cart/');
+    if(!res.ok) return;
+    appState.cartItems = await res.json();
+    displayCart();
+    updateCartBadge();
+  } catch(err){ 
+    console.error(err); 
+    // Show empty cart state on error
+    displayEmptyCart();
   }
+}
 
-  const formData = new FormData(this);
-  const orderData = {
-    name: formData.get('name'),
-    address: formData.get('address'),
-    contact: formData.get('contact'),
-    delivery_option: formData.get('delivery_option'),
-    notes: formData.get('notes'),
-    payment_method: selectedPayment
-  };
+// ============================================
+// PAYMENT METHOD SELECTION
+// ============================================
+let selectedPayment = 'cod';
 
-  const placeOrderBtn = document.getElementById('placeOrderBtn');
-  const originalText = placeOrderBtn.innerHTML;
-  const originalDisabled = placeOrderBtn.disabled;
-  
-  try {
-    isSubmittingOrder = true;
-    
-    // Show loading state
-    placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    placeOrderBtn.disabled = true;
-    
-    const res = await fetch('/api/orders/', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
-      body: JSON.stringify(orderData)
+function setupPaymentOptions() {
+  document.querySelectorAll('.payment-option').forEach(el=>{
+    addEventWithCleanup(el, 'click', function() {
+      selectedPayment = this.dataset.method;
+      document.getElementById('paymentMethod').value = selectedPayment;
+      document.querySelectorAll('.payment-option').forEach(s=>s.classList.remove('active'));
+      this.classList.add('active');
     });
+  });
+}
 
-    const data = await res.json();
-
-    if(res.ok){
-      showToast('Order placed successfully!');
-      cartItems=[];
-      displayCart();
-      updateCartBadge();
-      this.reset();
-      
-      // Redirect to order confirmation page
-      if(data.order_id){
-        setTimeout(() => {
-          window.location.href=`/order/?order_id=${data.order_id}`;
-        }, 1500);
-      }
-    } else {
-      showToast(data.detail||'Failed to place order.');
-      placeOrderBtn.innerHTML = originalText;
-      placeOrderBtn.disabled = originalDisabled;
+// ============================================
+// ORDER FORM SUBMISSION
+// ============================================
+function setupOrderForm() {
+  const orderForm = document.getElementById('orderForm');
+  const placeOrderBtn = document.getElementById('placeOrderBtn');
+  
+  addEventWithCleanup(orderForm, 'submit', async function(e){
+    e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (appState.isSubmittingOrder) return;
+    
+    if(appState.cartItems.length === 0){ 
+      showToast('Your cart is empty.'); 
+      return; 
     }
 
-  } catch(err){
-    console.error(err);
-    showToast('Error submitting order');
-    placeOrderBtn.innerHTML = originalText;
-    placeOrderBtn.disabled = originalDisabled;
-  } finally {
-    setTimeout(() => {
-      isSubmittingOrder = false;
-    }, 1000);
-  }
-});
+    const formData = new FormData(this);
+    const orderData = {
+      name: formData.get('name'),
+      address: formData.get('address'),
+      contact: formData.get('contact'),
+      delivery_option: formData.get('delivery_option'),
+      notes: formData.get('notes'),
+      payment_method: selectedPayment
+    };
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Set up navigation
+    const originalText = placeOrderBtn.innerHTML;
+    
+    try {
+      appState.isSubmittingOrder = true;
+      
+      // Show loading state
+      placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      placeOrderBtn.disabled = true;
+      
+      const res = await fetch('/api/orders/', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+        body: JSON.stringify(orderData)
+      });
+
+      const data = await res.json();
+
+      if(res.ok){
+        showToast('Order placed successfully!');
+        appState.cartItems = [];
+        displayCart();
+        updateCartBadge();
+        this.reset();
+        
+        // Redirect to order confirmation page
+        if(data.order_id){
+          const redirectTimeout = setTimeout(() => {
+            window.location.href=`/order/?order_id=${data.order_id}`;
+          }, 1500);
+          appState.activeTimeouts.push(redirectTimeout);
+        }
+      } else {
+        showToast(data.detail||'Failed to place order.');
+        placeOrderBtn.innerHTML = originalText;
+        placeOrderBtn.disabled = false;
+      }
+
+    } catch(err){
+      console.error(err);
+      showToast('Error submitting order');
+      placeOrderBtn.innerHTML = originalText;
+      placeOrderBtn.disabled = false;
+    } finally {
+      const enableTimeout = setTimeout(() => {
+        appState.isSubmittingOrder = false;
+      }, 1000);
+      appState.activeTimeouts.push(enableTimeout);
+    }
+  });
+}
+
+// ============================================
+// PAGE INITIALIZATION - EXACT SAME AS INDEX
+// ============================================
+
+function initializePage() {
+  if (appState.isInitialized) {
+    return;
+  }
+  
+  // Clean up any existing state
+  cleanupTimeouts();
+  cleanupEventListeners();
+  
+  // Initialize with cached cart count
+  const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+  updateBadgeUI(cachedCount);
+  
+  // Set up event listeners
+  addEventWithCleanup(menuToggle, 'click', toggleMobileMenu);
+  addEventWithCleanup(overlay, 'click', toggleMobileMenu);
+  
+  // Setup navigation
   setupNavigationLinks();
   updateActiveNavState();
   
-  // Mark cart link as active
-  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(link => {
-    link.classList.remove('active');
-  });
-  document.getElementById('cart-link')?.classList.add('active');
-  document.getElementById('mobile-cart-link')?.classList.add('active');
+  // Setup payment options
+  setupPaymentOptions();
   
-  // Fetch cart data
+  // Setup order form
+  setupOrderForm();
+  
+  // Fetch fresh cart data
   fetchCart();
   
-  // Handle page visibility changes
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      // Page became visible again, update cart
-      setTimeout(() => {
-        fetchCart();
-      }, 300);
+  // Set up mobile menu link close handlers
+  mobileNav.querySelectorAll('a:not(.mobile-cart-btn):not(.mobile-profile-btn)').forEach(link => {
+    addEventWithCleanup(link, 'click', closeMobileMenu);
+  });
+  
+  // Setup cart item controls
+  document.addEventListener('click', function(e) {
+    if (e.target.matches('[data-action="decrease"]')) {
+      const itemId = parseInt(e.target.getAttribute('data-item-id'));
+      updateQuantity(itemId, -1);
+    } else if (e.target.matches('[data-action="increase"]')) {
+      const itemId = parseInt(e.target.getAttribute('data-item-id'));
+      updateQuantity(itemId, 1);
+    } else if (e.target.matches('[data-action="remove"]')) {
+      const cartId = parseInt(e.target.getAttribute('data-cart-id'));
+      removeItem(cartId);
     }
   });
   
-  // Prevent rapid scrolling issues
-  let lastScrollTime = 0;
-  window.addEventListener('scroll', function() {
-    const currentTime = Date.now();
-    if (currentTime - lastScrollTime < 50) {
-      // Throttle rapid scrolling
-      return;
-    }
-    lastScrollTime = currentTime;
-  });
+  // Mark as initialized
+  appState.isInitialized = true;
+}
+
+// ============================================
+// PAGE VISIBILITY AND CLEANUP - EXACT SAME AS INDEX
+// ============================================
+
+// Handle page visibility changes
+function handleVisibilityChange() {
+  if (!document.hidden) {
+    // Page became visible again, update cart
+    fetchCart();
+    updateCartBadge();
+  }
+}
+
+// Clean up before page unload
+function handleBeforeUnload() {
+  cleanupTimeouts();
+  cleanupEventListeners();
+}
+
+// ============================================
+// EVENT LISTENERS SETUP - EXACT SAME AS INDEX
+// ============================================
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializePage);
+
+// Set up visibility and unload handlers
+addEventWithCleanup(document, 'visibilitychange', handleVisibilityChange);
+addEventWithCleanup(window, 'beforeunload', handleBeforeUnload);
+
+// Prevent rapid scrolling issues - EXACT SAME LOGIC
+let lastScrollTime = 0;
+addEventWithCleanup(window, 'scroll', function() {
+  const currentTime = Date.now();
+  if (currentTime - lastScrollTime < 50) {
+    return;
+  }
+  lastScrollTime = currentTime;
 });
 </script>
 

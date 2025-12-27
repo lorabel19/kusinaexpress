@@ -482,10 +482,16 @@ body {
     <a href="{% url 'restaurant:admin-orders' %}">
       <i class="fas fa-receipt"></i> Manage Orders
     </a>
+    <a href="{% url 'restaurant:admin-users' %}">
+      <i class="fas fa-users"></i> Manage Users
+    </a>
     <a href="{% url 'restaurant:admin-feedback' %}">
       <i class="fas fa-comments"></i> Feedback
     </a>
-    <a href="{% url 'restaurant:logout' %}">
+    <a href="{% url 'restaurant:admin-settings' %}">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+    <a href="{% url 'restaurant:admin-logout' %}">
       <i class="fas fa-sign-out-alt"></i> Logout
     </a>
   </nav>
@@ -496,7 +502,8 @@ body {
     <h1>Dashboard</h1>
     <div class="welcome">
       <i class="fas fa-user-circle"></i>
-      Welcome, {{ admin_name }}!
+      <!-- UPDATED: Changed from admin_name to admin.name -->
+      Welcome, {{ admin.name }}!
     </div>
   </div>
 

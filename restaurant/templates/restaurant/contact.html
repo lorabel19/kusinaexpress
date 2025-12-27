@@ -193,7 +193,7 @@ header {
   border-radius: 50%;
   width: 20px;
   height: 20px;
-  display: flex;
+  display: none; /* HIDDEN BY DEFAULT */
   align-items: center;
   justify-content: center;
   font-size: 12px;
@@ -380,7 +380,8 @@ header {
 .btn,
 .mobile-cart-btn,
 .mobile-profile-btn,
-.btn-action {
+.btn-action,
+.star {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   touch-action: manipulation;
@@ -836,7 +837,7 @@ footer {
           <a href="{% url 'restaurant:cart' %}" class="btn btn-primary" id="cart-link">
             <i class="fas fa-shopping-cart"></i> Cart
             <!-- Cart badge - will be updated by JavaScript -->
-            <span class="cart-count" id="desktop-cart-badge"></span>
+            <span class="cart-count" id="desktop-cart-badge" style="display: none;"></span>
           </a>
         </div>
       </nav>
@@ -878,7 +879,7 @@ footer {
     <a href="{% url 'restaurant:cart' %}" class="mobile-cart-btn" id="mobile-cart-link">
       <i class="fas fa-shopping-cart"></i> Cart
       <!-- Mobile cart badge - will be updated by JavaScript -->
-      <span class="cart-count" id="mobile-cart-badge"></span>
+      <span class="cart-count" id="mobile-cart-badge" style="display: none;"></span>
     </a>
   </div>
 </nav>
@@ -949,7 +950,8 @@ footer {
       <h3><i class="fas fa-comment-medical"></i> Send Feedback</h3>
       <p>We value your feedback! Please share your comments or suggestions below to help us improve.</p>
       
-      <form id="feedbackForm" style="margin-top: 25px;">
+      <!-- FORM WITH METHOD POST AND ACTION -->
+      <form id="feedbackForm" method="POST" action="{% url 'restaurant:submit-feedback' %}" style="margin-top: 25px;">
         {% csrf_token %}
         <div class="form-group">
           <label for="message">Your Message *</label>
@@ -1042,125 +1044,191 @@ footer {
 <div id="toast">Item added to cart!</div>
 
 <script>
-// Mobile menu toggle with improved anti-glitching
+// ============================================
+// GLOBAL STATE MANAGEMENT
+// ============================================
+let appState = {
+  isInitialized: false,
+  isMenuAnimating: false,
+  cartUpdating: false,
+  lastCartCount: -1,
+  activeTimeouts: [],
+  eventListeners: [],
+  isSelectingRating: false,
+  isSubmittingFeedback: false,
+  isCallingHelpDesk: false,
+  isStartingLiveChat: false
+};
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+// Debounce function to prevent rapid clicks
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// CSRF helper
+function getCookie(name){
+  let cookieValue = null;
+  if(document.cookie && document.cookie!==''){
+    document.cookie.split(';').forEach(cookie=>{
+      if(cookie.trim().startsWith(name+'=')){
+        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
+      }
+    });
+  }
+  return cookieValue;
+}
+
+// Clean up timeouts
+function cleanupTimeouts() {
+  appState.activeTimeouts.forEach(timeoutId => {
+    clearTimeout(timeoutId);
+  });
+  appState.activeTimeouts = [];
+}
+
+// Remove all event listeners
+function cleanupEventListeners() {
+  appState.eventListeners.forEach(({ element, type, handler }) => {
+    if (element) {
+      element.removeEventListener(type, handler);
+    }
+  });
+  appState.eventListeners = [];
+}
+
+// Store event listener for cleanup
+function addEventWithCleanup(element, type, handler) {
+  element.addEventListener(type, handler);
+  appState.eventListeners.push({ element, type, handler });
+}
+
+// ============================================
+// TOAST NOTIFICATION
+// ============================================
+
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.innerHTML = msg;
+  toast.style.opacity = 1;
+  
+  // Clear any existing toast timeout
+  if (toast.timeoutId) {
+    clearTimeout(toast.timeoutId);
+  }
+  
+  toast.timeoutId = setTimeout(()=>{ 
+    toast.style.opacity = 0; 
+    toast.timeoutId = null;
+  }, 2000);
+  
+  appState.activeTimeouts.push(toast.timeoutId);
+}
+
+// ============================================
+// CART BADGE MANAGEMENT
+// ============================================
+
+// Update badge UI with count
+function updateBadgeUI(count) {
+  const desktopBadge = document.getElementById('desktop-cart-badge');
+  const mobileBadge = document.getElementById('mobile-cart-badge');
+  
+  if (count > 0) {
+    desktopBadge.textContent = count;
+    desktopBadge.style.display = 'flex';
+    mobileBadge.textContent = count;
+    mobileBadge.style.display = 'flex';
+  } else {
+    desktopBadge.style.display = 'none';
+    desktopBadge.textContent = '';
+    mobileBadge.style.display = 'none';
+    mobileBadge.textContent = '';
+  }
+  
+  // Update global state
+  appState.lastCartCount = count;
+  // Store in session storage
+  sessionStorage.setItem('cartCount', count);
+}
+
+// Fetch cart count from server
+async function updateCartBadge(){
+  // Prevent multiple simultaneous calls
+  if (appState.cartUpdating) return;
+  
+  appState.cartUpdating = true;
+  
+  try {
+    const response = await fetch('/api/cart/', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch cart');
+    }
+    
+    const items = await response.json();
+    const count = Array.isArray(items) ? 
+      items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0) : 0;
+    
+    // Only update if count changed
+    if (count !== appState.lastCartCount) {
+      updateBadgeUI(count);
+    }
+  } catch (error) {
+    console.warn('Cart update error:', error);
+    // Try to use cached value
+    const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+    updateBadgeUI(cachedCount);
+  } finally {
+    appState.cartUpdating = false;
+  }
+}
+
+// ============================================
+// MOBILE MENU MANAGEMENT
+// ============================================
+
 const menuToggle = document.getElementById('menuToggle');
 const mobileNav = document.getElementById('mobileNav');
 const overlay = document.getElementById('overlay');
 
-let isMenuOpen = false;
-let isAnimating = false;
-let menuToggleTimeout = null;
-
 function toggleMobileMenu() {
-  if (isAnimating) return;
+  if (appState.isMenuAnimating) return;
   
-  // Clear any pending timeout
-  if (menuToggleTimeout) {
-    clearTimeout(menuToggleTimeout);
-    menuToggleTimeout = null;
-  }
+  appState.isMenuAnimating = true;
   
-  isAnimating = true;
-  isMenuOpen = !isMenuOpen;
+  const isOpening = !mobileNav.classList.contains('active');
   
-  if (isMenuOpen) {
-    menuToggle.classList.add('active');
-    mobileNav.classList.add('active');
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Close menu when clicking a link
-    mobileNav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', closeMobileMenuOnClick, { once: true });
-    });
-  } else {
-    menuToggle.classList.remove('active');
-    mobileNav.classList.remove('active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = 'auto';
-  }
+  menuToggle.classList.toggle('active');
+  mobileNav.classList.toggle('active');
+  overlay.classList.toggle('active');
+  document.body.style.overflow = isOpening ? 'hidden' : 'auto';
   
-  // Reset animation flag after transition with a small buffer
-  menuToggleTimeout = setTimeout(() => {
-    isAnimating = false;
-    menuToggleTimeout = null;
-  }, 450);
+  const menuTimeout = setTimeout(() => {
+    appState.isMenuAnimating = false;
+  }, 400);
+  
+  appState.activeTimeouts.push(menuTimeout);
 }
 
-function closeMobileMenuOnClick() {
-  if (isMenuOpen) {
-    toggleMobileMenu();
-  }
-}
-
-// Debounced click handler for menu toggle
-let lastClickTime = 0;
-menuToggle.addEventListener('click', (e) => {
-  const currentTime = Date.now();
-  if (currentTime - lastClickTime < 500) { // 500ms debounce
-    return;
-  }
-  lastClickTime = currentTime;
-  toggleMobileMenu();
-});
-
-overlay.addEventListener('click', toggleMobileMenu);
-
-// Prevent rapid clicking on navigation links
-function setupNavigationLinks() {
-  const navigationLinks = [
-    // Desktop links
-    document.getElementById('home-link'),
-    document.getElementById('menu-link'),
-    document.getElementById('order-link'),
-    document.getElementById('contact-link'),
-    document.getElementById('about-link'),
-    document.getElementById('profile-link'),
-    document.getElementById('cart-link'),
-    // Mobile links
-    document.getElementById('mobile-home-link'),
-    document.getElementById('mobile-menu-link'),
-    document.getElementById('mobile-order-link'),
-    document.getElementById('mobile-contact-link'),
-    document.getElementById('mobile-about-link'),
-    document.getElementById('mobile-profile-link'),
-    document.getElementById('mobile-cart-link'),
-    // Footer links
-    ...document.querySelectorAll('.footer-links a'),
-    // Action buttons
-    document.getElementById('live-chat-btn'),
-    document.getElementById('call-help-btn'),
-    document.getElementById('submit-feedback-btn')
-  ];
-  
-  navigationLinks.forEach(link => {
-    if (!link) return;
-    
-    link.addEventListener('click', function(e) {
-      // Prevent rapid clicks
-      if (this.classList.contains('nav-loading')) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      
-      // If already on the same page, prevent default and just update active state
-      if (this.href && this.href === window.location.href) {
-        e.preventDefault();
-        updateActiveNavState();
-        return;
-      }
-      
-      // Add loading state to prevent rapid clicking
-      this.classList.add('nav-loading');
-      
-      // Remove loading state after 1 second
-      setTimeout(() => {
-        this.classList.remove('nav-loading');
-      }, 1000);
-    });
-  });
-}
+// ============================================
+// NAVIGATION MANAGEMENT
+// ============================================
 
 // Update active navigation state
 function updateActiveNavState() {
@@ -1196,163 +1264,186 @@ function updateActiveNavState() {
   }
 }
 
-// CSRF helper
-function getCookie(name){
-  let cookieValue = null;
-  if(document.cookie && document.cookie!==''){
-    document.cookie.split(';').forEach(cookie=>{
-      if(cookie.trim().startsWith(name+'=')){
-        cookieValue = decodeURIComponent(cookie.trim().split('=')[1]);
-      }
-    });
-  }
-  return cookieValue;
-}
-
-// Toast notification
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.innerHTML = msg;
-  toast.style.opacity = 1;
-  
-  // Clear any existing timeout
-  if (toast.timeoutId) {
-    clearTimeout(toast.timeoutId);
+// Handle navigation click
+function handleNavClick(e) {
+  // If already on the same page, prevent default and just update active state
+  if (this.href && this.href === window.location.href) {
+    e.preventDefault();
+    updateActiveNavState();
+    if (mobileNav.classList.contains('active')) toggleMobileMenu();
+    return;
   }
   
-  toast.timeoutId = setTimeout(()=>{ 
-    toast.style.opacity = 0; 
-    toast.timeoutId = null;
-  }, 2000);
-}
-
-// Update cart badge - FIXED LOGIC: Hide badge when count is 0
-async function updateCartBadge(){
-  try{
-    const res = await fetch('/api/cart/');
-    if(!res.ok) return;
-    const items = await res.json();
-    const count = items.reduce((acc,i)=>acc+i.quantity,0);
+  // Add loading state to prevent rapid clicking
+  if (!this.classList.contains('nav-loading')) {
+    this.classList.add('nav-loading');
     
-    // Get both cart badges
-    const desktopBadge = document.getElementById('desktop-cart-badge');
-    const mobileBadge = document.getElementById('mobile-cart-badge');
+    // Clean up before navigation
+    cleanupTimeouts();
     
-    // Update desktop badge
-    if(count > 0){
-      desktopBadge.textContent = count;
-      desktopBadge.style.display = 'flex';
-    } else {
-      desktopBadge.style.display = 'none';
-      desktopBadge.textContent = '';
-    }
+    // Remove loading state after 1 second
+    const loadingTimeout = setTimeout(() => {
+      this.classList.remove('nav-loading');
+    }, 1000);
     
-    // Update mobile badge
-    if(count > 0){
-      mobileBadge.textContent = count;
-      mobileBadge.style.display = 'flex';
-    } else {
-      mobileBadge.style.display = 'none';
-      mobileBadge.textContent = '';
-    }
-    
-    return count;
-  }catch(err){ 
-    console.error('Error updating cart badge:', err); 
-    // Hide badges on error
-    document.getElementById('desktop-cart-badge').style.display = 'none';
-    document.getElementById('mobile-cart-badge').style.display = 'none';
-    return 0;
+    appState.activeTimeouts.push(loadingTimeout);
   }
 }
 
-// Star rating functionality with click prevention
-let isSelectingRating = false;
+// Setup navigation links
+function setupNavigationLinks() {
+  const navigationLinks = [
+    // Desktop links
+    document.getElementById('home-link'),
+    document.getElementById('menu-link'),
+    document.getElementById('order-link'),
+    document.getElementById('contact-link'),
+    document.getElementById('about-link'),
+    document.getElementById('profile-link'),
+    document.getElementById('cart-link'),
+    // Mobile links
+    document.getElementById('mobile-home-link'),
+    document.getElementById('mobile-menu-link'),
+    document.getElementById('mobile-order-link'),
+    document.getElementById('mobile-contact-link'),
+    document.getElementById('mobile-about-link'),
+    document.getElementById('mobile-profile-link'),
+    document.getElementById('mobile-cart-link'),
+    // Footer links
+    ...document.querySelectorAll('.footer-links a'),
+    // Action buttons
+    document.getElementById('live-chat-btn'),
+    document.getElementById('call-help-btn')
+  ];
+  
+  navigationLinks.forEach(link => {
+    if (!link) return;
+    
+    // Remove existing listeners
+    link.removeEventListener('click', handleNavClick);
+    // Add debounced listener with cleanup
+    addEventWithCleanup(link, 'click', debounce(handleNavClick, 300));
+  });
+}
+
+// ============================================
+// STAR RATING MANAGEMENT
+// ============================================
+
 const stars = document.querySelectorAll('.star');
 const ratingValue = document.getElementById('ratingValue');
 
-stars.forEach(star => {
-  star.addEventListener('click', () => {
-    if (isSelectingRating) return;
-    
-    isSelectingRating = true;
-    const value = star.getAttribute('data-value');
-    ratingValue.value = value;
-    
-    // Update star display
-    stars.forEach((s, index) => {
-      if(index < value) {
-        s.innerHTML = '<i class="fas fa-star"></i>';
-        s.classList.add('active');
-      } else {
-        s.innerHTML = '<i class="far fa-star"></i>';
-        s.classList.remove('active');
-      }
+// Initialize stars
+function initializeStars() {
+  stars.forEach(star => {
+    // Click handler
+    addEventWithCleanup(star, 'click', () => {
+      if (appState.isSelectingRating) return;
+      
+      appState.isSelectingRating = true;
+      const value = star.getAttribute('data-value');
+      ratingValue.value = value;
+      
+      // Update star display
+      stars.forEach((s, index) => {
+        if(index < value) {
+          s.innerHTML = '<i class="fas fa-star"></i>';
+          s.classList.add('active');
+        } else {
+          s.innerHTML = '<i class="far fa-star"></i>';
+          s.classList.remove('active');
+        }
+      });
+      
+      const ratingTimeout = setTimeout(() => {
+        appState.isSelectingRating = false;
+      }, 300);
+      
+      appState.activeTimeouts.push(ratingTimeout);
     });
     
-    setTimeout(() => {
-      isSelectingRating = false;
-    }, 300);
-  });
-  
-  // Hover effect
-  star.addEventListener('mouseenter', () => {
-    const value = star.getAttribute('data-value');
-    stars.forEach((s, index) => {
-      if(index < value) {
-        s.innerHTML = '<i class="fas fa-star"></i>';
-      } else {
-        s.innerHTML = '<i class="far fa-star"></i>';
-      }
+    // Hover effect
+    addEventWithCleanup(star, 'mouseenter', () => {
+      const value = star.getAttribute('data-value');
+      stars.forEach((s, index) => {
+        if(index < value) {
+          s.innerHTML = '<i class="fas fa-star"></i>';
+        } else {
+          s.innerHTML = '<i class="far fa-star"></i>';
+        }
+      });
+    });
+    
+    addEventWithCleanup(star, 'mouseleave', () => {
+      const currentRating = ratingValue.value;
+      stars.forEach((s, index) => {
+        if(currentRating && index < currentRating) {
+          s.innerHTML = '<i class="fas fa-star"></i>';
+        } else {
+          s.innerHTML = '<i class="far fa-star"></i>';
+        }
+      });
     });
   });
-  
-  star.addEventListener('mouseleave', () => {
-    const currentRating = ratingValue.value;
-    stars.forEach((s, index) => {
-      if(currentRating && index < currentRating) {
-        s.innerHTML = '<i class="fas fa-star"></i>';
-      } else {
-        s.innerHTML = '<i class="far fa-star"></i>';
-      }
-    });
-  });
-});
+}
 
-// Feedback form submission with click prevention
-let isSubmittingFeedback = false;
+// ============================================
+// FEEDBACK FORM MANAGEMENT
+// ============================================
+
 const form = document.getElementById("feedbackForm");
-form.addEventListener("submit", async function(e){
+
+// Handle form submission
+async function handleFormSubmit(e) {
   e.preventDefault();
   
   // Prevent multiple submissions
-  if (isSubmittingFeedback) return;
+  if (appState.isSubmittingFeedback) return;
   
   const submitBtn = document.getElementById('submit-feedback-btn');
   const originalText = submitBtn.innerHTML;
   
-  const csrftoken = getCookie('csrftoken');
-  const data = { 
-    message: this.message.value, 
-    rating: this.rating.value || null 
-  };
-
-  try{
-    isSubmittingFeedback = true;
+  // Get CSRF token
+  const csrfTokenInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+  const csrftoken = csrfTokenInput ? csrfTokenInput.value : getCookie('csrftoken');
+  
+  if (!csrftoken) {
+    showToast("Error: CSRF token missing. Please refresh the page.");
+    return;
+  }
+  
+  // Create FormData for traditional form submission
+  const formData = new FormData(form);
+  
+  try {
+    appState.isSubmittingFeedback = true;
     
     // Show loading state
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
     submitBtn.disabled = true;
     
-    const response = await fetch("{% url 'restaurant:api-feedback' %}", {
+    // Use traditional form submission instead of AJAX
+    const response = await fetch(form.action, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json", 
-        "X-CSRFToken": csrftoken 
+        "X-CSRFToken": csrftoken,
+        "X-Requested-With": "XMLHttpRequest"
       },
-      body: JSON.stringify(data),
+      body: formData,
       credentials: "same-origin"
     });
+    
+    if (response.redirected) {
+      // If redirected, the submission was successful
+      showToast("Feedback submitted successfully!");
+      form.reset();
+      ratingValue.value = '';
+      stars.forEach(star => {
+        star.innerHTML = '<i class="far fa-star"></i>';
+        star.classList.remove('active');
+      });
+      return;
+    }
     
     const result = await response.json();
     if(response.ok){
@@ -1367,27 +1458,30 @@ form.addEventListener("submit", async function(e){
       let errors = Object.entries(result).map(([field,msgs]) => `${field}: ${msgs}`).join("\n");
       showToast("Error submitting feedback. Please try again.");
     }
-  }catch(err){
+  } catch(err) {
     console.error(err);
     showToast("An error occurred. Please try again.");
   } finally {
     // Reset button state
     submitBtn.innerHTML = originalText;
     submitBtn.disabled = false;
-    setTimeout(() => {
-      isSubmittingFeedback = false;
+    const feedbackTimeout = setTimeout(() => {
+      appState.isSubmittingFeedback = false;
     }, 1000);
+    
+    appState.activeTimeouts.push(feedbackTimeout);
   }
-});
+}
 
-// Live chat and call button functionality with click prevention
-let isCallingHelpDesk = false;
-let isStartingLiveChat = false;
+// ============================================
+// ACTION BUTTONS MANAGEMENT
+// ============================================
 
-document.getElementById('live-chat-btn')?.addEventListener('click', () => {
-  if (isStartingLiveChat) return;
+// Live chat button handler
+function handleLiveChat() {
+  if (appState.isStartingLiveChat) return;
   
-  isStartingLiveChat = true;
+  appState.isStartingLiveChat = true;
   const btn = document.getElementById('live-chat-btn');
   const originalText = btn.innerHTML;
   
@@ -1396,18 +1490,21 @@ document.getElementById('live-chat-btn')?.addEventListener('click', () => {
   btn.disabled = true;
   
   // Simulate connection delay
-  setTimeout(() => {
+  const chatTimeout = setTimeout(() => {
     alert('Live chat feature would open here in a real implementation.');
     btn.innerHTML = originalText;
     btn.disabled = false;
-    isStartingLiveChat = false;
+    appState.isStartingLiveChat = false;
   }, 800);
-});
-
-document.getElementById('call-help-btn')?.addEventListener('click', () => {
-  if (isCallingHelpDesk) return;
   
-  isCallingHelpDesk = true;
+  appState.activeTimeouts.push(chatTimeout);
+}
+
+// Call help desk button handler
+function handleCallHelpDesk() {
+  if (appState.isCallingHelpDesk) return;
+  
+  appState.isCallingHelpDesk = true;
   const btn = document.getElementById('call-help-btn');
   const originalText = btn.innerHTML;
   
@@ -1416,57 +1513,112 @@ document.getElementById('call-help-btn')?.addEventListener('click', () => {
   btn.disabled = true;
   
   // Simulate dialing delay
-  setTimeout(() => {
+  const callTimeout = setTimeout(() => {
     alert('Calling help desk at +63 912 345 6789');
     btn.innerHTML = originalText;
     btn.disabled = false;
-    isCallingHelpDesk = false;
+    appState.isCallingHelpDesk = false;
   }, 800);
-});
+  
+  appState.activeTimeouts.push(callTimeout);
+}
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Set up navigation
+// ============================================
+// PAGE INITIALIZATION
+// ============================================
+
+function initializePage() {
+  if (appState.isInitialized) {
+    return;
+  }
+  
+  // Clean up any existing state
+  cleanupTimeouts();
+  cleanupEventListeners();
+  
+  // Initialize with cached cart count
+  const cachedCount = parseInt(sessionStorage.getItem('cartCount')) || 0;
+  updateBadgeUI(cachedCount);
+  
+  // Set up event listeners
+  addEventWithCleanup(menuToggle, 'click', toggleMobileMenu);
+  addEventWithCleanup(overlay, 'click', toggleMobileMenu);
+  
+  // Setup navigation
   setupNavigationLinks();
   updateActiveNavState();
   
-  // Update cart badge
-  updateCartBadge();
-  
-  // Handle page visibility changes
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      // Page became visible again, update cart
-      setTimeout(() => {
-        updateCartBadge();
-      }, 300);
-    }
-  });
-  
-  // Prevent rapid scrolling issues
-  let lastScrollTime = 0;
-  window.addEventListener('scroll', function() {
-    const currentTime = Date.now();
-    if (currentTime - lastScrollTime < 50) {
-      // Throttle rapid scrolling
-      return;
-    }
-    lastScrollTime = currentTime;
-  });
-  
-  // Prevent form double submission
-  document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function() {
-      const submitBtn = this.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        setTimeout(() => {
-          submitBtn.disabled = false;
-        }, 3000);
+  // Set up mobile menu link close handlers
+  mobileNav.querySelectorAll('a').forEach(link => {
+    addEventWithCleanup(link, 'click', () => {
+      if (mobileNav.classList.contains('active')) {
+        toggleMobileMenu();
       }
     });
   });
-});
+  
+  // Setup stars
+  initializeStars();
+  
+  // Setup form - use traditional form submission
+  addEventWithCleanup(form, 'submit', handleFormSubmit);
+  
+  // Setup action buttons
+  const liveChatBtn = document.getElementById('live-chat-btn');
+  const callHelpBtn = document.getElementById('call-help-btn');
+  
+  if (liveChatBtn) {
+    addEventWithCleanup(liveChatBtn, 'click', handleLiveChat);
+  }
+  
+  if (callHelpBtn) {
+    addEventWithCleanup(callHelpBtn, 'click', handleCallHelpDesk);
+  }
+  
+  // Fetch initial cart count
+  updateCartBadge();
+  
+  // Mark as initialized
+  appState.isInitialized = true;
+  
+  console.log('Contact page initialized successfully');
+}
+
+// ============================================
+// PAGE VISIBILITY AND CLEANUP
+// ============================================
+
+// Handle page visibility changes
+function handleVisibilityChange() {
+  if (!document.hidden) {
+    // Page became visible again, update cart
+    const visibilityTimeout = setTimeout(() => {
+      updateCartBadge();
+    }, 300);
+    
+    appState.activeTimeouts.push(visibilityTimeout);
+  }
+}
+
+// Clean up before page unload
+function handleBeforeUnload() {
+  cleanupTimeouts();
+  cleanupEventListeners();
+}
+
+// ============================================
+// EVENT LISTENERS SETUP
+// ============================================
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initializePage);
+
+// Set up visibility and unload handlers
+document.addEventListener('visibilitychange', handleVisibilityChange);
+window.addEventListener('beforeunload', handleBeforeUnload);
+
+// Periodic cart update (every 30 seconds)
+setInterval(updateCartBadge, 30000);
 </script>
 
 </body>
