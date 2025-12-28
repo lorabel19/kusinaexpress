@@ -825,7 +825,7 @@ footer {
   font-size: 14px;
 }
 
-/* --- Login Modal --- */
+/* --- Login Modal Styles --- */
 .login-modal {
   display: none;
   position: fixed;
@@ -833,49 +833,143 @@ footer {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   z-index: 9999;
   align-items: center;
   justify-content: center;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
   background: var(--surface-color);
   border-radius: var(--border-radius);
   padding: 40px;
-  max-width: 400px;
+  max-width: 420px;
   width: 90%;
   box-shadow: var(--shadow-heavy);
   text-align: center;
+  animation: modalSlideIn 0.3s ease;
 }
 
-.modal-content i {
+@keyframes modalSlideIn {
+  from { 
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-icon {
+  margin-bottom: 20px;
+}
+
+.modal-icon i {
   font-size: 48px;
   color: var(--primary-color);
-  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding: 15px;
+  border-radius: 50%;
+  border: 3px solid rgba(198, 40, 40, 0.1);
 }
 
 .modal-content h3 {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   color: var(--text-primary);
 }
 
 .modal-content p {
   color: var(--text-secondary);
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   line-height: 1.6;
+  font-size: 15px;
 }
 
 .modal-buttons {
   display: flex;
   gap: 15px;
   justify-content: center;
+  margin-top: 25px;
 }
 
 .modal-buttons .btn {
-  min-width: 120px;
+  min-width: 140px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Modal button specific styles */
+.modal-buttons .btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  border: none;
+}
+
+.modal-buttons .btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-dark), #E64A19);
+  transform: translateY(-2px);
+}
+
+.modal-buttons .btn-secondary {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--divider-color);
+}
+
+.modal-buttons .btn-secondary:hover {
+  background-color: var(--divider-color);
+  color: var(--text-primary);
+  border-color: var(--divider-color);
+}
+
+/* Responsive adjustments for modal */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 30px 25px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+  
+  .modal-buttons .btn {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .modal-icon i {
+    font-size: 42px;
+  }
+  
+  .modal-content h3 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 25px 20px;
+  }
+  
+  .modal-content h3 {
+    font-size: 20px;
+  }
+  
+  .modal-content p {
+    font-size: 14px;
+  }
 }
 
 /* --- Responsive Design --- */
@@ -1086,16 +1180,18 @@ footer {
 <!-- Login Modal -->
 <div class="login-modal" id="loginModal">
   <div class="modal-content">
-    <i class="fas fa-user-lock"></i>
+    <div class="modal-icon">
+      <i class="fas fa-lock"></i>
+    </div>
     <h3 id="modalTitle">Login Required</h3>
     <p id="modalMessage">You need to log in to access this feature. Sign in to continue.</p>
     <div class="modal-buttons">
-      <a href="{% url 'restaurant:login' %}" class="btn btn-primary">
-        <i class="fas fa-sign-in-alt"></i> Sign In
-      </a>
       <button class="btn btn-secondary" onclick="closeLoginModal()">
         <i class="fas fa-times"></i> Cancel
       </button>
+      <a href="{% url 'restaurant:login' %}" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i> Sign In Now
+      </a>
     </div>
   </div>
 </div>

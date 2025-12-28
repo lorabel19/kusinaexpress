@@ -807,7 +807,7 @@ body {
     </div>
     
     <!-- Date Filter Button (Visible when on delivered orders or All Orders with delivered filter) -->
-    {% if request.GET.status == 'delivered' or not request.GET.status %}
+    {% if request.GET.status == 'delivered' %}
     <button class="btn-date-filter" id="openDateFilter">
       <i class="fas fa-calendar-alt"></i> Filter by Date
     </button>
