@@ -28,7 +28,7 @@ body {
   min-height:100vh; 
   background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
   color: var(--text-primary);
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 /* Sidebar */
@@ -143,7 +143,7 @@ body {
   margin-left: var(--sidebar-width);
   padding: 32px;
   width: calc(100% - var(--sidebar-width));
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 /* Header */
@@ -192,6 +192,12 @@ body {
   gap: 12px;
   flex-wrap: wrap;
   flex: 1;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .btn-filter {
@@ -248,6 +254,29 @@ body {
   box-shadow: 0 4px 12px rgba(252, 191, 73, 0.3);
 }
 
+/* Export Button */
+.btn-export {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-export:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
 /* Modal Styles */
 .modal {
   display: none;
@@ -300,6 +329,102 @@ body {
   color: var(--primary);
 }
 
+/* Export Options */
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.export-option {
+  background: rgba(0,0,0,0.02);
+  border: 2px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.export-option:hover {
+  background: rgba(214, 40, 40, 0.05);
+  border-color: var(--primary);
+  transform: translateY(-4px);
+}
+
+.export-option.active {
+  background: rgba(214, 40, 40, 0.1);
+  border-color: var(--primary);
+}
+
+.export-option i {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: var(--primary);
+}
+
+.export-option h4 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.export-option p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Format Selection */
+.format-selection {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(0,0,0,0.02);
+  border-radius: 12px;
+}
+
+.format-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.format-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.format-option {
+  flex: 1;
+  min-width: 100px;
+}
+
+.format-option input[type="radio"] {
+  display: none;
+}
+
+.format-option label {
+  display: block;
+  padding: 12px;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.format-option input[type="radio"]:checked + label {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Date Filter Form */
 .date-filter-form {
   display: flex;
   flex-direction: column;
@@ -480,7 +605,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 0; /* Prevent overflow */
+  min-width: 0;
 }
 
 .detail-label {
@@ -495,7 +620,7 @@ body {
   font-size: 14px;
   color: var(--text-primary);
   font-weight: 500;
-  word-break: break-word; /* Prevent long text overflow */
+  word-break: break-word;
 }
 
 .order-amount {
@@ -695,13 +820,17 @@ body {
     align-items: stretch;
   }
   
-  .filter-buttons {
+  .filter-buttons, .filter-actions {
     width: 100%;
   }
   
   .modal-content {
     padding: 24px;
     width: 95%;
+  }
+  
+  .export-options {
+    grid-template-columns: 1fr;
   }
   
   .order-details {
@@ -732,16 +861,15 @@ body {
     flex-direction: column;
   }
   
-  .btn-filter {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-  
-  .btn-date-filter {
+  .btn-filter, .btn-date-filter, .btn-export {
     padding: 8px 16px;
     font-size: 13px;
     width: 100%;
     justify-content: center;
+  }
+  
+  .format-options {
+    flex-direction: column;
   }
 }
 </style>
@@ -773,8 +901,8 @@ body {
       <i class="fas fa-comments"></i> Feedback
     </a>
     <a href="{% url 'restaurant:admin-settings' %}">
-            <i class="fas fa-cog"></i> Settings
-        </a>
+      <i class="fas fa-cog"></i> Settings
+    </a>
     <a href="{% url 'restaurant:admin-logout' %}">
       <i class="fas fa-sign-out-alt"></i> Logout
     </a>
@@ -789,11 +917,15 @@ body {
     </h1>
   </div>
 
-  <!-- Filter Container with Status Buttons and Date Filter Button -->
+  <!-- Filter Container with Status Buttons, Date Filter, and Export -->
   <div class="filter-container">
     <div class="filter-buttons">   
       <a href="?status=pending" class="btn-filter {% if request.GET.status == 'pending' %}active{% endif %}">
         <i class="fas fa-clock"></i> Pending
+      </a>
+      <!-- CONFIRMED BUTTON ADDED HERE -->
+      <a href="?status=confirmed" class="btn-filter {% if request.GET.status == 'confirmed' %}active{% endif %}">
+        <i class="fas fa-check"></i> Confirmed
       </a>
       <a href="?status=preparing" class="btn-filter {% if request.GET.status == 'preparing' %}active{% endif %}">
         <i class="fas fa-fire"></i> Preparing
@@ -806,12 +938,19 @@ body {
       </a>
     </div>
     
-    <!-- Date Filter Button (Visible when on delivered orders or All Orders with delivered filter) -->
-    {% if request.GET.status == 'delivered' %}
-    <button class="btn-date-filter" id="openDateFilter">
-      <i class="fas fa-calendar-alt"></i> Filter by Date
-    </button>
-    {% endif %}
+    <!-- Right side buttons - SHOW ONLY FOR DELIVERED STATUS -->
+    <div class="filter-actions">
+      {% if request.GET.status == 'delivered' %}
+      <button class="btn-date-filter" id="openDateFilter">
+        <i class="fas fa-calendar-alt"></i> Filter by Date
+      </button>
+      
+      <!-- Export/Reports Button - SHOW ONLY FOR DELIVERED -->
+      <button class="btn-export" id="openExportModal">
+        <i class="fas fa-file-export"></i> Export Reports
+      </button>
+      {% endif %}
+    </div>
   </div>
 
   <!-- Date Filter Modal -->
@@ -850,6 +989,66 @@ body {
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Export Reports Modal - UPDATED WITH CURRENT FILTERS -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeExportModal">&times;</button>
+      
+      <div class="modal-header">
+        <h3><i class="fas fa-file-export"></i> Export Orders Report</h3>
+      </div>
+      
+      <!-- Export Options with CURRENT FILTERS -->
+      <div class="export-options">
+        <!-- Detailed Report Button -->
+        <div class="export-option" id="exportDetailed">
+          <i class="fas fa-file-alt"></i>
+          <h4>Detailed Report</h4>
+          <p>Export all displayed orders with full details</p>
+          <div class="format-options" style="margin-top: 10px;">
+            <a href="#" class="format-option-link" data-format="pdf" data-type="detailed">
+              <i class="fas fa-file-pdf"></i> PDF
+            </a>
+            <a href="#" class="format-option-link" data-format="excel" data-type="detailed">
+              <i class="fas fa-file-excel"></i> Excel
+            </a>
+            <a href="#" class="format-option-link" data-format="csv" data-type="detailed">
+              <i class="fas fa-file-csv"></i> CSV
+            </a>
+          </div>
+        </div>
+        
+        <!-- Individual Receipts Button -->
+        <div class="export-option" id="exportReceipts">
+          <i class="fas fa-receipt"></i>
+          <h4>Individual Receipts</h4>
+          <p>Download PDF receipts for displayed orders</p>
+          <div class="format-options" style="margin-top: 10px;">
+            <a href="#" class="format-option-link" data-format="pdf" data-type="receipts">
+              <i class="fas fa-file-pdf"></i> Download PDF Receipts
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Display current filters -->
+      <div style="margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.02); border-radius: 10px;">
+        <p style="margin: 0 0 10px 0; font-weight: 600; color: var(--text-secondary);">
+          <i class="fas fa-info-circle"></i> Current Filters:
+        </p>
+        <div id="currentFilters" style="font-size: 13px; color: var(--text-primary);">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="closeExportModal2">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1042,7 +1241,7 @@ const dateFilterForm = document.getElementById('dateFilterForm');
 const modalStartDate = document.getElementById('modal_start_date');
 const modalEndDate = document.getElementById('modal_end_date');
 
-// Open modal
+// Open date modal
 if (openDateFilterBtn) {
   openDateFilterBtn.addEventListener('click', () => {
     dateFilterModal.style.display = 'flex';
@@ -1060,17 +1259,16 @@ if (openDateFilterBtn) {
   });
 }
 
-// Close modal
+// Close date modal
 closeDateFilterBtn.addEventListener('click', () => {
   dateFilterModal.style.display = 'none';
 });
 
-// Clear filter - Redirect to current status or all orders
+// Clear date filter
 clearDateFilterBtn.addEventListener('click', () => {
   modalStartDate.value = '';
   modalEndDate.value = '';
   
-  // Get current status from URL or use empty for all orders
   const urlParams = new URLSearchParams(window.location.search);
   const currentStatus = urlParams.get('status');
   
@@ -1081,38 +1279,199 @@ clearDateFilterBtn.addEventListener('click', () => {
   }
 });
 
-// Close modal when clicking outside
+// Export Modal Logic - UPDATED TO USE CURRENT FILTERS
+const exportModal = document.getElementById('exportModal');
+const openExportModalBtn = document.getElementById('openExportModal');
+const closeExportModalBtn = document.getElementById('closeExportModal');
+const closeExportModalBtn2 = document.getElementById('closeExportModal2');
+const currentFiltersDiv = document.getElementById('currentFilters');
+
+// Open export modal
+if (openExportModalBtn) {
+  openExportModalBtn.addEventListener('click', () => {
+    console.log('Export button clicked');
+    
+    // Get current URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentStatus = urlParams.get('status') || 'delivered';
+    const startDate = urlParams.get('start_date');
+    const endDate = urlParams.get('end_date');
+    
+    // Display current filters
+    let filtersText = `<div><strong>Status:</strong> ${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}</div>`;
+    
+    if (startDate && endDate) {
+      filtersText += `<div><strong>Date Range:</strong> ${startDate} to ${endDate}</div>`;
+    } else {
+      filtersText += `<div><strong>Date Range:</strong> All dates</div>`;
+    }
+    
+    // Display order count
+    const orderCount = document.querySelectorAll('.order-card').length;
+    filtersText += `<div><strong>Orders to export:</strong> ${orderCount}</div>`;
+    
+    currentFiltersDiv.innerHTML = filtersText;
+    
+    exportModal.style.display = 'flex';
+  });
+}
+
+// Close export modal
+if (closeExportModalBtn) {
+  closeExportModalBtn.addEventListener('click', () => {
+    exportModal.style.display = 'none';
+  });
+}
+
+if (closeExportModalBtn2) {
+  closeExportModalBtn2.addEventListener('click', () => {
+    exportModal.style.display = 'none';
+  });
+}
+
+// Close modals when clicking outside
 window.addEventListener('click', (e) => {
   if (e.target === dateFilterModal) {
     dateFilterModal.style.display = 'none';
+  }
+  if (e.target === exportModal) {
+    exportModal.style.display = 'none';
   }
 });
 
 // Close modal with Escape key
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && dateFilterModal.style.display === 'flex') {
-    dateFilterModal.style.display = 'none';
+  if (e.key === 'Escape') {
+    if (dateFilterModal.style.display === 'flex') {
+      dateFilterModal.style.display = 'none';
+    }
+    if (exportModal.style.display === 'flex') {
+      exportModal.style.display = 'none';
+    }
   }
 });
 
-// Form submission
-dateFilterForm.addEventListener('submit', (e) => {
-  // Validate dates
-  if (modalStartDate.value && modalEndDate.value) {
-    const start = new Date(modalStartDate.value);
-    const end = new Date(modalEndDate.value);
-    
-    if (start > end) {
-      e.preventDefault();
-      alert('Start date cannot be later than end date.');
-      return;
+// Date validation for date filter
+if (dateFilterForm) {
+  dateFilterForm.addEventListener('submit', (e) => {
+    if (modalStartDate.value && modalEndDate.value) {
+      const start = new Date(modalStartDate.value);
+      const end = new Date(modalEndDate.value);
+      
+      if (start > end) {
+        e.preventDefault();
+        alert('Start date cannot be later than end date.');
+        return;
+      }
     }
-  }
+    
+    setTimeout(() => {
+      dateFilterModal.style.display = 'none';
+    }, 100);
+  });
+}
+
+// Handle export links - USES EXACT SAME FILTERS AS CURRENT PAGE
+document.addEventListener('DOMContentLoaded', function() {
+  // Get all export links
+  const exportLinks = document.querySelectorAll('.format-option-link');
   
-  // Close modal after submission
-  setTimeout(() => {
-    dateFilterModal.style.display = 'none';
-  }, 100);
+  exportLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const format = this.getAttribute('data-format');
+      const reportType = this.getAttribute('data-type');
+      
+      // Get current URL parameters - EXACT SAME AS PAGE
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Build export URL with EXACT SAME parameters
+      let exportUrl = "{% url 'restaurant:admin-export-orders' %}?";
+      
+      // Add ALL current filters from the page
+      let hasParams = false;
+      
+      // Add status
+      const status = urlParams.get('status');
+      if (status) {
+        exportUrl += `status=${status}&`;
+        hasParams = true;
+      } else if (window.location.href.includes('status=')) {
+        // Get status from URL if not in params
+        const url = new URL(window.location.href);
+        const statusParam = url.searchParams.get('status');
+        if (statusParam) {
+          exportUrl += `status=${statusParam}&`;
+          hasParams = true;
+        }
+      }
+      
+      // Add date filters
+      const startDate = urlParams.get('start_date');
+      const endDate = urlParams.get('end_date');
+      
+      if (startDate && endDate) {
+        exportUrl += `start_date=${startDate}&end_date=${endDate}&`;
+        hasParams = true;
+      } else if (window.location.href.includes('start_date=')) {
+        // Get dates from URL if not in params
+        const url = new URL(window.location.href);
+        const startDateParam = url.searchParams.get('start_date');
+        const endDateParam = url.searchParams.get('end_date');
+        if (startDateParam && endDateParam) {
+          exportUrl += `start_date=${startDateParam}&end_date=${endDateParam}&`;
+          hasParams = true;
+        }
+      }
+      
+      // If no parameters, still export delivered orders by default
+      if (!hasParams) {
+        exportUrl += 'status=delivered&';
+      }
+      
+      // Add format and report type
+      exportUrl += `format=${format}&report_type=${reportType}`;
+      
+      console.log('Export URL with current filters:', exportUrl);
+      
+      // Show loading message
+      alert(`Exporting ${document.querySelectorAll('.order-card').length} orders...`);
+      
+      // Open in new tab
+      window.open(exportUrl, '_blank');
+      
+      // Close modal
+      exportModal.style.display = 'none';
+    });
+  });
+  
+  // Style the format option links
+  const formatLinks = document.querySelectorAll('.format-option-link');
+  formatLinks.forEach(link => {
+    link.style.display = 'inline-block';
+    link.style.padding = '8px 12px';
+    link.style.margin = '4px';
+    link.style.background = 'rgba(214, 40, 40, 0.1)';
+    link.style.borderRadius = '6px';
+    link.style.color = 'var(--primary)';
+    link.style.textDecoration = 'none';
+    link.style.fontWeight = '500';
+    link.style.fontSize = '13px';
+    link.style.transition = 'all 0.3s ease';
+    
+    link.addEventListener('mouseenter', function() {
+      this.style.background = 'var(--primary)';
+      this.style.color = 'white';
+      this.style.transform = 'translateY(-2px)';
+    });
+    
+    link.addEventListener('mouseleave', function() {
+      this.style.background = 'rgba(214, 40, 40, 0.1)';
+      this.style.color = 'var(--primary)';
+      this.style.transform = 'translateY(0)';
+    });
+  });
 });
 </script>
 

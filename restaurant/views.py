@@ -927,6 +927,7 @@ def admin_orders(request):
 
     # Order by order_date
     orders = orders.order_by('-order_date')
+    orders = [order for order in orders if order.items.exists()]
 
     return render(
         request,
@@ -1350,3 +1351,923 @@ def submit_feedback_form(request):
         return JsonResponse({'message': 'Feedback submitted successfully!'}, status=201)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+# restaurant/views.py
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from datetime import datetime
+import csv
+from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+import openpyxl
+from .models import Orders, Deliveries
+
+def export_orders(request):
+    """Handle order export requests"""
+    try:
+        report_type = request.GET.get('report_type', 'detailed')
+        format_type = request.GET.get('format', 'pdf')
+        status = request.GET.get('status', 'delivered')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        
+        print(f"Export Parameters: status={status}, start_date={start_date}, end_date={end_date}, format={format_type}, report_type={report_type}")
+        
+        # Start with all orders
+        orders = Orders.objects.all()
+        
+        # Apply status filter based on delivery status
+        if status == 'delivered':
+            orders = orders.filter(deliveries__delivered_at__isnull=False)
+            print(f"Filtering delivered orders. Found: {orders.count()}")
+        elif status == 'out_for_delivery':
+            orders = orders.filter(deliveries__out_for_delivery_at__isnull=False, 
+                                   deliveries__delivered_at__isnull=True)
+        elif status == 'preparing':
+            orders = orders.filter(deliveries__preparing_at__isnull=False,
+                                   deliveries__out_for_delivery_at__isnull=True)
+        elif status == 'confirmed':
+            orders = orders.filter(deliveries__confirmed_at__isnull=False,
+                                   deliveries__preparing_at__isnull=True)
+        elif status == 'pending':
+            orders = orders.filter(deliveries__confirmed_at__isnull=True)
+        else:
+            # If no status specified, show all
+            pass
+        
+        # Apply date filter if provided - FIXED
+        if start_date and end_date:
+            # Convert string dates to datetime objects
+            from datetime import datetime
+            try:
+                start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+                end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
+                # Add time to end date to include the entire day
+                from datetime import timedelta
+                end_datetime = end_datetime + timedelta(days=1) - timedelta(seconds=1)
+                
+                print(f"Date filter range: {start_datetime} to {end_datetime}")
+                
+                if status == 'delivered':
+                    # For delivered orders, filter by delivered_at date
+                    orders = orders.filter(deliveries__delivered_at__range=[start_datetime, end_datetime])
+                    print(f"Filtered by delivered_at. Found: {orders.count()}")
+                else:
+                    # For other statuses, filter by order_date
+                    orders = orders.filter(order_date__range=[start_datetime, end_datetime])
+                    print(f"Filtered by order_date. Found: {orders.count()}")
+                    
+            except Exception as e:
+                print(f"Date parsing error: {str(e)}")
+                # Fallback to string comparison if datetime parsing fails
+                orders = orders.filter(order_date__date__range=[start_date, end_date])
+                print(f"Fallback date filter. Found: {orders.count()}")
+        
+        # Sort by order date (newest first)
+        orders = orders.order_by('-order_date')
+        
+        print(f"Total orders for export: {orders.count()}")
+        
+        # Debug: Print sample orders
+        sample_count = min(3, orders.count())
+        for i, order in enumerate(orders[:sample_count]):
+            delivery = order.deliveries_set.first() if hasattr(order, 'deliveries_set') and order.deliveries_set.exists() else None
+            print(f"Sample Order {i+1}: #{order.order_id}, Date: {order.order_date}, "
+                  f"Delivery Date: {delivery.delivered_at if delivery else 'None'}")
+        
+        if format_type == 'pdf':
+            if report_type == 'receipts':
+                print("Generating individual receipts PDF...")
+                return generate_individual_receipts_pdf(orders)
+            else:
+                print("Generating detailed PDF report...")
+                return generate_detailed_pdf_report(orders, report_type, status)
+        elif format_type == 'excel':
+            print("Generating Excel report...")
+            return generate_detailed_excel_report(orders, report_type, status)
+        elif format_type == 'csv':
+            print("Generating CSV report...")
+            return generate_detailed_csv_report(orders, report_type, status)
+        else:
+            print("Default: Generating detailed PDF report...")
+            return generate_detailed_pdf_report(orders, report_type, status)
+            
+    except Exception as e:
+        import traceback
+        print(f"Export error: {str(e)}")
+        print(traceback.format_exc())
+        return HttpResponse(f"Error generating report: {str(e)}", status=500)
+
+def generate_detailed_pdf_report(orders, report_type, status):
+    """Generate detailed PDF report with compact layout"""
+    try:
+        buffer = BytesIO()
+        
+        # Create PDF document with smaller margins
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib.units import inch
+        
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=letter,
+            leftMargin=0.4*inch,
+            rightMargin=0.4*inch,
+            topMargin=0.3*inch,
+            bottomMargin=0.3*inch
+        )
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        
+        # Compact Title style
+        title_style = ParagraphStyle(
+            'CompactTitle',
+            parent=styles['Heading1'],
+            fontSize=12,
+            textColor=colors.HexColor('#D62828'),
+            alignment=TA_CENTER,
+            spaceAfter=4
+        )
+        
+        # Compact Subtitle style
+        subtitle_style = ParagraphStyle(
+            'CompactSubtitle',
+            parent=styles['Normal'],
+            fontSize=7,
+            textColor=colors.gray,
+            alignment=TA_CENTER,
+            spaceAfter=6
+        )
+        
+        # Compact Order Header style
+        order_header_style = ParagraphStyle(
+            'CompactOrderHeader',
+            parent=styles['Heading2'],
+            fontSize=9,
+            textColor=colors.HexColor('#D62828'),
+            spaceAfter=2,
+            spaceBefore=4
+        )
+        
+        # Compact Label style
+        label_style = ParagraphStyle(
+            'CompactLabel',
+            parent=styles['Normal'],
+            fontSize=6,
+            textColor=colors.HexColor('#6C757D'),
+            spaceAfter=0
+        )
+        
+        # Compact Value style
+        value_style = ParagraphStyle(
+            'CompactValue',
+            parent=styles['Normal'],
+            fontSize=7,
+            textColor=colors.black,
+            spaceAfter=1
+        )
+        
+        # Compact Item style
+        item_style = ParagraphStyle(
+            'CompactItem',
+            parent=styles['Normal'],
+            fontSize=6,
+            leftIndent=8,
+            spaceAfter=0
+        )
+        
+        # Title
+        status_text = status.upper().replace('_', ' ') if status else 'ALL'
+        title = Paragraph(f"KUSINAEXPRESS - {status_text} ORDERS", title_style)
+        elements.append(title)
+        
+        # Subtitle
+        subtitle = Paragraph(f"Generated: {datetime.now().strftime('%m/%d/%Y %I:%M%p')}", subtitle_style)
+        elements.append(subtitle)
+        
+        # Order count and total
+        total_amount = sum(order.total_amount for order in orders)
+        count_text = Paragraph(f"Orders: {orders.count()} | Total: ₱{total_amount:,.2f}", subtitle_style)
+        elements.append(count_text)
+        
+        # Add minimal space
+        elements.append(Spacer(1, 8))
+        
+        if orders.count() == 0:
+            no_orders = Paragraph("No orders found.", 
+                                 ParagraphStyle('NoOrders', parent=styles['Normal'], 
+                                               fontSize=8, alignment=TA_CENTER, textColor=colors.gray))
+            elements.append(no_orders)
+            doc.build(elements)
+            buffer.seek(0)
+            filename = f"orders_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+            response = HttpResponse(buffer, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        
+        # Process each order
+        for i, order in enumerate(orders):
+            try:
+                delivery = order.deliveries_set.first() if hasattr(order, 'deliveries_set') and order.deliveries_set.exists() else None
+                
+                # Order Header
+                order_header = Paragraph(f"<b>#{order.order_id}</b>", order_header_style)
+                elements.append(order_header)
+                
+                # Create a compact details table
+                details_data = []
+                
+                # Status
+                if delivery and hasattr(delivery, 'delivered_at') and delivery.delivered_at:
+                    status_text = "DELIVERED"
+                    status_color = colors.green
+                elif delivery and hasattr(delivery, 'out_for_delivery_at') and delivery.out_for_delivery_at:
+                    status_text = "OUT FOR DELIVERY"
+                    status_color = colors.blue
+                elif delivery and hasattr(delivery, 'preparing_at') and delivery.preparing_at:
+                    status_text = "PREPARING"
+                    status_color = colors.purple
+                elif delivery and hasattr(delivery, 'confirmed_at') and delivery.confirmed_at:
+                    status_text = "CONFIRMED"
+                    status_color = colors.blue
+                else:
+                    status_text = "PENDING"
+                    status_color = colors.orange
+                
+                details_data.append(['Status:', f"<font color='{status_color}'><b>{status_text}</b></font>"])
+                
+                # Customer
+                customer_name = f"{order.user.first_name or ''} {order.user.last_name or ''}".strip()
+                if customer_name:
+                    details_data.append(['Customer:', customer_name[:20] + '..' if len(customer_name) > 20 else customer_name])
+                
+                # Order Date (compact format)
+                order_date = order.order_date.strftime('%m/%d %H:%M') if hasattr(order, 'order_date') else "N/A"
+                details_data.append(['Date:', order_date])
+                
+                # Delivery Address (truncated)
+                if delivery and hasattr(delivery, 'delivery_address') and delivery.delivery_address:
+                    address = delivery.delivery_address
+                    if len(address) > 25:
+                        address = address[:22] + "..."
+                    details_data.append(['Address:', address])
+                
+                # Contact Number
+                if delivery and hasattr(delivery, 'contact_number') and delivery.contact_number:
+                    details_data.append(['Contact:', delivery.contact_number])
+                
+                # Payment Method
+                payment_method = "COD"
+                if hasattr(order, 'payments_set') and order.payments_set.exists():
+                    payment = order.payments_set.first()
+                    if payment and hasattr(payment, 'payment_method'):
+                        payment_method = payment.payment_method or "COD"
+                details_data.append(['Payment:', payment_method.upper()[:8]])
+                
+                # Total Amount
+                details_data.append(['Total:', f"<b>₱{order.total_amount:,.2f}</b>"])
+                
+                # Delivery Date
+                if delivery and hasattr(delivery, 'delivered_at') and delivery.delivered_at:
+                    details_data.append(['Delivered:', delivery.delivered_at.strftime('%m/%d %H:%M')])
+                
+                # Create details table
+                details_table = Table(details_data, colWidths=[35, 165])
+                details_table.setStyle(TableStyle([
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 6),
+                    ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#6C757D')),
+                    ('TEXTCOLOR', (1, 0), (1, -1), colors.black),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 1),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                    ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ]))
+                elements.append(details_table)
+                
+                # Order Items (compact)
+                if hasattr(order, 'items') and order.items.exists():
+                    items_text = ""
+                    item_count = min(2, order.items.count())
+                    for j, item in enumerate(order.items.all()[:item_count]):
+                        item_name = item.item.name if hasattr(item.item, 'name') else "Item"
+                        quantity = item.quantity if hasattr(item, 'quantity') else 0
+                        items_text += f"{item_name[:18]}{'..' if len(item_name) > 18 else ''}×{quantity}"
+                        if j < item_count - 1:
+                            items_text += ", "
+                    
+                    if order.items.count() > 2:
+                        items_text += f" +{order.items.count() - 2} more"
+                    
+                    items_display = Paragraph(f"<font size=5>Items: {items_text}</font>", item_style)
+                    elements.append(items_display)
+                
+                # Notes (if any, very compact)
+                if delivery and hasattr(delivery, 'notes') and delivery.notes and len(delivery.notes.strip()) > 0:
+                    notes = delivery.notes.strip()
+                    if len(notes) > 30:
+                        notes = notes[:27] + "..."
+                    notes_display = Paragraph(f"<font size=5>Note: {notes}</font>", item_style)
+                    elements.append(notes_display)
+                
+                # Add minimal separator
+                if i < len(orders) - 1:
+                    elements.append(Spacer(1, 3))
+                    elements.append(Paragraph("─" * 45, 
+                                            ParagraphStyle('Separator', parent=styles['Normal'], 
+                                                         fontSize=5, alignment=TA_CENTER, textColor=colors.lightgrey)))
+                    elements.append(Spacer(1, 3))
+                
+            except Exception as e:
+                print(f"Error processing order {order.order_id}: {str(e)}")
+                continue
+        
+        # Add final summary
+        elements.append(Spacer(1, 5))
+        end_mark = Paragraph("─ END OF REPORT ─", 
+                            ParagraphStyle('EndMark', parent=styles['Normal'], 
+                                         fontSize=7, alignment=TA_CENTER, textColor=colors.gray))
+        elements.append(end_mark)
+        
+        # Build PDF
+        doc.build(elements)
+        buffer.seek(0)
+        
+        status_text_for_filename = status if status else 'all'
+        filename = f"{status_text_for_filename}_orders_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
+    except Exception as e:
+        import traceback
+        print(f"PDF generation error: {str(e)}")
+        print(traceback.format_exc())
+        return HttpResponse(f"Error generating PDF: {str(e)}", status=500)
+
+
+def generate_individual_receipts_pdf(orders):
+    """Generate individual receipts PDF (compact one per page)"""
+    try:
+        if orders.count() == 0:
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            elements = []
+            styles = getSampleStyleSheet()
+            
+            title = Paragraph("No Orders Found", 
+                             ParagraphStyle('Title', parent=styles['Heading1'], 
+                                          fontSize=14, alignment=TA_CENTER, textColor=colors.red))
+            elements.append(title)
+            
+            subtitle = Paragraph("No orders to generate receipts.", 
+                               ParagraphStyle('Subtitle', parent=styles['Normal'], 
+                                            fontSize=9, alignment=TA_CENTER, textColor=colors.gray))
+            elements.append(subtitle)
+            
+            doc.build(elements)
+            buffer.seek(0)
+            filename = f"receipts_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+            response = HttpResponse(buffer, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        
+        buffer = BytesIO()
+        
+        # Create PDF document with compact margins
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=letter,
+            leftMargin=0.4*inch,
+            rightMargin=0.4*inch,
+            topMargin=0.3*inch,
+            bottomMargin=0.3*inch
+        )
+        elements = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        
+        # Compact Receipt title style
+        receipt_title_style = ParagraphStyle(
+            'CompactReceiptTitle',
+            parent=styles['Heading1'],
+            fontSize=14,
+            textColor=colors.HexColor('#D62828'),
+            alignment=TA_CENTER,
+            spaceAfter=4
+        )
+        
+        # Compact Store info style
+        store_style = ParagraphStyle(
+            'CompactStoreInfo',
+            parent=styles['Normal'],
+            fontSize=8,
+            alignment=TA_CENTER,
+            textColor=colors.gray,
+            spaceAfter=10
+        )
+        
+        # Compact Order header style
+        order_header_style = ParagraphStyle(
+            'CompactOrderHeader',
+            parent=styles['Heading2'],
+            fontSize=11,
+            textColor=colors.HexColor('#D62828'),
+            spaceAfter=6
+        )
+        
+        # Compact Label style
+        label_style = ParagraphStyle(
+            'CompactReceiptLabel',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.HexColor('#6C757D'),
+            spaceAfter=1
+        )
+        
+        # Compact Value style
+        value_style = ParagraphStyle(
+            'CompactReceiptValue',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=colors.black,
+            spaceAfter=4
+        )
+        
+        # Process each order as individual receipt
+        for order_index, order in enumerate(orders):
+            try:
+                delivery = order.deliveries_set.first() if hasattr(order, 'deliveries_set') and order.deliveries_set.exists() else None
+                
+                # Add page break except for first receipt
+                if order_index > 0:
+                    elements.append(PageBreak())
+                
+                # Receipt Header
+                receipt_title = Paragraph("KUSINAEXPRESS", receipt_title_style)
+                elements.append(receipt_title)
+                
+                store_info = Paragraph("RECEIPT", store_style)
+                elements.append(store_info)
+                
+                elements.append(Spacer(1, 5))
+                
+                # Order Info
+                order_header = Paragraph(f"Order #{order.order_id}", order_header_style)
+                elements.append(order_header)
+                
+                # Status
+                if delivery and hasattr(delivery, 'delivered_at') and delivery.delivered_at:
+                    status = Paragraph("<b><font color='green'>✓ DELIVERED</font></b>", value_style)
+                elif delivery and hasattr(delivery, 'out_for_delivery_at') and delivery.out_for_delivery_at:
+                    status = Paragraph("<b><font color='blue'>OUT FOR DELIVERY</font></b>", value_style)
+                elif delivery and hasattr(delivery, 'preparing_at') and delivery.preparing_at:
+                    status = Paragraph("<b><font color='purple'>PREPARING</font></b>", value_style)
+                elif delivery and hasattr(delivery, 'confirmed_at') and delivery.confirmed_at:
+                    status = Paragraph("<b><font color='blue'>CONFIRMED</font></b>", value_style)
+                else:
+                    status = Paragraph("<b><font color='orange'>PENDING</font></b>", value_style)
+                
+                elements.append(status)
+                
+                elements.append(Spacer(1, 8))
+                
+                # Create compact details table
+                details_data = []
+                
+                # Customer Info
+                customer_name = f"{order.user.first_name or ''} {order.user.last_name or ''}".strip()
+                details_data.append(['Customer:', customer_name or 'Guest'])
+                
+                # Order Date
+                order_date = order.order_date.strftime('%b %d, %Y %I:%M %p') if hasattr(order, 'order_date') else "N/A"
+                details_data.append(['Date:', order_date])
+                
+                # Delivery Address
+                if delivery and hasattr(delivery, 'delivery_address'):
+                    details_data.append(['Address:', delivery.delivery_address or '-'])
+                
+                # Contact Number
+                if delivery and hasattr(delivery, 'contact_number'):
+                    details_data.append(['Contact:', delivery.contact_number or '-'])
+                
+                # Create details table
+                details_table = Table(details_data, colWidths=[50, 150])
+                details_table.setStyle(TableStyle([
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#6C757D')),
+                    ('TEXTCOLOR', (1, 0), (1, -1), colors.black),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                ]))
+                elements.append(details_table)
+                
+                elements.append(Spacer(1, 10))
+                
+                # Order Items Table (compact)
+                items_data = [['Item', 'Qty', 'Price', 'Total']]
+                total_amount = 0
+                
+                if hasattr(order, 'items') and order.items.exists():
+                    for item in order.items.all():
+                        item_name = item.item.name if hasattr(item.item, 'name') else "Item"
+                        quantity = item.quantity if hasattr(item, 'quantity') else 0
+                        price = item.item.price if hasattr(item.item, 'price') else 0
+                        item_total = price * quantity
+                        total_amount += item_total
+                        
+                        # Truncate long item names
+                        if len(item_name) > 25:
+                            item_name = item_name[:22] + "..."
+                        
+                        items_data.append([
+                            item_name,
+                            f"×{quantity}",
+                            f"₱{price:,.2f}",
+                            f"₱{item_total:,.2f}"
+                        ])
+                else:
+                    items_data.append(['No items', '', '', ''])
+                
+                # Create table
+                table = Table(items_data, colWidths=[150, 30, 60, 60])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#D62828')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 8),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.lightgrey),
+                    ('ALIGN', (2, 1), (-1, -1), 'RIGHT'),
+                ]))
+                
+                elements.append(table)
+                elements.append(Spacer(1, 10))
+                
+                # Total Amount (compact)
+                total_text = Paragraph(f"<b>TOTAL: ₱{total_amount:,.2f}</b>", 
+                                      ParagraphStyle('TotalStyle', parent=styles['Normal'], 
+                                                   fontSize=12, textColor=colors.HexColor('#D62828'),
+                                                   alignment=TA_RIGHT))
+                elements.append(total_text)
+                
+                # Payment Method
+                payment_method = "COD"
+                if hasattr(order, 'payments_set') and order.payments_set.exists():
+                    payment = order.payments_set.first()
+                    if payment and hasattr(payment, 'payment_method'):
+                        payment_method = payment.payment_method or "COD"
+                
+                payment_info = Paragraph(f"<b>Payment:</b> {payment_method.upper()}", value_style)
+                elements.append(payment_info)
+                
+                # Delivered Date
+                if delivery and hasattr(delivery, 'delivered_at') and delivery.delivered_at:
+                    delivered_info = Paragraph(f"<b>Delivered:</b> {delivery.delivered_at.strftime('%b %d, %Y %I:%M %p')}", value_style)
+                    elements.append(delivered_info)
+                
+                # Notes (if any)
+                if delivery and hasattr(delivery, 'notes') and delivery.notes:
+                    notes = delivery.notes
+                    if len(notes) > 60:
+                        notes = notes[:57] + "..."
+                    notes_info = Paragraph(f"<b>Note:</b> {notes}", 
+                                          ParagraphStyle('Notes', parent=styles['Normal'], fontSize=8))
+                    elements.append(notes_info)
+                
+                elements.append(Spacer(1, 15))
+                
+                # Compact Footer
+                footer = Paragraph("Thank you for ordering!<br/>Contact: (02) 1234-5678<br/>Email: support@kusinaexpress.com", 
+                                  ParagraphStyle('CompactFooter', parent=styles['Normal'], 
+                                               fontSize=7, alignment=TA_CENTER, textColor=colors.gray))
+                elements.append(footer)
+                
+            except Exception as e:
+                print(f"Error processing order {order.order_id} for receipt: {str(e)}")
+                continue
+        
+        # Build PDF
+        doc.build(elements)
+        buffer.seek(0)
+        
+        filename = f"receipts_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
+    except Exception as e:
+        import traceback
+        print(f"Individual receipts PDF error: {str(e)}")
+        print(traceback.format_exc())
+        return HttpResponse(f"Error generating individual receipts PDF: {str(e)}", status=500)
+
+
+def generate_detailed_excel_report(orders, report_type, status):
+    """Generate detailed Excel report with compact layout"""
+    try:
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        status_text = status if status else 'all'
+        filename = f"{status_text}_orders_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        wb = Workbook()
+        ws = wb.active
+        ws.title = f"{status_text[:20]} Orders"
+        
+        # Define compact styles
+        header_font = Font(bold=True, size=10, color='FFFFFF')
+        header_fill = PatternFill(start_color='D62828', end_color='D62828', fill_type='solid')
+        title_font = Font(bold=True, size=11, color='D62828')
+        compact_font = Font(size=9)
+        bold_font = Font(bold=True, size=9)
+        amount_font = Font(bold=True, size=9, color='D62828')
+        
+        # Thin border for compact cells
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Company Header (compact)
+        ws.merge_cells('A1:H1')
+        ws['A1'] = f"KUSINAEXPRESS - {status_text.upper().replace('_', ' ')} ORDERS"
+        ws['A1'].font = title_font
+        ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+        
+        ws.merge_cells('A2:H2')
+        ws['A2'] = f"Report: {datetime.now().strftime('%m/%d/%Y %I:%M%p')}"
+        ws['A2'].alignment = Alignment(horizontal='center', vertical='center')
+        
+        ws.merge_cells('A3:H3')
+        total_amount = sum(order.total_amount for order in orders)
+        ws['A3'] = f"Orders: {orders.count()} | Total: ₱{total_amount:,.2f}"
+        ws['A3'].alignment = Alignment(horizontal='center', vertical='center')
+        
+        row_num = 5
+        
+        if orders.count() == 0:
+            ws.merge_cells(f'A{row_num}:H{row_num}')
+            ws[f'A{row_num}'] = "No orders found."
+            ws[f'A{row_num}'].alignment = Alignment(horizontal='center')
+            ws[f'A{row_num}'].font = Font(bold=True, color='FF0000')
+            
+        # Create headers for compact table
+        headers = ['Order#', 'Customer', 'Date', 'Status', 'Items', 'Address', 'Payment', 'Total']
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=row_num, column=col_num, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            cell.border = thin_border
+        
+        row_num += 1
+        
+        # Add each order as a compact row
+        for order in orders:
+            try:
+                delivery = order.deliveries_set.first()
+                
+                # Customer name (compact)
+                customer_name = f"{order.user.first_name or ''} {order.user.last_name or ''}".strip()
+                if not customer_name:
+                    customer_name = "Guest"
+                if len(customer_name) > 20:
+                    customer_name = customer_name[:18] + ".."
+                
+                # Order date (compact)
+                order_date = order.order_date.strftime('%m/%d %H:%M') if hasattr(order, 'order_date') else "N/A"
+                
+                # Status
+                if delivery and delivery.delivered_at:
+                    status_text = "DELIVERED"
+                elif delivery and delivery.out_for_delivery_at:
+                    status_text = "OUT FOR DELIVERY"
+                elif delivery and delivery.preparing_at:
+                    status_text = "PREPARING"
+                elif delivery and delivery.confirmed_at:
+                    status_text = "CONFIRMED"
+                else:
+                    status_text = "PENDING"
+                
+                # Items count
+                if hasattr(order, 'items') and order.items.exists():
+                    items_count = order.items.count()
+                    items_text = f"{items_count} item{'s' if items_count != 1 else ''}"
+                else:
+                    items_text = "0 items"
+                
+                # Delivery Address (truncated)
+                address = "-"
+                if delivery and delivery.delivery_address:
+                    address = delivery.delivery_address
+                    if len(address) > 25:
+                        address = address[:23] + ".."
+                
+                # Payment Method
+                payment_method = "COD"
+                if hasattr(order, 'payments_set') and order.payments_set.exists():
+                    payment = order.payments_set.first()
+                    if payment and hasattr(payment, 'payment_method'):
+                        payment_method = payment.payment_method or "COD"
+                payment_text = payment_method.upper()[:10]
+                
+                # Create row data
+                row_data = [
+                    f"#{order.order_id}",
+                    customer_name,
+                    order_date,
+                    status_text,
+                    items_text,
+                    address,
+                    payment_text,
+                    f"₱{order.total_amount:,.2f}"
+                ]
+                
+                # Write row
+                for col_num, value in enumerate(row_data, 1):
+                    cell = ws.cell(row=row_num, column=col_num, value=value)
+                    cell.font = compact_font
+                    cell.border = thin_border
+                    cell.alignment = Alignment(vertical='center')
+                    
+                    # Right align total column
+                    if col_num == 8:
+                        cell.alignment = Alignment(horizontal='right', vertical='center')
+                        cell.font = amount_font
+                    # Center align status and items columns
+                    elif col_num in [4, 5, 7]:
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                
+                row_num += 1
+                
+                # Add order details in next row (optional, comment out for ultra-compact)
+                notes = ""
+                if delivery and delivery.notes and delivery.notes.strip():
+                    notes = delivery.notes.strip()
+                    if len(notes) > 40:
+                        notes = notes[:38] + ".."
+                
+                if notes:
+                    ws.merge_cells(f'A{row_num}:H{row_num}')
+                    note_cell = ws.cell(row=row_num, column=1, value=f"Note: {notes}")
+                    note_cell.font = Font(size=8, italic=True, color='666666')
+                    note_cell.alignment = Alignment(horizontal='left')
+                    row_num += 1
+                
+                # Add minimal spacing
+                ws.row_dimensions[row_num].height = 5
+                row_num += 1
+                
+            except Exception as e:
+                print(f"Error processing order {order.order_id} for Excel: {str(e)}")
+                continue
+        
+        # Auto-adjust column widths for compactness
+        column_widths = [8, 20, 12, 12, 8, 25, 10, 12]
+        for i, width in enumerate(column_widths, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = width
+        
+        # Freeze header row
+        ws.freeze_panes = 'A6'
+        
+        wb.save(response)
+        return response
+        
+    except Exception as e:
+        import traceback
+        print(f"Excel generation error: {str(e)}")
+        print(traceback.format_exc())
+        return HttpResponse(f"Error generating Excel: {str(e)}", status=500)
+
+
+def generate_detailed_csv_report(orders, report_type, status):
+    """Generate detailed CSV report with compact format"""
+    try:
+        response = HttpResponse(content_type='text/csv')
+        status_text = status if status else 'all'
+        filename = f"{status_text}_orders_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        writer = csv.writer(response)
+        
+        # Write compact header
+        status_text = status.upper().replace('_', ' ') if status else 'ALL'
+        writer.writerow([f"KUSINAEXPRESS - {status_text} ORDERS"])
+        writer.writerow([f"Generated: {datetime.now().strftime('%m/%d/%Y %I:%M%p')}"])
+        
+        total_amount = sum(order.total_amount for order in orders)
+        writer.writerow([f"Orders: {orders.count()}, Total: ₱{total_amount:,.2f}"])
+        writer.writerow([])
+        
+        if orders.count() == 0:
+            writer.writerow(["No orders found."])
+            return response
+        
+        # Write compact column headers
+        writer.writerow(['Order#', 'Customer', 'Date', 'Status', 'Items', 'Address', 'Payment', 'Total', 'Notes'])
+        
+        for order in orders:
+            try:
+                delivery = order.deliveries_set.first()
+                
+                # Customer name (compact)
+                customer_name = f"{order.user.first_name or ''} {order.user.last_name or ''}".strip()
+                if not customer_name:
+                    customer_name = "Guest"
+                
+                # Order date (compact)
+                order_date = order.order_date.strftime('%m/%d %H:%M') if hasattr(order, 'order_date') else "N/A"
+                
+                # Status
+                if delivery and delivery.delivered_at:
+                    status_text = "DELIVERED"
+                elif delivery and delivery.out_for_delivery_at:
+                    status_text = "OUT FOR DELIVERY"
+                elif delivery and delivery.preparing_at:
+                    status_text = "PREPARING"
+                elif delivery and delivery.confirmed_at:
+                    status_text = "CONFIRMED"
+                else:
+                    status_text = "PENDING"
+                
+                # Items count
+                if hasattr(order, 'items') and order.items.exists():
+                    items_count = order.items.count()
+                    items_text = f"{items_count} item{'s' if items_count != 1 else ''}"
+                else:
+                    items_text = "0 items"
+                
+                # Delivery Address (truncated)
+                address = "-"
+                if delivery and delivery.delivery_address:
+                    address = delivery.delivery_address
+                    if len(address) > 30:
+                        address = address[:28] + ".."
+                
+                # Payment Method
+                payment_method = "COD"
+                if hasattr(order, 'payments_set') and order.payments_set.exists():
+                    payment = order.payments_set.first()
+                    if payment and hasattr(payment, 'payment_method'):
+                        payment_method = payment.payment_method or "COD"
+                payment_text = payment_method.upper()
+                
+                # Notes (truncated)
+                notes = ""
+                if delivery and delivery.notes and delivery.notes.strip():
+                    notes = delivery.notes.strip()
+                    if len(notes) > 30:
+                        notes = notes[:28] + ".."
+                
+                # Create compact row
+                row = [
+                    f"#{order.order_id}",
+                    customer_name,
+                    order_date,
+                    status_text,
+                    items_text,
+                    address,
+                    payment_text,
+                    f"₱{order.total_amount:,.2f}",
+                    notes
+                ]
+                
+                writer.writerow(row)
+                
+            except Exception as e:
+                print(f"Error processing order {order.order_id} for CSV: {str(e)}")
+                continue
+        
+        # Add summary row
+        writer.writerow([])
+        writer.writerow(['SUMMARY', f'Total Orders: {orders.count()}', f'Total Amount: ₱{total_amount:,.2f}'])
+        
+        return response
+        
+    except Exception as e:
+        import traceback
+        print(f"CSV generation error: {str(e)}")
+        print(traceback.format_exc())
+        return HttpResponse(f"Error generating CSV: {str(e)}", status=500)

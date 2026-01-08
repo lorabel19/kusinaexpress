@@ -1600,7 +1600,7 @@ function initializeOrderTracking() {
   // Fetch order status on load and set interval
   if (orderId) {
     fetchOrderStatus();
-    const orderInterval = setInterval(fetchOrderStatus, 10000); // Update every 10 seconds
+    const orderInterval = setInterval(fetchOrderStatus, 5000); // Update every 10 seconds
     appState.activeTimeouts.push(orderInterval);
   }
 }

@@ -74,6 +74,7 @@ urlpatterns = [
     path('admin-edit-admin/', views.edit_admin, name='edit-admin'),
     path('admin-delete-admin/', views.delete_admin, name='delete-admin'),
     path('admin-settings/', views.admin_settings, name='admin-settings'),
+    path('export-orders/', views.export_orders, name='admin-export-orders'),
     
     # --- API Endpoints ---
     path('api/', include(router.urls)),  # DRF Menu API
