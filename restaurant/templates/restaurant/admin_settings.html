@@ -298,6 +298,75 @@
             color: var(--primary);
         }
 
+        /* Password Input Wrapper */
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-input-wrapper .form-control {
+            padding-right: 50px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease;
+            font-size: 18px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .password-toggle:focus {
+            outline: none;
+        }
+
+        /* Adjust form help for password fields */
+        .password-section .form-help {
+            margin-left: 0;
+        }
+
+        /* Accessibility improvements */
+        .password-toggle:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .password-toggle[aria-label]::after {
+            content: attr(aria-label);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+            margin-bottom: 5px;
+        }
+
+        .password-toggle:hover[aria-label]::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
         /* Password Section */
         .password-section {
             background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
@@ -335,7 +404,6 @@
             border-top: 1px solid rgba(0,0,0,0.08);
             flex-wrap: wrap;
         }
-        
 
         .btn {
             padding: 14px 28px;
@@ -344,7 +412,6 @@
             font-weight: 600;
             border: none;
             cursor: pointer;
-            
             display: flex;
             align-items: center;
             gap: 10px;
@@ -527,8 +594,7 @@
         <h1><i class="fas fa-cog"></i> Admin Settings</h1>
     </div>
 
-        
-
+    <div class="settings-container">
         <div class="profile-header">
             <div class="profile-avatar">
                 <i class="fas fa-user-shield"></i>
@@ -589,13 +655,18 @@
                         <label class="form-label" for="current_password">
                             <i class="fas fa-key"></i> Current Password
                         </label>
-                        <input 
-                            type="password" 
-                            id="current_password" 
-                            name="current_password" 
-                            class="form-control"
-                            placeholder="Enter current password"
-                        >
+                        <div class="password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="current_password" 
+                                name="current_password" 
+                                class="form-control"
+                                placeholder="Enter current password"
+                            >
+                            <button type="button" class="password-toggle" data-target="current_password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -604,13 +675,18 @@
                         <label class="form-label" for="new_password">
                             <i class="fas fa-key"></i> New Password
                         </label>
-                        <input 
-                            type="password" 
-                            id="new_password" 
-                            name="new_password" 
-                            class="form-control"
-                            placeholder="Enter new password"
-                        >
+                        <div class="password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="new_password" 
+                                name="new_password" 
+                                class="form-control"
+                                placeholder="Enter new password"
+                            >
+                            <button type="button" class="password-toggle" data-target="new_password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                         <div class="form-help">
                             <i class="fas fa-info-circle"></i> Must be at least 8 characters
                         </div>
@@ -620,13 +696,18 @@
                         <label class="form-label" for="confirm_password">
                             <i class="fas fa-key"></i> Confirm Password
                         </label>
-                        <input 
-                            type="password" 
-                            id="confirm_password" 
-                            name="confirm_password" 
-                            class="form-control"
-                            placeholder="Confirm new password"
-                        >
+                        <div class="password-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="confirm_password" 
+                                name="confirm_password" 
+                                class="form-control"
+                                placeholder="Confirm new password"
+                            >
+                            <button type="button" class="password-toggle" data-target="confirm_password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -671,6 +752,43 @@
     if (window.innerWidth <= 768) {
         sidebar.classList.add('mobile-hidden');
     }
+
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle').forEach(toggle => {
+        // Set initial aria-label
+        toggle.setAttribute('aria-label', 'Show password');
+        
+        toggle.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                this.setAttribute('aria-label', 'Hide password');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                this.setAttribute('aria-label', 'Show password');
+            }
+            
+            // Focus back on the input
+            passwordInput.focus();
+        });
+    });
+
+    // Optional: Add keyboard support
+    document.querySelectorAll('.password-toggle').forEach(toggle => {
+        toggle.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
 
     // Form validation
     document.querySelector('form').addEventListener('submit', function(e) {

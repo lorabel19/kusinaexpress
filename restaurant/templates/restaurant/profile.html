@@ -674,6 +674,34 @@ main {
   box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
 }
 
+/* Password input wrapper for toggle button */
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  transition: var(--transition);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
+  background: rgba(198, 40, 40, 0.1);
+}
+
 .form-row {
   display: flex;
   gap: 15px;
@@ -1418,19 +1446,34 @@ footer {
       
       <div class="form-group">
         <label for="currentPassword">Current Password</label>
-        <input type="password" id="currentPassword" name="current_password" required>
+        <div class="password-input-wrapper">
+          <input type="password" id="currentPassword" name="current_password" required>
+          <button type="button" class="password-toggle" id="toggleCurrentPassword" aria-label="Show password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
       </div>
       
       <div class="form-group">
         <label for="newPassword">New Password</label>
-        <input type="password" id="newPassword" name="new_password" required>
+        <div class="password-input-wrapper">
+          <input type="password" id="newPassword" name="new_password" required>
+          <button type="button" class="password-toggle" id="toggleNewPassword" aria-label="Show password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
         <div class="password-strength" id="passwordStrength"></div>
         <small style="color: var(--text-secondary);">Password must be at least 8 characters with uppercase, lowercase, number, and special character.</small>
       </div>
       
       <div class="form-group">
         <label for="confirmPassword">Confirm New Password</label>
-        <input type="password" id="confirmPassword" name="confirm_password" required>
+        <div class="password-input-wrapper">
+          <input type="password" id="confirmPassword" name="confirm_password" required>
+          <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Show password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
         <div id="passwordMatch" style="margin-top: 5px; font-size: 12px;"></div>
       </div>
       
@@ -1827,6 +1870,48 @@ function checkPasswordStrength(password) {
   return { strength, text };
 }
 
+// Toggle password visibility
+function setupPasswordVisibility() {
+  // Toggle current password visibility
+  const toggleCurrentBtn = document.getElementById('toggleCurrentPassword');
+  const currentPasswordInput = document.getElementById('currentPassword');
+  
+  if (toggleCurrentBtn && currentPasswordInput) {
+    addEventWithCleanup(toggleCurrentBtn, 'click', function() {
+      const isPassword = currentPasswordInput.type === 'password';
+      currentPasswordInput.type = isPassword ? 'text' : 'password';
+      this.innerHTML = isPassword ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+      this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    });
+  }
+  
+  // Toggle new password visibility
+  const toggleNewBtn = document.getElementById('toggleNewPassword');
+  const newPasswordInput = document.getElementById('newPassword');
+  
+  if (toggleNewBtn && newPasswordInput) {
+    addEventWithCleanup(toggleNewBtn, 'click', function() {
+      const isPassword = newPasswordInput.type === 'password';
+      newPasswordInput.type = isPassword ? 'text' : 'password';
+      this.innerHTML = isPassword ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+      this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    });
+  }
+  
+  // Toggle confirm password visibility
+  const toggleConfirmBtn = document.getElementById('toggleConfirmPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  
+  if (toggleConfirmBtn && confirmPasswordInput) {
+    addEventWithCleanup(toggleConfirmBtn, 'click', function() {
+      const isPassword = confirmPasswordInput.type === 'password';
+      confirmPasswordInput.type = isPassword ? 'text' : 'password';
+      this.innerHTML = isPassword ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+      this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    });
+  }
+}
+
 // ============================================
 // MODAL MANAGEMENT
 // ============================================
@@ -1843,6 +1928,11 @@ function openModal(modalId) {
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
     currentModal = modalId;
+    
+    // Initialize password visibility toggles when password modal opens
+    if (modalId === 'changePasswordModal') {
+      setupPasswordVisibility();
+    }
   }
 }
 
@@ -1981,9 +2071,15 @@ function setupForms() {
       validatePasswordForm();
     });
     
+    // Also check current password for enabling submit button
+    const currentPasswordInput = document.getElementById('currentPassword');
+    addEventWithCleanup(currentPasswordInput, 'input', function() {
+      validatePasswordForm();
+    });
+    
     // Validate password form
     function validatePasswordForm() {
-      const currentPassword = document.getElementById('currentPassword').value;
+      const currentPassword = currentPasswordInput.value;
       const newPassword = newPasswordInput.value;
       const confirmPassword = confirmPasswordInput.value;
       const { strength, text } = checkPasswordStrength(newPassword);
@@ -2055,6 +2151,12 @@ function setupForms() {
           changePasswordForm.reset();
           passwordStrengthDiv.textContent = '';
           passwordMatchDiv.textContent = '';
+          
+          // Reset password visibility toggles
+          const toggleButtons = document.querySelectorAll('.password-toggle');
+          toggleButtons.forEach(btn => {
+            btn.innerHTML = '<i class="fas fa-eye"></i>';
+          });
         } else {
           showNotification(data.error || 'Failed to change password. Please try again.', 'error');
         }
